@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Procurement System — Good Receipt</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary:        #1B3068;
+  --primary-dark:   #142451;
+  --primary-light:  #EEF4FF;
+  --accent:         #E8518A;
+  --accent-dark:    #C93D72;
+  --success:        #10B981;
+  --success-light:  #D1FAE5;
+  --danger:         #EF4444;
+  --danger-light:   #FEE2E2;
+  --warning:        #F59E0B;
+  --warning-light:  #FEF3C7;
+  --bg-primary:     #FFFFFF;
+  --bg-secondary:   #F8FAFC;
+  --bg-canvas:      #F0F4F9;
+  --border:         #CBD5E1;
+  --border-light:   #EEF2F7;
+  --text-primary:   #0F1F42;
+  --text-secondary: #4B5E85;
+  --text-muted:     #8799B8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', 'Segoe UI', sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+/* ── App Header ── */
+.app-header {
+  background: var(--bg-primary);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(27,48,104,.06);
+  position: relative;
+}
+.app-header::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px; background: var(--accent);
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff; flex-shrink: 0;
+}
+.brand-text { color: var(--text-primary); font-size: 15px; font-weight: 700; }
+.brand-sep { color: var(--border); margin: 0 4px; font-size: 13px; }
+.brand-module { color: var(--text-secondary); font-size: 13px; font-weight: 500; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.user-info { color: var(--text-secondary); font-size: 13px; }
+.btn-logout {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 5px 14px; border-radius: 6px; cursor: pointer;
+  font-size: 13px; transition: all 0.15s; font-family: inherit;
+}
+.btn-logout:hover { background: var(--bg-secondary); color: var(--text-primary); }
+
+/* ── Sub Nav ── */
+.sub-nav {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex; gap: 0;
+  position: sticky; top: 56px; z-index: 90;
+}
+.snav-item {
+  padding: 13px 18px; font-size: 13px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.15s; white-space: nowrap;
+  display: flex; align-items: center; gap: 7px;
+}
+.snav-item:hover { color: var(--text-primary); }
+.snav-item.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.snav-badge {
+  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+  background: var(--bg-secondary); color: var(--text-secondary);
+}
+.snav-item.active .snav-badge { background: var(--primary-light); color: var(--primary); }
+
+/* ── Page Container ── */
+.page-container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+/* ── Page Header ── */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.page-title { font-size: 22px; font-weight: 600; color: var(--text-primary); }
+.page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.625rem 1.25rem; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border: none; transition: all 0.15s; white-space: nowrap;
+  font-family: inherit;
+}
+.btn-primary  { background: var(--primary); color: #fff; }
+.btn-primary:hover  { background: var(--primary-dark); }
+.btn-primary:disabled { background: #8799B8; cursor: not-allowed; }
+.btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--primary-light); }
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 12px; font-weight: 500; }
+.btn-danger  { background: var(--danger); color: #fff; }
+.btn-danger:hover  { background: #DC2626; }
+.btn-danger:disabled { background: #FECACA; cursor: not-allowed; }
+
+/* ── Card ── */
+.card {
+  background: var(--bg-primary); border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27,48,104,.08), 0 4px 12px rgba(27,48,104,.06);
+}
+
+/* ── Toolbar ── */
+.table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+.toolbar-left  { display: flex; align-items: center; gap: 8px; flex: 1; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* Filter bar (second row) */
+.filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-wrap: wrap;
+}
+.filter-bar-label {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-secondary); margin-right: 4px; white-space: nowrap;
+}
+.filter-bar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+/* Search */
+.search-wrap { position: relative; min-width: 200px; max-width: 300px; flex: 1; }
+.search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; display: flex; align-items: center;
+}
+.search-input {
+  width: 100%; padding: 0.5rem 2rem 0.5rem 2.4rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; color: var(--text-primary);
+  background: var(--bg-primary); outline: none; font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.search-input::placeholder { color: var(--text-secondary); }
+.search-clear {
+  position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 14px; cursor: pointer; display: none; padding: 2px; line-height: 1;
+}
+.search-clear:hover { color: var(--danger); }
+.search-clear.visible { display: block; }
+
+/* Filter controls */
+.fi {
+  height: 36px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-primary); color: var(--text-primary);
+  padding: 0 10px; font-size: 13px; outline: none;
+  font-family: inherit; transition: border-color 0.15s;
+}
+.fi:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+select.fi {
+  padding-right: 28px; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234B5E85'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.date-sep { font-size: 12px; color: var(--text-secondary); }
+
+/* View toggle */
+.view-toggle {
+  display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+.vbtn {
+  padding: 6px 14px; font-size: 12px; font-weight: 500; cursor: pointer;
+  border: none; background: var(--bg-primary); color: var(--text-secondary);
+  transition: all 0.15s; font-family: inherit;
+}
+.vbtn.active { background: var(--primary); color: #fff; font-weight: 600; }
+
+/* ── Table ── */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--bg-secondary); border-bottom: 2px solid var(--border); }
+thead th {
+  padding: 12px 16px; text-align: left;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary); white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr.main-row:hover { background: var(--primary-light); cursor: pointer; }
+tbody td { padding: 13px 16px; font-size: 13px; vertical-align: middle; }
+
+/* Link */
+.link { color: var(--primary); font-weight: 600; cursor: pointer; }
+.link:hover { text-decoration: underline; color: var(--primary-dark); }
+.link.red { color: var(--danger); }
+
+/* Sub row */
+.sub-row { display: none; }
+.sub-row.open { display: table-row; }
+.sub-wrap { background: var(--bg-secondary); border-top: 1px solid var(--border); }
+.sub-label {
+  padding: 8px 16px 4px 52px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);
+}
+.sub-table { width: 100%; border-collapse: collapse; }
+.sub-table th {
+  background: var(--bg-secondary); padding: 7px 16px;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.4px; color: var(--text-secondary); border-bottom: 1px solid var(--border);
+}
+.sub-table td { padding: 9px 16px; font-size: 12.5px; border-bottom: 1px solid #EAECF0; }
+.sub-table tbody tr:last-child td { border-bottom: none; }
+.sub-table tbody tr:hover td { background: var(--primary-light); color: var(--text-primary); }
+
+/* View panels */
+.vp { display: none; }
+.vp.active { display: block; }
+
+/* Expand button */
+.expand-btn {
+  width: 22px; height: 22px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg-primary);
+  color: var(--text-secondary); font-size: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.expand-btn:hover { background: var(--bg-secondary); border-color: #B0B7C3; }
+
+/* Reversal button */
+.btn-reverse {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 1px solid #FECACA; background: var(--danger-light);
+  color: var(--danger); display: inline-flex;
+  align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: all 0.15s;
+}
+.btn-reverse:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+/* ── Status Badges ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.b-confirmed { background: var(--success-light); color: #065F46; }
+.b-confirmed::before { content:''; background: var(--success); border-radius: 50%; width: 6px; height: 6px; display: inline-block; flex-shrink: 0; }
+.b-reversed  { background: #F1F5F9; color: #475569; }
+.b-reversed::before  { content:''; background: #94A3B8; border-radius: 50%; width: 6px; height: 6px; display: inline-block; flex-shrink: 0; }
+.b-reversal  { background: var(--danger-light); color: #991B1B; }
+.b-reversal::before  { content:''; background: var(--danger); border-radius: 50%; width: 6px; height: 6px; display: inline-block; flex-shrink: 0; }
+
+/* Type badges */
+.b-asset   { background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.b-expense { background: #FFFBEB; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+
+/* Utility */
+.mono { font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif; font-size: 12px; font-weight: 600; }
+.tr  { text-align: right; }
+.tm  { color: var(--text-secondary); }
+.fw6 { font-weight: 600; }
+.red { color: var(--danger); }
+
+/* ── Empty State ── */
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+.empty-icon  { font-size: 40px; margin-bottom: 12px; }
+
+/* ── Toast ── */
+#toastContainer {
+  position: fixed; top: 68px; right: 24px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  min-width: 280px; max-width: 400px;
+  padding: 14px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  pointer-events: all;
+  animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.hiding { animation: toastOut 0.2s ease forwards; }
+@keyframes toastIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateX(40px); } }
+.toast-success { background: #D1FAE5; color: #065F46; border: 1px solid #6EE7B7; }
+.toast-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.toast-body { flex: 1; line-height: 1.45; }
+.toast-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: #065F46; opacity: 0.6; line-height: 1; padding: 0;
+}
+.toast-close:hover { opacity: 1; }
+
+/* ── Modal (base) ── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 200;
+  align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem; overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--bg-primary); border-radius: 12px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 20px 60px rgba(27,48,104,0.18);
+  animation: modalIn 0.2s ease; margin: auto;
+}
+.modal-lg { max-width: 780px; }
+@keyframes modalIn { from { opacity:0; transform: scale(0.96); } to { opacity:1; transform: scale(1); } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+}
+.modal-title    { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.modal-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.modal-close {
+  background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary);
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.modal-close:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.modal-body   { padding: 1.5rem; }
+.modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+  background: var(--bg-secondary); border-radius: 0 0 12px 12px;
+}
+
+/* Reversal modal specifics */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+}
+.ig-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 3px; }
+.ig-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.warn-box {
+  background: var(--warning-light); border: 1px solid #F59E0B; border-radius: 8px;
+  padding: 11px 14px; font-size: 12px; color: #92400E;
+  display: flex; gap: 9px; line-height: 1.55; margin-bottom: 16px;
+}
+.warn-ico { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block; }
+.form-label-muted { font-weight: 400; color: var(--text-secondary); font-size: 12px; margin-left: 4px; }
+.req { color: var(--danger); margin-left: 2px; }
+.form-ta {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  resize: vertical; min-height: 90px; outline: none;
+  color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.15s;
+}
+.form-ta:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.form-ta::placeholder { color: var(--text-secondary); }
+
+/* ── Record GR Modal ── */
+
+/* PR Search */
+.po-search-wrap { position: relative; margin-bottom: 8px; }
+.po-search-wrap .search-wrap { max-width: 100%; }
+
+.po-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.13); z-index: 999;
+  overflow: hidden; display: none;
+}
+.po-dropdown.open { display: block; }
+.po-empty-hint { padding: 14px 16px; font-size: 13px; color: var(--text-secondary); text-align: center; }
+.pr-option {
+  padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
+  transition: background 0.12s; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.pr-option:last-child { border-bottom: none; }
+.pr-option:hover { background: var(--primary-light); }
+.pr-opt-left { display: flex; flex-direction: column; gap: 3px; }
+.pr-opt-num  { font-size: 13px; font-weight: 700; color: var(--primary); }
+.pr-opt-topic { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.pr-opt-meta { font-size: 11px; color: var(--text-secondary); }
+.pr-opt-right { text-align: right; flex-shrink: 0; }
+.pr-opt-badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  background: var(--primary-light); color: var(--primary);
+}
+.dropdown-group-label {
+  padding: 7px 16px 4px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary); background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.dropdown-group-label:not(:first-child) { border-top: 1px solid var(--border); }
+
+/* Selected PR card */
+.selected-pr-card {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 16px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.selected-pr-left { display: flex; flex-direction: column; gap: 2px; }
+.selected-pr-num { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.selected-pr-topic { font-size: 12px; color: var(--text-secondary); }
+
+/* PO list under selected PR */
+.po-list-wrap {
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px;
+}
+.po-list-header {
+  background: var(--bg-secondary); padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-secondary);
+}
+.po-list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s; gap: 12px;
+}
+.po-list-item:last-child { border-bottom: none; }
+.po-list-item:hover { background: var(--primary-light); }
+.po-list-left { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.po-list-num { font-size: 13px; font-weight: 700; color: var(--primary); }
+.po-list-vendor { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.po-list-meta { font-size: 11px; color: var(--text-secondary); }
+.po-list-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.po-list-total { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.po-list-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  background: var(--primary-light); color: var(--primary);
+}
+
+/* Selected PO card */
+.selected-po-card {
+  background: var(--primary-light); border: 1.5px solid var(--primary);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.selected-po-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px; flex: 1;
+}
+.spi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+.spi-value { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 2px; }
+.btn-clear-po {
+  background: none; border: none; cursor: pointer; color: var(--text-secondary);
+  font-size: 18px; line-height: 1; padding: 4px; opacity: 0.6; transition: all 0.15s; flex-shrink: 0;
+}
+.btn-clear-po:hover { opacity: 1; color: var(--danger); }
+
+/* Layer card */
+.layer-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  background: #fff; margin-bottom: 16px; overflow: hidden;
+}
+.layer-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.layer-card-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text-secondary);
+}
+.layer-card-hint { font-size: 11px; color: var(--text-secondary); }
+
+/* GR Items table (inside modal) */
+.gr-items-wrap { overflow-x: auto; }
+.gr-items-table { width: 100%; border-collapse: collapse; }
+.gr-items-table thead tr { background: var(--bg-secondary); border-bottom: 2px solid var(--border); }
+.gr-items-table th {
+  padding: 9px 12px; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary);
+  white-space: nowrap; text-align: left;
+}
+.gr-items-table th.tr { text-align: right; }
+.gr-items-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.gr-items-table tbody tr:last-child td { border-bottom: none; }
+.gr-items-table tbody tr:hover { background: var(--primary-light); }
+.gr-items-table tbody tr.fully-received { opacity: 0.45; }
+
+.qty-cell { text-align: right; }
+.qty-input {
+  width: 80px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 8px; font-size: 13px; font-family: inherit;
+  text-align: right; outline: none; background: #fff; color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.qty-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.qty-input:disabled { background: var(--bg-secondary); color: var(--text-secondary); cursor: not-allowed; }
+.qty-input.over { border-color: var(--danger); background: var(--danger-light); box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+.qty-over-msg { font-size: 10.5px; color: var(--danger); margin-top: 3px; }
+
+.received-pill {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 1px 7px; border-radius: 10px;
+  background: var(--success-light); color: #065F46;
+}
+.received-pill.partial { background: var(--warning-light); color: #92400E; }
+.received-pill.none    { background: var(--bg-secondary); color: var(--text-secondary); }
+
+/* Form row (two columns) */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-input {
+  height: 36px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 0 12px; font-size: 13px; font-family: inherit; outline: none;
+  color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.form-input::placeholder { color: var(--text-secondary); }
+
+/* File drop zone */
+.file-drop {
+  border: 1.5px dashed var(--border); border-radius: 8px;
+  padding: 18px; text-align: center; cursor: pointer;
+  transition: all 0.15s; background: var(--bg-secondary);
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.file-drop:hover { border-color: var(--primary); background: var(--primary-light); border-style: solid; }
+.file-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.file-drop-icon { font-size: 22px; }
+.file-drop-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.file-name-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--primary-light); border: 1px solid var(--primary);
+  border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+  margin-top: 4px;
+}
+
+/* Totals row */
+.totals-row {
+  display: flex; justify-content: flex-end;
+  padding: 10px 16px; border-top: 2px solid var(--border);
+  background: var(--bg-secondary); gap: 32px;
+}
+.totals-item { text-align: right; }
+.totals-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); }
+.totals-value { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+.totals-value.blue { color: var(--accent); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark">P</div>
+    <span class="brand-text">Procurement System</span>
+    <span class="brand-sep">/</span>
+    <span class="brand-module">Good Receipt</span>
+  </div>
+  <div class="header-right">
+    <span class="user-info">Phasathon C. — Procurement</span>
+    <button class="btn-logout">Log out</button>
+  </div>
+</header>
+
+<!-- Sub Navigation -->
+<nav class="sub-nav">
+  <div class="snav-item">Dashboard</div>
+  <div class="snav-item">Purchase Request <span class="snav-badge">12</span></div>
+  <div class="snav-item">Purchase Order <span class="snav-badge">8</span></div>
+  <div class="snav-item active">Good Receipt <span class="snav-badge">5</span></div>
+  <div class="snav-item">Billing <span class="snav-badge">3</span></div>
+  <div class="snav-item">Vendor Management</div>
+</nav>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Page -->
+<div class="page-container">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Good Receipt</div>
+    </div>
+  </div>
+
+
+    <!-- Card: Toolbar + Table -->
+    <div class="card">
+
+      <!-- Row 1: Search + Actions -->
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="search-wrap">
+            <span class="search-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <circle cx="5.5" cy="5.5" r="4" stroke="#1B3068" stroke-width="1.5"/>
+                <line x1="8.7" y1="8.7" x2="11.5" y2="11.5" stroke="#1B3068" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input class="search-input" type="text" placeholder="Search GR number, PO, or vendor…" id="searchInput" oninput="onSearch(this.value)" autocomplete="off" />
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" title="Clear">✕</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-secondary btn-sm" onclick="exportGR()" title="Export to Excel">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M1 10.5h11" stroke="#6B7280" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Export
+          </button>
+          <div class="view-toggle">
+            <button class="vbtn active" onclick="switchView('doc', this)">Document View</button>
+            <button class="vbtn" onclick="switchView('line', this)">Line Item View</button>
+          </div>
+          <button class="btn btn-primary" onclick="openRecordGRModal()">+ Record GR</button>
+        </div>
+      </div>
+
+      <!-- Row 2: Filters -->
+      <div class="filter-bar">
+        <span class="filter-bar-label">Filter</span>
+        <input class="fi" type="date" value="2026-06-01" style="width:130px" />
+        <span class="date-sep">–</span>
+        <input class="fi" type="date" value="2026-06-05" style="width:130px" />
+        <div class="filter-bar-sep"></div>
+        <select class="fi" style="width:115px;display:none" id="typeFilter">
+          <option value="">All Types</option>
+          <option value="Asset">Asset</option>
+          <option value="Expense">Expense</option>
+        </select>
+        <select class="fi" style="width:125px" id="statusFilter" onchange="filterStatus(this.value)">
+          <option value="">All Status</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Reversed">Reversed</option>
+          <option value="Reversal">Reversal</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset</button>
+      </div>
+
+      <!-- ── Document View ── -->
+      <div class="vp active" id="vp-doc">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:44px"></th>
+                <th>GR Date</th>
+                <th>GR Number</th>
+                <th>PO Number</th>
+                <th>Vendor</th>
+                <th style="text-align:center">Items</th>
+                <th style="text-align:right">Total Amount</th>
+                <th>Status</th>
+                <th style="width:60px;text-align:center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- GR-0001 Reversed -->
+              <tr class="main-row" onclick="toggleRow('d1')">
+                <td><button class="expand-btn" id="btn-d1">▶</button></td>
+                <td class="tm">2026-06-01</td>
+                <td><span class="link mono">GR-0001</span></td>
+                <td><span class="link mono">PO-0042</span></td>
+                <td>ABC Co., Ltd.</td>
+                <td style="text-align:center" class="tm">3</td>
+                <td style="text-align:right" class="tm">145,000</td>
+                <td><span class="badge b-reversed">Reversed</span></td>
+                <td style="text-align:center" class="tm">—</td>
+              </tr>
+              <tr class="sub-row" id="d1"><td colspan="9" style="padding:0">
+                <div class="sub-wrap">
+                  <div class="sub-label">Line Items</div>
+                  <table class="sub-table"><thead><tr>
+                    <th style="padding-left:52px;width:270px">Item Name</th>
+                    <th>Type</th><th>Asset No. / GL Code</th>
+                    <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Amount</th>
+                  </tr></thead><tbody>
+                    <tr><td style="padding-left:52px" class="tm">Laptop Dell XPS 15</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240012</td><td class="tr tm">2</td><td class="tr tm">55,000</td><td class="tr tm">110,000</td></tr>
+                    <tr><td style="padding-left:52px" class="tm">HDMI Cable 3m</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td><td class="tr tm">5</td><td class="tr tm">500</td><td class="tr tm">2,500</td></tr>
+                    <tr><td style="padding-left:52px" class="tm">USB-C Hub</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td><td class="tr tm">10</td><td class="tr tm">3,250</td><td class="tr tm">32,500</td></tr>
+                  </tbody></table>
+                </div>
+              </td></tr>
+
+              <!-- GR-0002 Confirmed -->
+              <tr class="main-row" onclick="toggleRow('d2')">
+                <td><button class="expand-btn" id="btn-d2">▶</button></td>
+                <td class="tm">2026-06-03</td>
+                <td><span class="link mono">GR-0002</span></td>
+                <td><span class="link mono">PO-0038</span></td>
+                <td>XYZ Supply Co.</td>
+                <td style="text-align:center" class="tm">1</td>
+                <td style="text-align:right" class="fw6">12,500</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+                <td style="text-align:center">
+                  <button class="btn-reverse" title="Reverse this GR" onclick="event.stopPropagation();openReversalModal('GR-0002','PO-0038','XYZ Supply Co.','12,500','2026-06-03')">🗑</button>
+                </td>
+              </tr>
+              <tr class="sub-row" id="d2"><td colspan="9" style="padding:0">
+                <div class="sub-wrap">
+                  <div class="sub-label">Line Items</div>
+                  <table class="sub-table"><thead><tr>
+                    <th style="padding-left:52px;width:270px">Item Name</th>
+                    <th>Type</th><th>Asset No. / GL Code</th>
+                    <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Amount</th>
+                  </tr></thead><tbody>
+                    <tr><td style="padding-left:52px">Wireless Mouse Logitech</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210500040</td><td class="tr">10</td><td class="tr">1,250</td><td class="tr fw6">12,500</td></tr>
+                  </tbody></table>
+                </div>
+              </td></tr>
+
+              <!-- GR-0001-R Reversal -->
+              <tr class="main-row" onclick="toggleRow('d3')">
+                <td><button class="expand-btn" id="btn-d3">▶</button></td>
+                <td class="tm">2026-06-05</td>
+                <td><span class="link mono red">GR-0001-R</span></td>
+                <td><span class="link mono">PO-0042</span></td>
+                <td>ABC Co., Ltd.</td>
+                <td style="text-align:center" class="tm">3</td>
+                <td style="text-align:right" class="red fw6">-145,000</td>
+                <td><span class="badge b-reversal">Reversal</span></td>
+                <td style="text-align:center" class="tm">—</td>
+              </tr>
+              <tr class="sub-row" id="d3"><td colspan="9" style="padding:0">
+                <div class="sub-wrap">
+                  <div class="sub-label">Line Items (Reversal)</div>
+                  <table class="sub-table"><thead><tr>
+                    <th style="padding-left:52px;width:270px">Item Name</th>
+                    <th>Type</th><th>Asset No. / GL Code</th>
+                    <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Amount</th>
+                  </tr></thead><tbody>
+                    <tr><td style="padding-left:52px" class="tm">Laptop Dell XPS 15</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240012</td><td class="tr red">-2</td><td class="tr tm">55,000</td><td class="tr red">-110,000</td></tr>
+                    <tr><td style="padding-left:52px" class="tm">HDMI Cable 3m</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td><td class="tr red">-5</td><td class="tr tm">500</td><td class="tr red">-2,500</td></tr>
+                    <tr><td style="padding-left:52px" class="tm">USB-C Hub</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td><td class="tr red">-10</td><td class="tr tm">3,250</td><td class="tr red">-32,500</td></tr>
+                  </tbody></table>
+                </div>
+              </td></tr>
+
+              <!-- GR-0003 Confirmed -->
+              <tr class="main-row" onclick="toggleRow('d4')">
+                <td><button class="expand-btn" id="btn-d4">▶</button></td>
+                <td class="tm">2026-06-05</td>
+                <td><span class="link mono">GR-0003</span></td>
+                <td><span class="link mono">PO-0042</span></td>
+                <td>ABC Co., Ltd.</td>
+                <td style="text-align:center" class="tm">2</td>
+                <td style="text-align:right" class="fw6">145,000</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+                <td style="text-align:center">
+                  <button class="btn-reverse" title="Reverse this GR" onclick="event.stopPropagation();openReversalModal('GR-0003','PO-0042','ABC Co., Ltd.','145,000','2026-06-05')">🗑</button>
+                </td>
+              </tr>
+              <tr class="sub-row" id="d4"><td colspan="9" style="padding:0">
+                <div class="sub-wrap">
+                  <div class="sub-label">Line Items</div>
+                  <table class="sub-table"><thead><tr>
+                    <th style="padding-left:52px;width:270px">Item Name</th>
+                    <th>Type</th><th>Asset No. / GL Code</th>
+                    <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Amount</th>
+                  </tr></thead><tbody>
+                    <tr><td style="padding-left:52px">Laptop Dell XPS 15</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240012</td><td class="tr">2</td><td class="tr">55,000</td><td class="tr fw6">110,000</td></tr>
+                    <tr><td style="padding-left:52px">HDMI Cable 3m</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td><td class="tr">5</td><td class="tr">500</td><td class="tr fw6">2,500</td></tr>
+                  </tbody></table>
+                </div>
+              </td></tr>
+
+              <!-- GR-0004 Confirmed -->
+              <tr class="main-row" onclick="toggleRow('d5')">
+                <td><button class="expand-btn" id="btn-d5">▶</button></td>
+                <td class="tm">2026-06-05</td>
+                <td><span class="link mono">GR-0004</span></td>
+                <td><span class="link mono">PO-0055</span></td>
+                <td>DEF Solutions</td>
+                <td style="text-align:center" class="tm">1</td>
+                <td style="text-align:right" class="fw6">132,500</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+                <td style="text-align:center">
+                  <button class="btn-reverse" title="Reverse this GR" onclick="event.stopPropagation();openReversalModal('GR-0004','PO-0055','DEF Solutions','132,500','2026-06-05')">🗑</button>
+                </td>
+              </tr>
+              <tr class="sub-row" id="d5"><td colspan="9" style="padding:0">
+                <div class="sub-wrap">
+                  <div class="sub-label">Line Items</div>
+                  <table class="sub-table"><thead><tr>
+                    <th style="padding-left:52px;width:270px">Item Name</th>
+                    <th>Type</th><th>Asset No. / GL Code</th>
+                    <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Amount</th>
+                  </tr></thead><tbody>
+                    <tr><td style="padding-left:52px">Server Rack Unit 2U</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240033</td><td class="tr">1</td><td class="tr">132,500</td><td class="tr fw6">132,500</td></tr>
+                  </tbody></table>
+                </div>
+              </td></tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /vp-doc -->
+
+      <!-- ── Line Item View ── -->
+      <div class="vp" id="vp-line">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>GR Date</th><th>GR Number</th><th>PO Number</th><th>Vendor</th>
+                <th>Item Name</th><th>Type</th><th>Asset No. / GL Code</th>
+                <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th>
+                <th style="text-align:right">Amount</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="tm">2026-06-01</td><td><span class="link mono tm">GR-0001</span></td><td><span class="link mono tm">PO-0042</span></td><td class="tm">ABC Co., Ltd.</td>
+                <td class="tm">Laptop Dell XPS 15</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240012</td>
+                <td class="tr tm">2</td><td class="tr tm">55,000</td><td class="tr tm">110,000</td>
+                <td><span class="badge b-reversed">Reversed</span></td>
+              </tr>
+              <tr>
+                <td class="tm">2026-06-01</td><td><span class="link mono tm">GR-0001</span></td><td><span class="link mono tm">PO-0042</span></td><td class="tm">ABC Co., Ltd.</td>
+                <td class="tm">HDMI Cable 3m</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td>
+                <td class="tr tm">5</td><td class="tr tm">500</td><td class="tr tm">2,500</td>
+                <td><span class="badge b-reversed">Reversed</span></td>
+              </tr>
+              <tr>
+                <td class="tm">2026-06-01</td><td><span class="link mono tm">GR-0001</span></td><td><span class="link mono tm">PO-0042</span></td><td class="tm">ABC Co., Ltd.</td>
+                <td class="tm">USB-C Hub</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td>
+                <td class="tr tm">10</td><td class="tr tm">3,250</td><td class="tr tm">32,500</td>
+                <td><span class="badge b-reversed">Reversed</span></td>
+              </tr>
+              <tr>
+                <td class="tm">2026-06-03</td><td><span class="link mono">GR-0002</span></td><td><span class="link mono">PO-0038</span></td><td>XYZ Supply Co.</td>
+                <td class="fw6">Wireless Mouse Logitech</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210500040</td>
+                <td class="tr">10</td><td class="tr">1,250</td><td class="tr fw6">12,500</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+              </tr>
+              <tr style="background:#FFF8F8">
+                <td class="tm">2026-06-05</td><td><span class="link mono red">GR-0001-R</span></td><td><span class="link mono">PO-0042</span></td><td class="tm">ABC Co., Ltd.</td>
+                <td class="tm">Laptop Dell XPS 15</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240012</td>
+                <td class="tr red">-2</td><td class="tr tm">55,000</td><td class="tr red fw6">-110,000</td>
+                <td><span class="badge b-reversal">Reversal</span></td>
+              </tr>
+              <tr style="background:#FFF8F8">
+                <td class="tm">2026-06-05</td><td><span class="link mono red">GR-0001-R</span></td><td><span class="link mono">PO-0042</span></td><td class="tm">ABC Co., Ltd.</td>
+                <td class="tm">HDMI Cable 3m</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td>
+                <td class="tr red">-5</td><td class="tr tm">500</td><td class="tr red fw6">-2,500</td>
+                <td><span class="badge b-reversal">Reversal</span></td>
+              </tr>
+              <tr style="background:#FFF8F8">
+                <td class="tm">2026-06-05</td><td><span class="link mono red">GR-0001-R</span></td><td><span class="link mono">PO-0042</span></td><td class="tm">ABC Co., Ltd.</td>
+                <td class="tm">USB-C Hub</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td>
+                <td class="tr red">-10</td><td class="tr tm">3,250</td><td class="tr red fw6">-32,500</td>
+                <td><span class="badge b-reversal">Reversal</span></td>
+              </tr>
+              <tr>
+                <td class="tm">2026-06-05</td><td><span class="link mono">GR-0003</span></td><td><span class="link mono">PO-0042</span></td><td>ABC Co., Ltd.</td>
+                <td class="fw6">Laptop Dell XPS 15</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240012</td>
+                <td class="tr">2</td><td class="tr">55,000</td><td class="tr fw6">110,000</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td class="tm">2026-06-05</td><td><span class="link mono">GR-0003</span></td><td><span class="link mono">PO-0042</span></td><td>ABC Co., Ltd.</td>
+                <td class="fw6">HDMI Cable 3m</td><td><span class="b-expense">Expense</span></td><td class="mono tm">5210600010</td>
+                <td class="tr">5</td><td class="tr">500</td><td class="tr fw6">2,500</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td class="tm">2026-06-05</td><td><span class="link mono">GR-0004</span></td><td><span class="link mono">PO-0055</span></td><td>DEF Solutions</td>
+                <td class="fw6">Server Rack Unit 2U</td><td><span class="b-asset">Asset</span></td><td class="mono tm">A-20240033</td>
+                <td class="tr">1</td><td class="tr">132,500</td><td class="tr fw6">132,500</td>
+                <td><span class="badge b-confirmed">Confirmed</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /vp-line -->
+
+    </div><!-- /card -->
+
+</div><!-- /page-container -->
+
+<!-- ══════════════════════════════════════
+     REVERSAL MODAL
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="reversalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Reverse GR Record</div>
+        <div class="modal-subtitle">A reversal document will be created and posted to Bookkeeping</div>
+      </div>
+      <button class="modal-close" onclick="closeReversalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid">
+        <div><div class="ig-lbl">GR Number</div><div class="ig-val mono" id="m-gr"></div></div>
+        <div><div class="ig-lbl">GR Date</div><div class="ig-val" id="m-date"></div></div>
+        <div><div class="ig-lbl">PO Number</div><div class="ig-val mono" id="m-po"></div></div>
+        <div><div class="ig-lbl">Total Amount</div><div class="ig-val" id="m-amt"></div></div>
+        <div style="grid-column:1/-1"><div class="ig-lbl">Vendor</div><div class="ig-val" id="m-vendor"></div></div>
+      </div>
+      <div class="warn-box">
+        <span class="warn-ico">⚠️</span>
+        <span>Reversal document <strong id="m-rev"></strong> will be created dated <strong>2026-06-05</strong> with negative quantities and amounts. An offsetting accounting transaction will be sent to Bookkeeping. <strong>This action cannot be undone.</strong></span>
+      </div>
+      <label class="form-label">Reason for Reversal <span class="req">*</span></label>
+      <textarea class="form-ta" id="reasonInput" placeholder="Describe why this GR is being reversed…" oninput="checkReason()"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeReversalModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirmBtn" disabled onclick="doReversal()">Confirm Reversal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     RECORD GR MODAL
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="recordGRModal">
+  <div class="modal modal-lg">
+
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Record Goods Receipt</div>
+        <div class="modal-subtitle" id="rgr-subtitle">Search for a Purchase Order to begin</div>
+      </div>
+      <button class="modal-close" onclick="closeRecordGRModal()">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding:1.5rem">
+
+      <!-- Step 1: Search -->
+      <div id="rgr-search-section">
+        <label class="form-label">Search <span class="req">*</span></label>
+        <div class="po-search-wrap">
+          <div class="search-wrap" style="max-width:100%">
+            <span class="search-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <circle cx="5.5" cy="5.5" r="4" stroke="#1B3068" stroke-width="1.5"/>
+                <line x1="8.7" y1="8.7" x2="11.5" y2="11.5" stroke="#1B3068" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input class="search-input" id="prSearchInput" type="text"
+              placeholder="Search by PR number, PO number, or vendor…"
+              oninput="searchPR(this.value)"
+              autocomplete="off"
+              style="font-size:14px; padding:0.6rem 1rem 0.6rem 2.6rem" />
+          </div>
+          <div class="po-dropdown" id="prDropdown"></div>
+        </div>
+        <p style="font-size:11.5px;color:var(--text-secondary);margin-top:8px;">
+          Search by PR number to see all POs under it, or enter a PO number to go directly.
+        </p>
+      </div>
+
+      <!-- Step 2: Selected PR + PO list (hidden until PR picked) -->
+      <div id="rgr-pr-section" style="display:none">
+        <div class="selected-pr-card">
+          <div class="selected-pr-left">
+            <div class="selected-pr-num" id="rgr-pr-num"></div>
+            <div class="selected-pr-topic" id="rgr-pr-topic"></div>
+          </div>
+          <button class="btn-clear-po" onclick="clearSelectedPR()" title="Search again">✕</button>
+        </div>
+        <label class="form-label">Select Purchase Order <span class="req">*</span></label>
+        <div class="po-list-wrap">
+          <div class="po-list-header">Purchase Orders in this PR</div>
+          <div id="rgr-po-list"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Selected PO card (hidden until PO picked) -->
+      <div id="rgr-po-card" style="display:none">
+        <div class="selected-po-card">
+          <div class="selected-po-grid">
+            <div>
+              <div class="spi-label">PO Number</div>
+              <div class="spi-value mono" id="rgr-po-num"></div>
+            </div>
+            <div>
+              <div class="spi-label">Vendor</div>
+              <div class="spi-value" id="rgr-vendor"></div>
+            </div>
+            <div>
+              <div class="spi-label">PO Date</div>
+              <div class="spi-value" id="rgr-po-date"></div>
+            </div>
+            <div>
+              <div class="spi-label">PO Total</div>
+              <div class="spi-value" id="rgr-po-total"></div>
+            </div>
+          </div>
+          <button class="btn-clear-po" onclick="clearSelectedPO()" title="Select a different PO">✕</button>
+        </div>
+      </div>
+
+      <!-- ── Step 2: Line Items + Details (hidden until PO picked) ── -->
+      <div id="rgr-items-section" style="display:none">
+
+        <!-- Items table -->
+        <div class="layer-card">
+          <div class="layer-card-header">
+            <span class="layer-card-title">Items to Receive</span>
+            <span class="layer-card-hint" id="rgr-items-hint"></span>
+          </div>
+          <div class="gr-items-wrap">
+            <table class="gr-items-table">
+              <thead>
+                <tr>
+                  <th style="width:36px; padding-left:16px">#</th>
+                  <th>Item Name</th>
+                  <th>Type</th>
+                  <th>GL / Asset No.</th>
+                  <th class="tr">Line Total</th>
+                  <th class="tr">Prev. Received</th>
+                  <th class="tr">Remaining</th>
+                  <th class="tr" style="padding-right:16px; width:120px">% to Receive</th>
+                </tr>
+              </thead>
+              <tbody id="rgr-items-body"></tbody>
+            </table>
+          </div>
+          <!-- Totals -->
+          <div class="totals-row" id="rgr-totals" style="display:none">
+            <div class="totals-item">
+              <div class="totals-label">Items Selected</div>
+              <div class="totals-value" id="rgr-total-items">0</div>
+            </div>
+            <div class="totals-item">
+              <div class="totals-label">Avg. % Received</div>
+              <div class="totals-value blue" id="rgr-total-qty">0%</div>
+            </div>
+            <div class="totals-item">
+              <div class="totals-label">Est. Amount</div>
+              <div class="totals-value" id="rgr-total-amt">฿ 0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Receipt Details -->
+        <div class="layer-card">
+          <div class="layer-card-header">
+            <span class="layer-card-title">Receipt Details</span>
+          </div>
+          <div style="padding:1rem 1rem 0.5rem">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Receipt Date <span class="req">*</span></label>
+                <input class="form-input" type="date" id="rgrDate" value="2026-06-05" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Delivery Note No. <span class="form-label-muted">(optional)</span></label>
+                <input class="form-input" type="text" id="rgrDeliveryNo" placeholder="e.g. DN-2024-001" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px">
+              <label class="form-label">Delivery Document <span class="form-label-muted">(optional)</span></label>
+              <div class="file-drop" id="fileDrop" ondragover="event.preventDefault()" ondrop="handleFileDrop(event)">
+                <input type="file" accept=".pdf,.jpg,.png" onchange="handleFileSelect(this)" />
+                <div class="file-drop-icon">📎</div>
+                <div class="file-drop-text">
+                  Click to attach or drag &amp; drop<br>
+                  <span style="color:var(--text-secondary);font-size:11px">PDF, JPG, PNG · max 10 MB</span>
+                </div>
+                <div id="fileNameTag" style="display:none"></div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label">Remarks <span class="form-label-muted">(optional)</span></label>
+              <textarea class="form-ta" id="rgrRemarks" placeholder="Any notes about this receipt…" style="min-height:70px"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /rgr-items-section -->
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <span id="rgr-footer-hint" style="font-size:12px;color:var(--text-secondary);flex:1"></span>
+      <button class="btn btn-secondary" onclick="closeRecordGRModal()">Cancel</button>
+      <button class="btn btn-primary" id="rgrSubmitBtn" disabled onclick="doRecordGR()">Confirm Receipt</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────
+   GR List page interactions
+───────────────────────────────────────── */
+function toggleRow(id) {
+  const row = document.getElementById(id);
+  const btn = document.getElementById('btn-' + id);
+  btn.textContent = row.classList.toggle('open') ? '▼' : '▶';
+}
+
+function switchView(v, el) {
+  document.querySelectorAll('.vp').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+  document.getElementById('vp-' + v).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('typeFilter').style.display = v === 'line' ? '' : 'none';
+  if (v === 'doc') { document.getElementById('typeFilter').selectedIndex = 0; }
+}
+
+function filterStatus(val) {
+  document.querySelectorAll('#vp-doc tbody .main-row').forEach(row => {
+    const badge = row.querySelector('.badge');
+    const status = badge ? badge.textContent.trim() : '';
+    row.style.display = (!val || status === val) ? '' : 'none';
+  });
+}
+
+function onSearch(val) {
+  document.getElementById('searchClear').classList.toggle('visible', !!val);
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').classList.remove('visible');
+}
+
+function resetFilters() {
+  clearSearch();
+  document.getElementById('statusFilter').selectedIndex = 0;
+  document.getElementById('typeFilter').selectedIndex = 0;
+  filterStatus('');
+}
+
+function exportGR() {
+  showToast('GR list exported to Excel.');
+}
+
+/* ─────────────────────────────────────────
+   Reversal Modal
+───────────────────────────────────────── */
+let curGr = '';
+function openReversalModal(gr, po, vendor, amt, date) {
+  curGr = gr;
+  document.getElementById('m-gr').textContent = gr;
+  document.getElementById('m-po').textContent = po;
+  document.getElementById('m-vendor').textContent = vendor;
+  document.getElementById('m-amt').textContent = '฿' + amt;
+  document.getElementById('m-date').textContent = date;
+  document.getElementById('m-rev').textContent = gr + '-R';
+  document.getElementById('reasonInput').value = '';
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('reversalModal').classList.add('open');
+}
+function closeReversalModal() {
+  document.getElementById('reversalModal').classList.remove('open');
+}
+function checkReason() {
+  document.getElementById('confirmBtn').disabled =
+    document.getElementById('reasonInput').value.trim().length < 5;
+}
+function doReversal() {
+  closeReversalModal();
+  showToast('GR Reversal ' + curGr + '-R created and posted to Bookkeeping.');
+}
+document.getElementById('reversalModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('reversalModal')) closeReversalModal();
+});
+
+/* ─────────────────────────────────────────
+   Record GR Modal — data
+───────────────────────────────────────── */
+const PR_DATA = [
+  {
+    num: 'PR-0021', topic: 'IT Equipment Q2 2026', requester: 'Somchai P.',
+    pos: [
+      {
+        num: 'PO-0043', vendor: 'Infotech Systems Co., Ltd.', date: '2026-05-28', total: '฿ 198,000',
+        items: [
+          { name: 'MacBook Pro 14"',    type: 'Asset',   typeClass: 'b-asset',   code: 'A-2024009X', ordered: 3,  received: 0, unitPrice: 52000 },
+          { name: 'iPhone 15 Pro',      type: 'Asset',   typeClass: 'b-asset',   code: 'A-2024010X', ordered: 5,  received: 2, unitPrice: 16000 },
+          { name: 'Lightning Cable 2m', type: 'Expense', typeClass: 'b-expense', code: '5210600020', ordered: 20, received: 0, unitPrice: 350   },
+        ]
+      }
+    ]
+  },
+  {
+    num: 'PR-0024', topic: 'Office Supplies Replenishment', requester: 'Nattaya K.',
+    pos: [
+      {
+        num: 'PO-0050', vendor: 'Office Depot (Thailand) Ltd.', date: '2026-06-01', total: '฿ 45,500',
+        items: [
+          { name: 'Ergonomic Office Chair',  type: 'Asset',   typeClass: 'b-asset',   code: 'A-2024011X', ordered: 10, received: 4, unitPrice: 3800 },
+          { name: 'Desk Pad A3 (pack 10)',   type: 'Expense', typeClass: 'b-expense', code: '5210400030', ordered: 50, received: 0, unitPrice: 350  },
+        ]
+      }
+    ]
+  },
+  {
+    num: 'PR-0026', topic: 'Network Infrastructure Upgrade', requester: 'Thanawat R.',
+    pos: [
+      {
+        num: 'PO-0053', vendor: 'TechSupply Co., Ltd.', date: '2026-06-03', total: '฿ 87,000',
+        items: [
+          { name: 'Network Switch 24-port', type: 'Asset', typeClass: 'b-asset', code: 'A-2024012X', ordered: 2, received: 0, unitPrice: 43500 },
+        ]
+      },
+      {
+        num: 'PO-0054', vendor: 'DataCom Systems Ltd.', date: '2026-06-03', total: '฿ 34,000',
+        items: [
+          { name: 'Cat6 Cable (box 100m)', type: 'Expense', typeClass: 'b-expense', code: '5210600030', ordered: 5, received: 0, unitPrice: 6800 },
+        ]
+      }
+    ]
+  }
+];
+
+let selectedPR  = null;
+let selectedPO  = null;
+
+/* ─────────────────────────────────────────
+   Open / Close Record GR Modal
+───────────────────────────────────────── */
+function openRecordGRModal() {
+  selectedPR = null; selectedPO = null;
+  document.getElementById('prSearchInput').value = '';
+  document.getElementById('prDropdown').classList.remove('open');
+  document.getElementById('rgr-search-section').style.display = '';
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  document.getElementById('rgr-po-card').style.display = 'none';
+  document.getElementById('rgr-items-section').style.display = 'none';
+  document.getElementById('rgrSubmitBtn').disabled = true;
+  document.getElementById('rgr-subtitle').textContent = 'Search for a Purchase Request to begin';
+  document.getElementById('rgr-footer-hint').textContent = '';
+  document.getElementById('rgrDate').value = '2026-06-05';
+  document.getElementById('rgrDeliveryNo').value = '';
+  document.getElementById('rgrRemarks').value = '';
+  document.getElementById('fileNameTag').style.display = 'none';
+  document.getElementById('recordGRModal').classList.add('open');
+  setTimeout(() => document.getElementById('prSearchInput').focus(), 120);
+}
+
+function closeRecordGRModal() {
+  document.getElementById('recordGRModal').classList.remove('open');
+  document.getElementById('prDropdown').classList.remove('open');
+}
+
+document.getElementById('recordGRModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('recordGRModal')) closeRecordGRModal();
+  if (!e.target.closest('.po-search-wrap')) {
+    document.getElementById('prDropdown').classList.remove('open');
+  }
+});
+
+/* ─────────────────────────────────────────
+   Step 1 — PR Search
+───────────────────────────────────────── */
+function searchPR(q) {
+  const dropdown = document.getElementById('prDropdown');
+  const query = q.toLowerCase().trim();
+  if (!query) { dropdown.classList.remove('open'); return; }
+
+  const prMatches = PR_DATA.filter(pr =>
+    pr.num.toLowerCase().includes(query) ||
+    pr.topic.toLowerCase().includes(query) ||
+    pr.requester.toLowerCase().includes(query)
+  );
+
+  // Collect PO matches across all PRs
+  const poMatches = [];
+  PR_DATA.forEach(pr => {
+    pr.pos.forEach(po => {
+      if (po.num.toLowerCase().includes(query) || po.vendor.toLowerCase().includes(query)) {
+        poMatches.push({ pr, po });
+      }
+    });
+  });
+
+  if (prMatches.length === 0 && poMatches.length === 0) {
+    dropdown.innerHTML = '<div class="po-empty-hint">No matching PR or PO found</div>';
+    dropdown.classList.add('open');
+    return;
+  }
+
+  let html = '';
+
+  if (prMatches.length > 0) {
+    html += '<div class="dropdown-group-label">Purchase Requests</div>';
+    html += prMatches.map(pr => {
+      const poCount = pr.pos.length;
+      const remaining = pr.pos.reduce((s, po) =>
+        s + po.items.reduce((ss, it) => ss + (it.ordered - it.received), 0), 0);
+      return `
+        <div class="pr-option" onclick="selectPR('${pr.num}')">
+          <div class="pr-opt-left">
+            <div class="pr-opt-num">${pr.num}</div>
+            <div class="pr-opt-topic">${pr.topic}</div>
+            <div class="pr-opt-meta">By ${pr.requester} &nbsp;·&nbsp; ${poCount} PO${poCount > 1 ? 's' : ''}</div>
+          </div>
+          <div class="pr-opt-right">
+            <span class="pr-opt-badge">${remaining} unit${remaining !== 1 ? 's' : ''} remaining</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  if (poMatches.length > 0) {
+    html += '<div class="dropdown-group-label">Purchase Orders</div>';
+    html += poMatches.map(({ pr, po }) => {
+      const remaining = po.items.reduce((s, it) => s + (it.ordered - it.received), 0);
+      return `
+        <div class="pr-option" onclick="selectPODirect('${pr.num}','${po.num}')">
+          <div class="pr-opt-left">
+            <div class="pr-opt-num">${po.num}</div>
+            <div class="pr-opt-topic">${po.vendor}</div>
+            <div class="pr-opt-meta">From ${pr.num} &nbsp;·&nbsp; ${po.date}</div>
+          </div>
+          <div class="pr-opt-right">
+            <span class="pr-opt-badge">${remaining} unit${remaining !== 1 ? 's' : ''} remaining</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  dropdown.innerHTML = html;
+  dropdown.classList.add('open');
+}
+
+// Direct PO selection (skip PR list step)
+function selectPODirect(prNum, poNum) {
+  selectedPR = PR_DATA.find(p => p.num === prNum);
+  document.getElementById('prDropdown').classList.remove('open');
+  document.getElementById('rgr-search-section').style.display = 'none';
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  selectPO(poNum);
+}
+
+function selectPR(prNum) {
+  selectedPR = PR_DATA.find(p => p.num === prNum);
+  if (!selectedPR) return;
+
+  document.getElementById('prDropdown').classList.remove('open');
+  document.getElementById('rgr-search-section').style.display = 'none';
+  document.getElementById('rgr-pr-num').textContent = selectedPR.num + ' — ' + selectedPR.topic;
+  document.getElementById('rgr-pr-topic').textContent = 'Requested by ' + selectedPR.requester;
+
+  const listEl = document.getElementById('rgr-po-list');
+  listEl.innerHTML = selectedPR.pos.map(po => {
+    const remaining = po.items.reduce((s, it) => s + (it.ordered - it.received), 0);
+    return `
+      <div class="po-list-item" onclick="selectPO('${po.num}')">
+        <div class="po-list-left">
+          <div class="po-list-num">${po.num}</div>
+          <div class="po-list-vendor">${po.vendor}</div>
+          <div class="po-list-meta">${po.date} &nbsp;·&nbsp; ${po.items.length} item${po.items.length > 1 ? 's' : ''}</div>
+        </div>
+        <div class="po-list-right">
+          <span class="po-list-total">${po.total}</span>
+          <span class="po-list-badge">${remaining} unit${remaining !== 1 ? 's' : ''} remaining</span>
+          <button class="btn btn-secondary btn-sm">Select</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('rgr-pr-section').style.display = '';
+  document.getElementById('rgr-subtitle').textContent = selectedPR.num + ' — Select a PO';
+}
+
+function clearSelectedPR() {
+  selectedPR = null; selectedPO = null;
+  document.getElementById('rgr-search-section').style.display = '';
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  document.getElementById('rgr-po-card').style.display = 'none';
+  document.getElementById('rgr-items-section').style.display = 'none';
+  document.getElementById('rgrSubmitBtn').disabled = true;
+  document.getElementById('rgr-subtitle').textContent = 'Search for a Purchase Request to begin';
+  document.getElementById('rgr-footer-hint').textContent = '';
+  setTimeout(() => document.getElementById('prSearchInput').focus(), 60);
+}
+
+/* ─────────────────────────────────────────
+   Step 2 — PO Selection
+───────────────────────────────────────── */
+function selectPO(poNum) {
+  if (!selectedPR) return;
+  selectedPO = selectedPR.pos.find(p => p.num === poNum);
+  if (!selectedPO) return;
+
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  document.getElementById('rgr-po-card').style.display = '';
+  document.getElementById('rgr-po-num').textContent = selectedPO.num;
+  document.getElementById('rgr-vendor').textContent = selectedPO.vendor;
+  document.getElementById('rgr-po-date').textContent = selectedPO.date;
+  document.getElementById('rgr-po-total').textContent = selectedPO.total;
+
+  renderItemsTable(selectedPO);
+  document.getElementById('rgr-items-section').style.display = '';
+  document.getElementById('rgr-subtitle').textContent = selectedPR.num + ' / ' + selectedPO.num + ' — ' + selectedPO.vendor;
+  document.getElementById('rgr-totals').style.display = 'none';
+  updateTotals();
+}
+
+function clearSelectedPO() {
+  selectedPO = null;
+  document.getElementById('rgr-po-card').style.display = 'none';
+  document.getElementById('rgr-items-section').style.display = 'none';
+  document.getElementById('rgrSubmitBtn').disabled = true;
+  document.getElementById('rgr-footer-hint').textContent = '';
+  document.getElementById('rgr-pr-section').style.display = '';
+  document.getElementById('rgr-subtitle').textContent = selectedPR.num + ' — Select a PO';
+}
+
+/* ─────────────────────────────────────────
+   Build items table rows
+───────────────────────────────────────── */
+function renderItemsTable(po) {
+  const totalItems = po.items.length;
+  const fullyReceived = po.items.filter(it => it.ordered === it.received).length;
+  document.getElementById('rgr-items-hint').textContent =
+    fullyReceived > 0 ? `${fullyReceived} of ${totalItems} item${totalItems > 1 ? 's' : ''} fully received (100%)` : '';
+
+  const tbody = document.getElementById('rgr-items-body');
+  tbody.innerHTML = po.items.map((it, i) => {
+    const lineTotal = it.ordered * it.unitPrice;
+    const receivedPct = it.ordered > 0 ? Math.round((it.received / it.ordered) * 100) : 0;
+    const remainingPct = 100 - receivedPct;
+    const isFull = remainingPct === 0;
+    const pillClass = receivedPct === 0 ? 'received-pill none' :
+                      receivedPct < 100 ? 'received-pill partial' : 'received-pill';
+    const pillText = receivedPct === 0 ? 'None' :
+                     receivedPct === 100 ? '100% received' : receivedPct + '% received';
+    return `
+      <tr class="${isFull ? 'fully-received' : ''}">
+        <td style="padding-left:16px;color:var(--text-secondary)">${i + 1}</td>
+        <td style="font-weight:${isFull ? 400 : 600}">${it.name}</td>
+        <td><span class="${it.typeClass}">${it.type}</span></td>
+        <td class="mono tm">${it.code}</td>
+        <td class="qty-cell" style="color:var(--text-secondary);font-size:12px">฿ ${lineTotal.toLocaleString()}</td>
+        <td class="qty-cell">
+          <span class="${pillClass}">${pillText}</span>
+        </td>
+        <td class="qty-cell" style="font-weight:${remainingPct > 0 ? 600 : 400};color:${remainingPct > 0 ? 'var(--text-primary)' : 'var(--text-secondary)'}">
+          ${remainingPct}%
+        </td>
+        <td class="qty-cell" style="padding-right:16px">
+          ${isFull
+            ? '<span style="font-size:12px;color:var(--text-secondary)">—</span>'
+            : `<div style="display:flex;align-items:center;gap:4px">
+                <input class="qty-input" type="number" min="0" max="${remainingPct}"
+                  value="0" id="qty-${i}" style="width:68px"
+                  oninput="validatePct(this, ${remainingPct}, ${lineTotal})"
+                  onchange="validatePct(this, ${remainingPct}, ${lineTotal})" />
+                <span style="font-size:13px;color:var(--text-secondary)">%</span>
+                <div class="qty-over-msg" id="over-${i}" style="display:none">Max ${remainingPct}%</div>
+               </div>`
+          }
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+/* ─────────────────────────────────────────
+   % validation + totals
+───────────────────────────────────────── */
+function validatePct(input, maxPct, lineTotal) {
+  const idx = input.id.replace('qty-', '');
+  const overEl = document.getElementById('over-' + idx);
+  const val = parseFloat(input.value) || 0;
+
+  if (val > maxPct) {
+    input.classList.add('over');
+    overEl.style.display = 'inline';
+  } else {
+    input.classList.remove('over');
+    overEl.style.display = 'none';
+  }
+  updateTotals();
+}
+
+function updateTotals() {
+  if (!selectedPO) return;
+
+  let totalItems = 0, totalAmt = 0, pctSum = 0;
+  let hasOver = false;
+
+  selectedPO.items.forEach((it, i) => {
+    const input = document.getElementById('qty-' + i);
+    if (!input) return;
+    const val = parseFloat(input.value) || 0;
+    const receivedPct = it.ordered > 0 ? Math.round((it.received / it.ordered) * 100) : 0;
+    const remainingPct = 100 - receivedPct;
+    const lineTotal = it.ordered * it.unitPrice;
+    if (val > remainingPct) hasOver = true;
+    if (val > 0) {
+      totalItems++;
+      pctSum += val;
+      totalAmt += (val / 100) * lineTotal;
+    }
+  });
+
+  const totalsEl = document.getElementById('rgr-totals');
+  if (totalItems > 0) {
+    totalsEl.style.display = 'flex';
+    document.getElementById('rgr-total-items').textContent = totalItems;
+    document.getElementById('rgr-total-qty').textContent = (pctSum / totalItems).toFixed(0) + '%';
+    document.getElementById('rgr-total-amt').textContent = '฿ ' + Math.round(totalAmt).toLocaleString();
+  } else {
+    totalsEl.style.display = 'none';
+  }
+
+  const submitBtn = document.getElementById('rgrSubmitBtn');
+  const footerHint = document.getElementById('rgr-footer-hint');
+
+  if (hasOver) {
+    submitBtn.disabled = true;
+    footerHint.textContent = 'Percentage exceeds remaining for one or more items.';
+    footerHint.style.color = 'var(--danger)';
+  } else if (totalItems === 0) {
+    submitBtn.disabled = true;
+    footerHint.textContent = 'Enter a percentage for at least one item to proceed.';
+    footerHint.style.color = 'var(--text-secondary)';
+  } else {
+    submitBtn.disabled = false;
+    footerHint.textContent = totalItems + ' item' + (totalItems > 1 ? 's' : '') + ' · Est. ฿ ' + Math.round(totalAmt).toLocaleString();
+    footerHint.style.color = 'var(--primary)';
+  }
+}
+
+/* ─────────────────────────────────────────
+   File handling
+───────────────────────────────────────── */
+function handleFileSelect(input) {
+  if (input.files && input.files[0]) showFileName(input.files[0].name);
+}
+function handleFileDrop(e) {
+  e.preventDefault();
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) showFileName(e.dataTransfer.files[0].name);
+}
+function showFileName(name) {
+  const tag = document.getElementById('fileNameTag');
+  tag.innerHTML = '<span>📄</span><span>' + name + '</span>';
+  tag.style.display = 'inline-flex';
+  tag.className = 'file-name-tag';
+}
+
+/* ─────────────────────────────────────────
+   Submit Record GR
+───────────────────────────────────────── */
+function doRecordGR() {
+  const po = selectedPO;
+  const date = document.getElementById('rgrDate').value;
+  closeRecordGRModal();
+  showToast('GR recorded against ' + po.num + ' (' + po.vendor.split(' ')[0] + ') on ' + date + ' — posted to Bookkeeping.');
+}
+
+/* ─────────────────────────────────────────
+   Toast
+───────────────────────────────────────── */
+function showToast(msg) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-success';
+  toast.innerHTML = `
+    <div class="toast-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="toast-body">${msg}</div>
+    <button class="toast-close" onclick="dismissToast(this.parentElement)">✕</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => dismissToast(toast), 5000);
+}
+function dismissToast(el) {
+  el.classList.add('hiding');
+  setTimeout(() => el.remove(), 200);
+}
+</script>
+</body>
+</html>
