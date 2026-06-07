@@ -95,6 +95,7 @@ A requester can cancel their PR only before the manager approves it. Once approv
 - **Expense items:** Accountant uses smart search to select a GL code from Bookkeeping master data. Enhancement — currently free text.
 - **Finance Coding return:** Accountant can return the PR to Procurement with comments if there is an issue. Procurement can then fix or return it further to the requester.
 - **Document type:** Each line item must have a document type assigned before the PR can advance past price comparison.
+- **Expected delivery date:** Each line item must have an expected delivery date filled in when the winning vendor is selected at Price Comparison. Mandatory — PR cannot advance without it. Locked after CFO approval. Pre-populated on PO creation.
 - **VAT flag:** Each line item must have a VAT flag selected (7% or 0%) at price comparison. This flag is locked after price comparison and flows to the PO and billing stages unchanged.
 - **PR completion:** PR status = Complete only when every line item has a purchasing document.
 - **SLA flag:** If a PR exceeds the configured SLA for its current stage, the "เกิน SLA" tag appears on the board card automatically.
@@ -152,6 +153,16 @@ flowchart TD
 
 - [ ] **E4 — Vendor field on document is read-only**
   On PO / Contract / Memo / Online Payment creation, the vendor field is pre-populated from the confirmed vendor code and is not editable. Procurement cannot substitute a different vendor at this stage.
+
+- [ ] **E5 — Expected delivery date per winning vendor at Price Comparison**
+  When Procurement selects the winning vendor for a line item at Price Comparison, they must also fill in the **Expected Delivery Date** for that line item. This represents the delivery commitment agreed with the vendor based on their quote.
+
+  - One expected delivery date per line item (not one per PR)
+  - Different line items assigned to different vendors can have different expected delivery dates
+  - Mandatory before the PR can advance past Price Comparison
+  - The date is locked after CFO approval alongside the vendor (same lock as E2)
+  - Carries through to the PO automatically when the PO is created — pre-populated and read-only on the PO form
+  - Visible on the PO detail and GR recording screens so the warehouse team knows when to expect delivery
 
 ---
 
