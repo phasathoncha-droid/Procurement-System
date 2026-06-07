@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vendor Portal — Billing Submission</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+/* ── Design tokens ── */
+:root {
+  --primary:        #1B3068;
+  --primary-dark:   #142451;
+  --primary-light:  #2A4A99;
+  --primary-bg:     #EEF4FF;
+  --accent:         #E8518A;
+  --accent-dark:    #C93D72;
+  --success:        #10B981;
+  --success-light:  #D1FAE5;
+  --danger:         #EF4444;
+  --danger-dark:    #DC2626;
+  --danger-light:   #FEE2E2;
+  --warning:        #F59E0B;
+  --warning-light:  #FEF3C7;
+  --bg-canvas:      #F0F4F9;
+  --bg-primary:     #FFFFFF;
+  --bg-secondary:   #F8FAFC;
+  --border:         #CBD5E1;
+  --border-light:   #EEF2F7;
+  --text-primary:   #0F1F42;
+  --text-secondary: #4B5E85;
+  --text-muted:     #8799B8;
+  --hover-bg:       #EEF4FF;
+  --sidebar-width:  240px;
+  --header-height:  56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border);
+  z-index: 50;
+  display: flex; flex-direction: column;
+}
+.sidebar-logo {
+  background: var(--primary); padding: 0 16px;
+  height: var(--header-height);
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.sidebar-logo-text { color: #fff; font-size: 14px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-ntb-tag { background: var(--accent); color: #fff; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px; flex-shrink: 0; }
+.sidebar-section-label {
+  padding: 16px 16px 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-muted);
+}
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; font-size: 13px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer;
+  transition: background 0.12s, color 0.12s; user-select: none;
+}
+.nav-item:hover { background: var(--hover-bg); color: var(--primary); }
+.nav-item.active { background: var(--primary); color: #fff; font-weight: 600; }
+.nav-item.active .nav-icon svg { stroke: #fff; }
+.nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav-icon svg { stroke: var(--text-secondary); transition: stroke 0.12s; }
+.nav-item:hover .nav-icon svg { stroke: var(--primary); }
+.nav-label { flex: 1; }
+.nav-badge { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; background: var(--bg-secondary); color: var(--text-secondary); }
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.2); color: #fff; }
+.sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 0; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.user-info-block { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; background: #EFF6FF; color: #1D4ED8; margin-top: 2px; }
+.btn-logout-sidebar {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: background 0.12s, color 0.12s;
+}
+.btn-logout-sidebar:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+
+/* ── HEADER ── */
+.app-header {
+  position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+  height: var(--header-height);
+  background: var(--bg-primary); border-bottom: 1px solid var(--border);
+  z-index: 40; display: flex; align-items: center;
+  padding: 0 24px; justify-content: space-between;
+}
+.app-header::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px; background: var(--accent);
+}
+.header-breadcrumb { font-size: 13px; color: var(--text-secondary); }
+.header-breadcrumb span { color: var(--text-muted); margin: 0 6px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-user { font-size: 13px; color: var(--text-secondary); }
+
+/* ── LAYOUT ── */
+.main-layout {
+  margin-left: var(--sidebar-width); padding-top: var(--header-height);
+  height: 100vh; overflow: hidden;
+  background: var(--bg-canvas); display: flex; flex-direction: column;
+}
+.page-container {
+  max-width: 1280px; width: 100%; margin: 0 auto;
+  padding: 24px; display: flex; flex-direction: column;
+  flex: 1; min-height: 0;
+}
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-shrink: 0; }
+.page-title { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+.page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0.625rem 1.25rem; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; border: none;
+  transition: background 0.15s, box-shadow 0.15s;
+  white-space: nowrap; font-family: inherit; line-height: 1;
+}
+.btn-primary  { background: var(--primary); color: #fff; }
+.btn-primary:hover  { background: var(--primary-dark); }
+.btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; }
+.btn-secondary { background: var(--bg-primary); color: var(--primary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--hover-bg); }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: var(--accent-dark); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-dark); }
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 12px; font-weight: 500; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-primary); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27,48,104,.08), 0 4px 12px rgba(27,48,104,.06);
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+}
+.card-scroll { flex: 1; overflow-y: auto; min-height: 0; }
+
+/* ── TOOLBAR ── */
+.table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  gap: 10px; background: var(--bg-primary);
+}
+.toolbar-left { display: flex; align-items: center; gap: 8px; flex: 1; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary); flex-wrap: wrap;
+}
+.filter-bar-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-right: 4px; white-space: nowrap; }
+.filter-bar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+.search-wrap { position: relative; min-width: 200px; max-width: 300px; flex: 1; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; display: flex; align-items: center; }
+.search-input {
+  width: 100%; padding: 0.5rem 2rem 0.5rem 2.4rem;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; color: var(--text-primary); background: var(--bg-primary);
+  outline: none; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.search-input::placeholder { color: var(--text-muted); }
+
+.fi {
+  height: 36px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg-primary); color: var(--text-primary);
+  padding: 0 10px; font-size: 13px; outline: none; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.fi:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+select.fi {
+  padding-right: 28px; appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234B5E85'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+
+/* ── TABLE ── */
+.table-wrapper { overflow-x: visible; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--bg-secondary); border-bottom: 2px solid var(--border); }
+thead th {
+  position: sticky; top: 0; z-index: 5;
+  padding: 12px 16px; text-align: left;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary); white-space: nowrap; background: var(--bg-secondary);
+}
+tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.12s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--hover-bg); cursor: pointer; }
+tbody td { padding: 13px 16px; font-size: 14px; color: var(--text-primary); vertical-align: middle; }
+.link { color: var(--primary); font-weight: 600; cursor: pointer; }
+.link:hover { text-decoration: underline; color: var(--primary-dark); }
+.tr { text-align: right; }
+.fw6 { font-weight: 600; }
+.mono { font-size: 12px; font-weight: 600; }
+
+/* ── BADGES ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.b-confirmed { background: var(--success-light); color: #065F46; }
+.b-confirmed::before { background: var(--success); }
+.b-reversed  { background: #F1F5F9; color: #475569; }
+.b-reversed::before  { background: #94A3B8; }
+.b-reversal  { background: var(--danger-light); color: #991B1B; }
+.b-reversal::before  { background: var(--danger); }
+.b-pending   { background: var(--warning-light); color: #92400E; }
+.b-pending::before { background: var(--warning); }
+
+/* GR status small badges */
+.gr-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.gr-full  { background: var(--success-light); color: #065F46; }
+.gr-part  { background: var(--warning-light); color: #92400E; }
+.gr-none  { background: #F1F5F9; color: #475569; }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 1000;
+  align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem; overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--bg-primary); border-radius: 12px;
+  width: 100%; max-width: 680px;
+  box-shadow: 0 20px 60px rgba(27,48,104,0.18);
+  animation: modalIn 0.2s ease; margin: auto;
+  display: flex; flex-direction: column; max-height: 90vh;
+}
+.modal-lg { max-width: 900px; }
+@keyframes modalIn { from { opacity:0; transform: scale(0.96); } to { opacity:1; transform: scale(1); } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border); border-radius: 12px 12px 0 0;
+}
+.modal-title   { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.modal-subtitle{ font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.modal-close {
+  background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary);
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.modal-close:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.modal-body { padding: 1.5rem; overflow-y: auto; flex: 1; min-height: 0; }
+.modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+  background: var(--bg-secondary); border-radius: 0 0 12px 12px;
+}
+
+/* ── LAYER CARDS ── */
+.layer-card { border: 1px solid var(--border); border-radius: 10px; background: var(--bg-primary); margin-bottom: 16px; overflow: hidden; }
+.layer-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--bg-secondary);
+}
+.layer-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); }
+.layer-card-body { padding: 1rem; }
+
+/* ── FORM ── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text-primary); display: block; }
+.form-label-muted { font-weight: 400; color: var(--text-secondary); font-size: 12px; margin-left: 4px; }
+.req { color: var(--danger); margin-left: 2px; }
+.form-input {
+  height: 36px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 0 12px; font-size: 13px; font-family: inherit; outline: none;
+  color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-input.readonly { background: var(--bg-secondary); color: var(--text-secondary); cursor: not-allowed; }
+.form-ta {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  resize: vertical; min-height: 80px; outline: none;
+  color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.15s;
+}
+.form-ta:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.form-ta::placeholder { color: var(--text-muted); }
+.form-hint { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+/* File drop zone */
+.file-drop {
+  border: 1.5px dashed var(--border); border-radius: 8px;
+  padding: 16px; text-align: center; cursor: pointer;
+  transition: all 0.15s; background: var(--bg-secondary);
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.file-drop:hover { border-color: var(--primary); background: var(--hover-bg); border-style: solid; }
+.file-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.file-drop-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.file-name-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--hover-bg); border: 1px solid var(--primary);
+  border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+  margin-top: 4px;
+}
+.file-drop.has-file { border-color: var(--primary); border-style: solid; background: var(--hover-bg); }
+
+/* ── INVOICE LINE ITEMS TABLE (inside modal) ── */
+.inv-items-wrap { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 0; }
+.inv-items-table { width: 100%; border-collapse: collapse; }
+.inv-items-table thead tr { background: var(--bg-secondary); border-bottom: 2px solid var(--border); }
+.inv-items-table th { padding: 9px 12px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); text-align: left; }
+.inv-items-table th.tr { text-align: right; }
+.inv-items-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.inv-items-table tbody tr:last-child td { border-bottom: none; }
+.inv-items-table tbody tr:hover { background: var(--hover-bg); }
+.qty-input {
+  width: 80px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 8px; font-size: 13px; font-family: inherit;
+  text-align: right; outline: none; background: var(--bg-primary); color: var(--text-primary);
+  transition: border-color 0.15s;
+}
+.qty-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.qty-input.over { border-color: var(--danger); background: var(--danger-light); }
+.item-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary); }
+
+/* ── TOTALS ROW ── */
+.totals-row {
+  display: flex; justify-content: flex-end;
+  padding: 12px 16px; border-top: 2px solid var(--border);
+  background: var(--bg-secondary); gap: 32px;
+}
+.totals-item { text-align: right; }
+.totals-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); }
+.totals-value { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+.totals-value.accent { color: var(--primary); font-size: 18px; }
+
+/* ── INFO GRID ── */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+}
+.ig-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 3px; }
+.ig-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+/* ── FINANCIAL SUMMARY PANEL ── */
+.fin-summary {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0; border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; margin-bottom: 20px;
+}
+.fin-col {
+  padding: 12px 16px; border-right: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.fin-col:last-child { border-right: none; }
+.fin-col.highlight { background: var(--hover-bg); }
+.fin-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 6px; }
+.fin-value { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.fin-value.success { color: #065F46; }
+.fin-value.warning { color: #92400E; }
+.fin-value.muted   { color: var(--text-muted); }
+
+/* ── REFERENCE TYPE SELECTOR ── */
+.ref-type-group { display: flex; gap: 8px; margin-bottom: 14px; }
+.ref-type-btn {
+  flex: 1; padding: 10px 8px; border-radius: 8px; text-align: center;
+  border: 1.5px solid var(--border); background: var(--bg-secondary);
+  cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-secondary);
+  transition: all 0.15s; font-family: inherit;
+}
+.ref-type-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--hover-bg); }
+.ref-type-btn.active { border-color: var(--primary); background: var(--hover-bg); color: var(--primary); }
+.ref-type-label { font-size: 10px; font-weight: 400; color: var(--text-muted); display: block; margin-top: 2px; }
+
+/* ── ACTION BUTTONS IN TABLE ── */
+.btn-action {
+  height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: none; font-family: inherit; white-space: nowrap;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px;
+}
+.btn-submit-inv { background: var(--primary-bg); color: var(--primary); border: 1px solid var(--primary); }
+.btn-submit-inv:hover { background: var(--primary); color: #fff; }
+.btn-view-inv { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-view-inv:hover { background: var(--hover-bg); color: var(--primary); border-color: var(--primary); }
+
+/* ── PO DETAIL PANEL ── */
+.detail-panel-po {
+  background: var(--hover-bg); border: 1.5px solid var(--primary);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+}
+.detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 16px; }
+.dg-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 2px; }
+.dg-value { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+/* ── WARN BOX ── */
+/* ── Billing progress bar ── */
+.bill-progress-wrap { display:flex;flex-direction:column;gap:4px;min-width:140px; }
+.bill-progress-track { height:8px;border-radius:100px;background:var(--border-light);position:relative;overflow:hidden; }
+.bill-bar-prev { position:absolute;top:0;left:0;height:100%;background:#CBD5E1;border-radius:100px 0 0 100px;transition:width 0.2s; }
+.bill-bar-this { position:absolute;top:0;height:100%;background:var(--primary);transition:left 0.2s,width 0.2s,background 0.15s; }
+.bill-bar-this.full { background:var(--success);border-radius:0 100px 100px 0; }
+.bill-bar-this.over { background:var(--danger); }
+.bill-progress-meta { display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-muted); }
+.bill-progress-pct { font-weight:700;color:var(--text-primary);font-size:11px; }
+.bill-progress-pct.over { color:var(--danger); }
+.bill-over-msg { font-size:10.5px;color:var(--danger);margin-top:2px; }
+/* ── Amount summary ── */
+.ams-item { text-align:right; }
+.ams-label { font-size:10.5px;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary); }
+.ams-value { font-size:15px;font-weight:700;color:var(--text-primary);margin-top:2px;font-variant-numeric:tabular-nums; }
+.ams-value.accent { color:var(--primary); }
+
+.warn-box {
+  background: var(--warning-light); border: 1px solid var(--warning); border-radius: 8px;
+  padding: 11px 14px; font-size: 12px; color: #92400E;
+  display: flex; gap: 9px; line-height: 1.55;
+}
+
+/* ── TOAST ── */
+#toastContainer { position: fixed; top: 68px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  min-width: 280px; max-width: 400px; padding: 14px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; background: var(--bg-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13); pointer-events: all;
+  animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.hiding { animation: toastOut 0.2s ease forwards; }
+.toast-success { border-left: 4px solid var(--success); }
+.toast-error   { border-left: 4px solid var(--danger); }
+.toast-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.toast-icon.success { background: var(--success); }
+.toast-icon.error   { background: var(--danger); }
+.toast-body { flex: 1; line-height: 1.45; color: var(--text-primary); }
+.toast-close { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text-secondary); opacity: 0.6; line-height: 1; padding: 0; }
+.toast-close:hover { opacity: 1; }
+@keyframes toastIn  { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateX(40px); } }
+
+/* ── TABS ── */
+.tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 0; flex-shrink: 0; padding: 0 0 0 0; }
+.tab-btn {
+  padding: 10px 20px; font-size: 13px; font-weight: 600;
+  color: var(--text-secondary); background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s; font-family: inherit;
+}
+.tab-btn:hover { color: var(--primary); }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-content { display: none; }
+.tab-content.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+.empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="sidebar-logo-text">Vendor Portal</span>
+    <span class="sidebar-ntb-tag">NTB</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-item active" onclick="showTab('po-list',this)">
+      <span class="nav-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="1" width="12" height="14" rx="2"/>
+          <line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/>
+        </svg>
+      </span>
+      <span class="nav-label">My POs</span>
+    </div>
+    <div class="nav-item" onclick="showTab('my-invoices',this)">
+      <span class="nav-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 1h12v14l-2-1-2 1-2-1-2 1-2-1V1z"/>
+          <line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="8" y2="11"/>
+        </svg>
+      </span>
+      <span class="nav-label">My Invoices</span>
+      <span class="nav-badge" id="nav-badge-invoices">3</span>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">AB</div>
+      <div class="user-info-block">
+        <div class="user-name">Apirak B.</div>
+        <span class="role-chip">Vendor</span>
+      </div>
+    </div>
+    <button class="btn-logout-sidebar">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 13H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h3"/><polyline points="9 10 13 7 9 4"/><line x1="13" y1="7" x2="5" y2="7"/>
+      </svg>
+      Log out
+    </button>
+  </div>
+</aside>
+
+<!-- ══ HEADER ══ -->
+<header class="app-header">
+  <div class="header-breadcrumb">
+    Vendor Portal <span>/</span> <span id="header-section">My POs</span>
+  </div>
+  <div class="header-right">
+    <span class="header-user">ABC Co., Ltd.</span>
+    <button class="btn btn-secondary btn-sm">Log out</button>
+  </div>
+</header>
+
+<div id="toastContainer"></div>
+
+<!-- ══ MAIN ══ -->
+<div class="main-layout">
+  <div class="page-container">
+
+    <!-- ══ PO LIST TAB ══ -->
+    <div class="tab-content active" id="tab-po-list">
+      <div class="page-header">
+        <div>
+          <div class="page-title">My Purchase Orders</div>
+          <div class="page-subtitle">All POs issued to ABC Co., Ltd.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <div class="search-wrap">
+              <span class="search-icon">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="5.5" cy="5.5" r="4" stroke="var(--primary)" stroke-width="1.5"/>
+                  <line x1="8.7" y1="8.7" x2="11.5" y2="11.5" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input class="search-input" type="text" placeholder="Search PO number…" />
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <select class="fi" style="width:140px">
+              <option>All GR Status</option>
+              <option>Fully Received</option>
+              <option>Partially Received</option>
+              <option>Not Started</option>
+            </select>
+            <select class="fi" style="width:145px">
+              <option>All Billing Status</option>
+              <option>Not Started</option>
+              <option>Partial</option>
+              <option>Complete</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card-scroll">
+          <div class="table-wrapper">
+            <table id="po-table">
+              <thead>
+                <tr>
+                  <th>Reference</th>
+                  <th>Type</th>
+                  <th>Date</th>
+                  <th style="text-align:right">Items</th>
+                  <th style="text-align:right">Total Amount</th>
+                  <th style="text-align:right">Remaining</th>
+                  <th>Billing Status</th>
+                  <th style="text-align:center;width:160px">Action</th>
+                </tr>
+              </thead>
+              <tbody id="po-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /po-list -->
+
+    <!-- ══ MY INVOICES TAB ══ -->
+    <div class="tab-content" id="tab-my-invoices">
+      <div class="page-header">
+        <div>
+          <div class="page-title">My Invoices</div>
+          <div class="page-subtitle">All invoices submitted to Ngern Turbo</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-toolbar">
+          <div class="toolbar-left">
+            <div class="search-wrap">
+              <span class="search-icon">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="5.5" cy="5.5" r="4" stroke="var(--primary)" stroke-width="1.5"/>
+                  <line x1="8.7" y1="8.7" x2="11.5" y2="11.5" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </span>
+              <input class="search-input" type="text" placeholder="Search invoice number or PO…" />
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <select class="fi" style="width:160px">
+              <option>All Status</option>
+              <option>Waiting Review</option>
+              <option>Confirmed</option>
+              <option>Rejected</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card-scroll">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Invoice No.</th>
+                  <th>Invoice Date</th>
+                  <th>Reference</th>
+                  <th>Type</th>
+                  <th style="text-align:right">Net Amount</th>
+                  <th style="text-align:right">Invoice Total</th>
+                  <th>Status</th>
+                  <th style="text-align:center;width:80px">Action</th>
+                </tr>
+              </thead>
+              <tbody id="inv-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /my-invoices -->
+
+  </div>
+</div>
+
+<!-- ══ PO DETAIL MODAL ══ -->
+<div class="modal-backdrop" id="poDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="pod-title">PO-0042</div>
+        <div class="modal-subtitle">Read-only — contact Procurement for changes</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('poDetailModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:16px" id="pod-info"></div>
+
+      <!-- Financial Summary -->
+      <div id="pod-fin-summary"></div>
+
+      <div id="pod-items-section">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:14px">Line Items</div>
+        <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px">
+          <table style="width:100%;border-collapse:collapse" id="pod-items"></table>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div id="pod-gr-section">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:14px">GR History</div>
+          <div id="pod-gr-history"></div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:14px">Billing History</div>
+          <div id="pod-billing-history"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('poDetailModal')">Close</button>
+      <button class="btn btn-accent" id="pod-submit-btn" onclick="openSubmitInvoiceFromDetail()">+ Submit Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUBMIT INVOICE MODAL ══ -->
+<div class="modal-backdrop" id="submitInvModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="modal-title">Submit Invoice</div>
+          <span id="inv-type-badge"></span>
+        </div>
+        <div class="modal-subtitle" id="inv-modal-subtitle">Against PO-0042</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('submitInvModal')">✕</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:20px">
+
+      <!-- Reference info grid -->
+      <div class="info-grid" id="inv-info-grid" style="grid-template-columns:1fr 1fr 1fr 1fr"></div>
+
+      <!-- Invoice details -->
+      <div>
+        <div class="detail-section-title">Invoice Details</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Invoice Number <span class="req">*</span></label>
+            <input class="form-input" type="text" id="inv-number" placeholder="e.g. INV-2024-006" />
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Invoice Date <span class="req">*</span></label>
+            <input class="form-input" type="date" id="inv-date" value="2026-06-07" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Line items -->
+      <div>
+        <div class="detail-section-title" id="inv-items-title">Line Items to Bill</div>
+        <div class="layer-card" style="margin-bottom:0">
+          <!-- PO line items table -->
+          <div id="inv-po-lines">
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr style="background:var(--bg-secondary);border-bottom:2px solid var(--border)">
+                    <th style="padding:9px 8px 9px 16px;width:36px"></th>
+                    <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary)" id="inv-th-name">Item Name</th>
+                    <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right" id="inv-th-amt">PO Amount (฿)</th>
+                    <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Remaining (฿)</th>
+                    <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Net Amount (฿)</th>
+                    <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">VAT (฿)</th>
+                    <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Total (฿)</th>
+                    <th style="padding:9px 16px 9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary)">Progress</th>
+                  </tr>
+                </thead>
+                <tbody id="inv-items-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Ceiling warning -->
+          <div id="inv-ceiling-warn" style="display:none;padding:0 16px 12px">
+            <div class="warn-box" style="margin:0">
+              <span style="font-size:15px;flex-shrink:0">⚠</span>
+              <span id="inv-ceiling-msg"></span>
+            </div>
+          </div>
+          <!-- Amount summary -->
+          <div class="amount-summary" id="inv-amount-summary"></div>
+        </div>
+      </div>
+
+      <!-- Documents -->
+      <div>
+        <div class="detail-section-title">Documents</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Tax Invoice (PDF) <span class="req">*</span></label>
+            <div class="file-drop" id="file-tax-drop" ondragover="event.preventDefault()" ondrop="handleDrop(event,'file-tax-input','file-tax-drop','file-tax-name')">
+              <input type="file" id="file-tax-input" accept=".pdf" style="position:absolute;opacity:0;inset:0;cursor:pointer" onchange="handleFileChange(this,'file-tax-drop','file-tax-name')" />
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M10 13V3M6 7l4-4 4 4"/><path d="M3 17h14"/></svg>
+              <div class="file-drop-text">Click to attach or drag & drop<br><span style="font-size:11px">PDF only · max 10 MB</span></div>
+              <div id="file-tax-name" style="display:none"></div>
+            </div>
+          </div>
+          <div class="form-group" style="margin:0" id="file-po-group">
+            <label class="form-label">Copy of PO (PDF) <span class="req">*</span></label>
+            <div class="file-drop" id="file-po-drop" ondragover="event.preventDefault()" ondrop="handleDrop(event,'file-po-input','file-po-drop','file-po-name')">
+              <input type="file" id="file-po-input" accept=".pdf" style="position:absolute;opacity:0;inset:0;cursor:pointer" onchange="handleFileChange(this,'file-po-drop','file-po-name')" />
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M10 13V3M6 7l4-4 4 4"/><path d="M3 17h14"/></svg>
+              <div class="file-drop-text">Click to attach or drag & drop<br><span style="font-size:11px">PDF only · max 10 MB</span></div>
+              <div id="file-po-name" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label">Supporting Document <span class="form-label-muted">(optional)</span></label>
+          <div class="file-drop" id="file-delivery-drop" ondragover="event.preventDefault()" ondrop="handleDrop(event,'file-delivery-input','file-delivery-drop','file-delivery-name')">
+            <input type="file" id="file-delivery-input" accept=".pdf,.jpg,.png" style="position:absolute;opacity:0;inset:0;cursor:pointer" onchange="handleFileChange(this,'file-delivery-drop','file-delivery-name')" />
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"><path d="M10 13V3M6 7l4-4 4 4"/><path d="M3 17h14"/></svg>
+            <div class="file-drop-text">Delivery note, contract copy, etc.<br><span style="font-size:11px">PDF, JPG, PNG · max 10 MB</span></div>
+            <div id="file-delivery-name" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remarks -->
+      <div>
+        <div class="detail-section-title">Remarks</div>
+        <textarea class="form-ta" id="inv-remarks" placeholder="Any notes for Procurement… (optional)"></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <span id="inv-footer-hint" style="font-size:12px;color:var(--text-secondary);flex:1"></span>
+      <button class="btn btn-secondary" onclick="closeModal('submitInvModal')">Cancel</button>
+      <button class="btn btn-accent" id="inv-submit-btn" onclick="doSubmitInvoice()">Submit Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INVOICE DETAIL MODAL ══ -->
+<div class="modal-backdrop" id="invDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="invd-title">INV-2024-001</div>
+        <div class="modal-subtitle">Invoice detail — read only</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('invDetailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="invd-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('invDetailModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ MOCK DATA ══ */
+const VENDOR_NAME = 'ABC Co., Ltd.';
+
+const POS = [
+  {
+    id: 'PO-0042', date: '2026-05-10',
+    items: [
+      { name: 'Laptop Dell XPS 15',      qty: 5,  unit: 55000 },
+      { name: 'Wireless Mouse Logitech', qty: 10, unit: 1250  },
+      { name: 'Monitor 27" 4K LG',       qty: 3,  unit: 18500 },
+    ],
+    grStatus: 'Partially Received',
+    billingStatus: 'Partial',
+    vatRate: 7,
+    grHistory: [
+      { date: '2026-05-25', doc: 'GR-0038', items: 'Laptop ×3, Mouse ×10' },
+    ],
+    billingHistory: [
+      { inv: 'INV-2024-001', date: '2026-06-01', total: 85600, status: 'Confirmed' },
+      { inv: 'INV-2024-003', date: '2026-06-04', total: 32100, status: 'Waiting Review' },
+    ],
+    grQty: { 0: 3, 1: 10, 2: 0 },
+    billedQty: { 0: 3, 1: 10, 2: 0 },
+  },
+  {
+    id: 'PO-0038', date: '2026-04-20',
+    items: [
+      { name: 'Network Switch 24-port', qty: 2, unit: 43500 },
+    ],
+    grStatus: 'Fully Received',
+    billingStatus: 'Not Started',
+    vatRate: 7,
+    grHistory: [
+      { date: '2026-05-05', doc: 'GR-0029', items: 'Network Switch ×2' },
+    ],
+    billingHistory: [],
+    grQty: { 0: 2 },
+    billedQty: { 0: 0 },
+  },
+  {
+    id: 'PO-0045', date: '2026-05-30',
+    items: [
+      { name: 'Server Rack Unit 2U',   qty: 1, unit: 132500 },
+      { name: 'UPS Power Backup 1000VA', qty: 2, unit: 8900 },
+    ],
+    grStatus: 'Not Started',
+    billingStatus: 'Not Started',
+    vatRate: 0,
+    grHistory: [],
+    billingHistory: [],
+    grQty: { 0: 0, 1: 0 },
+    billedQty: { 0: 0, 1: 0 },
+  },
+  {
+    id: 'PO-0051', date: '2026-06-01',
+    refType: 'PO',
+    items: [
+      { name: 'USB-C Hub',              qty: 20, unit: 3250 },
+      { name: 'HDMI Cable 3m',          qty: 30, unit: 500  },
+    ],
+    grStatus: 'Fully Received',
+    billingStatus: 'Complete',
+    vatRate: 7,
+    grHistory: [
+      { date: '2026-06-05', doc: 'GR-0044', items: 'USB-C Hub ×20, HDMI Cable ×30' },
+    ],
+    billingHistory: [
+      { inv: 'INV-2024-002', date: '2026-06-03', total: 80000, status: 'Confirmed' },
+    ],
+    grQty: { 0: 20, 1: 30 },
+    billedQty: { 0: 20, 1: 30 },
+  },
+  {
+    id: 'CONTRACT-2026-003', date: '2026-03-01',
+    refType: 'Contract',
+    description: 'Annual IT Support & Maintenance Services',
+    contractValue: 480000,
+    vatRate: 7,
+    grStatus: null,
+    billingStatus: 'Partial',
+    grHistory: [],
+    billingHistory: [
+      { inv: 'INV-2024-004', date: '2026-06-05', total: 128400, status: 'Waiting Review' },
+    ],
+    items: [
+      { name: 'Monthly IT Support Fee',        qty: 1, unit: 120000 },
+      { name: 'On-site Engineer (per month)',   qty: 1, unit: 180000 },
+      { name: 'Software License Renewal',       qty: 1, unit: 180000 },
+    ],
+    grQty: {}, billedQty: {},
+  },
+  {
+    id: 'MEMO-2026-011', date: '2026-05-15',
+    refType: 'Memo',
+    description: 'Emergency office renovation — Board approved memo',
+    contractValue: 75000,
+    vatRate: 0,
+    grStatus: null,
+    billingStatus: 'Not Started',
+    grHistory: [],
+    billingHistory: [],
+    items: [
+      { name: 'Renovation Materials & Supplies', qty: 1, unit: 45000 },
+      { name: 'Labour & Installation',           qty: 1, unit: 30000 },
+    ],
+    grQty: {}, billedQty: {},
+  },
+];
+
+const INVOICES = [
+  { id: 'INV-2024-001', date: '2026-06-01', ref: 'PO-0042', refType: 'PO', vatRate: 7, net: 80000, total: 85600, status: 'Confirmed',
+    lines: [
+      { name: 'Laptop Dell XPS 15',      net: 55000 },
+      { name: 'Wireless Mouse Logitech', net: 25000 },
+    ]},
+  { id: 'INV-2024-002', date: '2026-06-03', ref: 'PO-0051', refType: 'PO', vatRate: 7, net: 50000, total: 53500, status: 'Waiting Review',
+    lines: [
+      { name: 'Office Desk (Adjustable)', net: 50000 },
+    ]},
+  { id: 'INV-2024-003', date: '2026-06-04', ref: 'PO-0042', refType: 'PO', vatRate: 7, net: 30000, total: 32100, status: 'Waiting Review',
+    lines: [
+      { name: 'Monitor 27" 4K LG',        net: 18500 },
+      { name: 'Laptop Dell XPS 15',       net: 11500 },
+    ]},
+  { id: 'INV-2024-004', date: '2026-06-05', ref: 'CONTRACT-2026-003', refType: 'Contract', vatRate: 7, net: 120000, total: 128400, status: 'Waiting Review',
+    lines: [
+      { name: 'Monthly IT Support — April 2026', net: 60000 },
+      { name: 'Monthly IT Support — May 2026',   net: 60000 },
+    ]},
+  { id: 'INV-2024-005', date: '2026-06-06', ref: 'MEMO-2026-011', refType: 'Memo', vatRate: 0, net: 15000, total: 15000, status: 'Rejected',
+    rejectionReason: 'Invoice amount does not match the approved memo value. Please resubmit with the correct amount.',
+    lines: [
+      { name: 'Emergency office renovation — materials', net: 15000 },
+    ]},
+];
+
+let currentPO = null;
+
+/* ── RENDER PO TABLE ── */
+const TYPE_BADGE = {
+  'PO':       'background:#EFF6FF;color:#1D4ED8',
+  'Contract': 'background:#F0FDF4;color:#166534',
+  'Memo':     'background:#FFF7ED;color:#9A3412',
+};
+
+function renderPOTable() {
+  const tbody = document.getElementById('po-tbody');
+  tbody.innerHTML = POS.map(po => {
+    const refType = po.refType || 'PO';
+    const total = refType === 'PO'
+      ? po.items.reduce((s, it) => s + it.qty * it.unit, 0)
+      : po.contractValue;
+    const typeBadge = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;${TYPE_BADGE[refType]}">${refType}</span>`;
+
+    const confirmedBilled = po.billingHistory.filter(b => b.status === 'Confirmed').reduce((s, b) => s + b.total, 0);
+    const pendingBilled   = po.billingHistory.filter(b => b.status !== 'Confirmed' && b.status !== 'Rejected').reduce((s, b) => s + b.total, 0);
+    const remaining       = po.billingStatus === 'Complete' ? 0 : Math.max(0, total - confirmedBilled - pendingBilled);
+
+    const billBadge = po.billingStatus === 'Complete'
+      ? `<span class="badge b-confirmed">Complete</span>`
+      : po.billingStatus === 'Partial'
+        ? `<span class="badge b-pending">Partial</span>`
+        : `<span class="badge b-reversed">Not Started</span>`;
+
+    const itemsCell = `<td class="tr fw6">${po.items.length}</td>`;
+
+    const remainingCell = remaining === 0
+      ? `<td class="tr" style="color:var(--text-muted)">฿ 0</td>`
+      : `<td class="tr fw6" style="color:#065F46">฿ ${remaining.toLocaleString()}</td>`;
+
+    const actionBtn = po.billingStatus === 'Complete'
+      ? `<span style="font-size:12px;color:var(--text-muted)">—</span>`
+      : `<button class="btn-action btn-submit-inv" onclick="event.stopPropagation();openSubmitInvoice('${po.id}')">+ Submit Invoice</button>`;
+
+    return `<tr onclick="openPODetail('${po.id}')">
+      <td><span class="link mono">${po.id}</span></td>
+      <td>${typeBadge}</td>
+      <td style="color:var(--text-secondary)">${po.date}</td>
+      ${itemsCell}
+      <td class="tr fw6">฿ ${total.toLocaleString()}</td>
+      ${remainingCell}
+      <td>${billBadge}</td>
+      <td style="text-align:center">${actionBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── RENDER INVOICES TABLE ── */
+function renderInvoicesTable() {
+  const tbody = document.getElementById('inv-tbody');
+  const statusMap = { 'Confirmed':'b-confirmed', 'Waiting Review':'b-pending', 'Rejected':'b-reversal' };
+  const typeColors = { 'PO':'background:#EFF6FF;color:#1D4ED8', 'Contract':'background:#F0FDF4;color:#166534', 'Memo':'background:#FFF7ED;color:#9A3412' };
+  tbody.innerHTML = INVOICES.map(inv => {
+    const cls = statusMap[inv.status] || 'b-reversed';
+    const tStyle = typeColors[inv.refType] || '';
+    return `<tr onclick="openInvDetail('${inv.id}')">
+      <td><span class="link mono">${inv.id}</span></td>
+      <td style="color:var(--text-secondary)">${inv.date}</td>
+      <td><span class="mono">${inv.ref}</span></td>
+      <td><span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;${tStyle}">${inv.refType}</span></td>
+      <td class="tr fw6">฿ ${inv.net.toLocaleString()}</td>
+      <td class="tr fw6">฿ ${inv.total.toLocaleString()}</td>
+      <td><span class="badge ${cls}">${inv.status}</span></td>
+      <td style="text-align:center"><button class="btn-action btn-view-inv" onclick="event.stopPropagation();openInvDetail('${inv.id}')">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ── TAB SWITCHING ── */
+function showTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  const labels = { 'po-list': 'My POs', 'my-invoices': 'My Invoices' };
+  document.getElementById('header-section').textContent = labels[id] || '';
+}
+
+/* ── PO DETAIL MODAL ── */
+function openPODetail(poId) {
+  const po = POS.find(p => p.id === poId);
+  if (!po) return;
+  currentPO = po;
+
+  document.getElementById('pod-title').textContent = po.id;
+
+  const total = po.items.reduce((s, it) => s + it.qty * it.unit, 0);
+  const grBadge = po.grStatus === 'Fully Received'
+    ? `<span class="gr-badge gr-full">Fully Received</span>`
+    : po.grStatus === 'Partially Received'
+      ? `<span class="gr-badge gr-part">Partially Received</span>`
+      : `<span class="gr-badge gr-none">Not Started</span>`;
+
+  const refType  = po.refType || 'PO';
+  const refLabel = refType === 'PO' ? 'PO Number' : refType === 'Contract' ? 'Contract Ref.' : 'Memo Ref.';
+  const totalLabel = refType === 'PO' ? 'PO Total' : refType === 'Contract' ? 'Contract Value' : 'Memo Value';
+  const typeBadgeInline = `<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;${TYPE_BADGE[refType]};margin-left:6px">${refType}</span>`;
+
+  document.getElementById('pod-info').innerHTML = `
+    <div><div class="ig-lbl">${refLabel}</div><div class="ig-val mono">${po.id}${typeBadgeInline}</div></div>
+    <div><div class="ig-lbl">Date</div><div class="ig-val">${po.date}</div></div>
+    <div><div class="ig-lbl">VAT Rate</div><div class="ig-val">${po.vatRate}%</div></div>
+    <div><div class="ig-lbl">Vendor</div><div class="ig-val">${VENDOR_NAME}</div></div>
+    <div><div class="ig-lbl">${totalLabel}</div><div class="ig-val fw6">฿ ${total.toLocaleString()}</div></div>
+    <div><div class="ig-lbl">${refType === 'PO' ? 'GR Status' : 'Description'}</div><div class="ig-val">${refType === 'PO' ? grBadge : (po.description || '—')}</div></div>
+  `;
+
+  // Financial summary
+  const confirmedBilled = po.billingHistory.filter(b => b.status === 'Confirmed').reduce((s, b) => s + b.total, 0);
+  const pendingBilled   = po.billingHistory.filter(b => b.status !== 'Confirmed' && b.status !== 'Rejected').reduce((s, b) => s + b.total, 0);
+  const remaining       = Math.max(0, total - confirmedBilled - pendingBilled);
+
+  if (refType === 'PO') {
+    const grValue = po.items.reduce((s, it, i) => s + (po.grQty[i] || 0) * it.unit, 0);
+    document.getElementById('pod-fin-summary').innerHTML = `
+      <div class="fin-summary" style="margin-bottom:20px">
+        <div class="fin-col"><div class="fin-label">PO Value</div><div class="fin-value">฿ ${total.toLocaleString()}</div></div>
+        <div class="fin-col"><div class="fin-label">GR Value (Delivered)</div><div class="fin-value">฿ ${grValue.toLocaleString()}</div></div>
+        <div class="fin-col"><div class="fin-label">Billed (Confirmed)</div><div class="fin-value success">฿ ${confirmedBilled.toLocaleString()}</div></div>
+        <div class="fin-col"><div class="fin-label">Pending (Under Review)</div><div class="fin-value warning">฿ ${pendingBilled.toLocaleString()}</div></div>
+        <div class="fin-col highlight"><div class="fin-label">Remaining Billable</div><div class="fin-value ${remaining === 0 ? 'muted' : ''}">฿ ${remaining.toLocaleString()}</div></div>
+      </div>`;
+  } else {
+    document.getElementById('pod-fin-summary').innerHTML = `
+      <div class="fin-summary" style="margin-bottom:20px">
+        <div class="fin-col"><div class="fin-label">${refType} Value</div><div class="fin-value">฿ ${total.toLocaleString()}</div></div>
+        <div class="fin-col"><div class="fin-label">Billed (Confirmed)</div><div class="fin-value success">฿ ${confirmedBilled.toLocaleString()}</div></div>
+        <div class="fin-col"><div class="fin-label">Pending (Under Review)</div><div class="fin-value warning">฿ ${pendingBilled.toLocaleString()}</div></div>
+        <div class="fin-col highlight"><div class="fin-label">Remaining Billable</div><div class="fin-value ${remaining === 0 ? 'muted' : ''}">฿ ${remaining.toLocaleString()}</div></div>
+      </div>`;
+  }
+
+  // Line items section — PO only
+  const podItemsSection = document.getElementById('pod-items-section');
+  const podGrSection    = document.getElementById('pod-gr-section');
+
+  if (refType === 'PO') {
+    podItemsSection.style.display = '';
+    podGrSection.style.display    = '';
+    const itemRows = po.items.map((it, i) => `
+      <tr style="border-bottom:1px solid var(--border-light)">
+        <td style="padding:10px 16px;font-size:13px">${it.name}</td>
+        <td style="padding:10px 16px;font-size:13px;text-align:right">${it.qty}</td>
+        <td style="padding:10px 16px;font-size:13px;text-align:right">฿ ${it.unit.toLocaleString()}</td>
+        <td style="padding:10px 16px;font-size:13px;font-weight:600;text-align:right">฿ ${(it.qty * it.unit).toLocaleString()}</td>
+      </tr>`).join('');
+    document.getElementById('pod-items').innerHTML = `
+      <thead><tr style="background:var(--bg-secondary);border-bottom:2px solid var(--border)">
+        <th style="padding:9px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary)">Item Name</th>
+        <th style="padding:9px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Qty</th>
+        <th style="padding:9px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Unit Price</th>
+        <th style="padding:9px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Amount</th>
+      </tr></thead>
+      <tbody>${itemRows}</tbody>`;
+    const grHist = po.grHistory.length
+      ? po.grHistory.map(g => `<div style="padding:10px 0;border-bottom:1px solid var(--border-light)">
+          <div style="font-size:13px;font-weight:600">${g.doc}</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${g.date} · ${g.items}</div>
+        </div>`).join('')
+      : '<div style="font-size:13px;color:var(--text-muted);font-style:italic">No GR recorded yet</div>';
+    document.getElementById('pod-gr-history').innerHTML = grHist;
+  } else {
+    podItemsSection.style.display = 'none';
+    podGrSection.style.display    = 'none';
+  }
+
+  const billHist = po.billingHistory.length
+    ? po.billingHistory.map(b => {
+        const cls = b.status === 'Confirmed' ? 'b-confirmed' : b.status === 'Rejected' ? 'b-reversal' : 'b-pending';
+        return `<div style="padding:10px 0;border-bottom:1px solid var(--border-light);display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div>
+            <div style="font-size:13px;font-weight:600">${b.inv}</div>
+            <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">${b.date} · ฿ ${b.total.toLocaleString()}</div>
+          </div>
+          <span class="badge ${cls}">${b.status}</span>
+        </div>`;
+      }).join('')
+    : '<div style="font-size:13px;color:var(--text-muted);font-style:italic">No invoices submitted yet</div>';
+  document.getElementById('pod-billing-history').innerHTML = billHist;
+
+  document.getElementById('pod-submit-btn').style.display = po.billingStatus === 'Complete' ? 'none' : '';
+  openModal('poDetailModal');
+}
+
+function openSubmitInvoiceFromDetail() {
+  closeModal('poDetailModal');
+  if (currentPO) openSubmitInvoice(currentPO.id);
+}
+
+/* ── REFERENCE TYPE ── */
+let currentRefType = 'PO';
+let freeLineCount = 0;
+
+function invRowToggle(i) {
+  const cb = document.querySelector(`.item-checkbox[data-idx="${i}"]`);
+  const ni = document.querySelector(`.net-input[data-idx="${i}"]`);
+  ni.disabled = !cb.checked;
+  if (!cb.checked) {
+    ni.value = '';
+    document.getElementById(`line-vat-${i}`).textContent = '—';
+    document.getElementById(`line-total-${i}`).textContent = '—';
+    document.getElementById(`inv-over-${i}`).style.display = 'none';
+    const ni2 = ni;
+    const prevPct = parseFloat(ni2.dataset.prevPct) || 0;
+    const barThis = document.getElementById(`inv-bar-this-${i}`);
+    if (barThis) { barThis.style.width = '0%'; barThis.classList.remove('over','full'); }
+    const pctEl = document.getElementById(`inv-prog-pct-${i}`);
+    const lblEl = document.getElementById(`inv-prog-lbl-${i}`);
+    if (pctEl) pctEl.textContent = prevPct + '%';
+    const rem = parseFloat(ni2.dataset.poAmt) - parseFloat(ni2.dataset.prev);
+    if (lblEl) lblEl.textContent = rem > 0 ? 'rem ฿' + rem.toLocaleString() : 'Fully billed';
+  }
+  recalcTotals();
+}
+
+function invRecalcRow(i) {
+  const ni      = document.querySelector(`.net-input[data-idx="${i}"]`);
+  const poAmt   = parseFloat(ni.dataset.poAmt) || 0;
+  const prev    = parseFloat(ni.dataset.prev) || 0;
+  const prevPct = parseFloat(ni.dataset.prevPct) || 0;
+  const vatRate = currentPO ? currentPO.vatRate : 7;
+  const net     = parseFloat(ni.value) || 0;
+  const vat     = Math.round(net * vatRate / 100);
+  const total   = net + vat;
+  const cumAmt  = prev + net;
+  const isOver  = cumAmt > poAmt + 0.005;
+  const isFull  = Math.abs(cumAmt - poAmt) < 0.01;
+  const thisPct = poAmt > 0 ? Math.round(net / poAmt * 100) : 0;
+  const maxThis = Math.max(0, 100 - prevPct);
+
+  document.getElementById(`line-vat-${i}`).textContent  = net > 0 ? (vatRate === 0 ? '—' : '฿ ' + vat.toLocaleString()) : '—';
+  document.getElementById(`line-total-${i}`).textContent = net > 0 ? '฿ ' + total.toLocaleString() : '—';
+  document.getElementById(`inv-over-${i}`).style.display = isOver ? 'block' : 'none';
+
+  const barThis = document.getElementById(`inv-bar-this-${i}`);
+  if (barThis) {
+    barThis.style.left  = prevPct + '%';
+    barThis.style.width = (isOver ? maxThis : Math.min(thisPct, maxThis)) + '%';
+    barThis.classList.toggle('over', isOver);
+    barThis.classList.toggle('full', !isOver && isFull);
+  }
+  const pctEl = document.getElementById(`inv-prog-pct-${i}`);
+  const lblEl = document.getElementById(`inv-prog-lbl-${i}`);
+  if (pctEl) { pctEl.textContent = Math.min(prevPct + Math.min(thisPct, maxThis), 100) + '%'; pctEl.classList.toggle('over', isOver); }
+  if (lblEl) {
+    if (isOver) { lblEl.textContent = 'Over ฿' + (cumAmt - poAmt).toLocaleString(); lblEl.style.color = 'var(--danger)'; }
+    else { const rem = poAmt - cumAmt; lblEl.textContent = rem > 0.005 ? 'rem ฿' + rem.toLocaleString() : 'Fully billed'; lblEl.style.color = isFull ? 'var(--success)' : 'var(--text-muted)'; }
+  }
+  recalcTotals();
+}
+
+function setRefType(type) {
+  currentRefType = type;
+  const isPO = type === 'PO';
+  document.getElementById('file-po-group').style.display = isPO ? '' : 'none';
+  const thAmt = document.getElementById('inv-th-amt');
+  if (thAmt) thAmt.textContent = isPO ? 'PO Amount (฿)' : (type === 'Contract' ? 'Contract Value (฿)' : 'Memo Value (฿)');
+  recalcTotals();
+}
+
+/* ── SUBMIT INVOICE MODAL ── */
+function openSubmitInvoice(poId) {
+  const po = POS.find(p => p.id === poId);
+  if (!po) return;
+  currentPO = po;
+  currentRefType = po.refType || 'PO';
+
+  const refType = currentRefType;
+  const isPO = refType === 'PO';
+  const total = isPO ? po.items.reduce((s, it) => s + it.qty * it.unit, 0) : po.contractValue;
+  const confirmedBilled = po.billingHistory.filter(b => b.status === 'Confirmed').reduce((s, b) => s + b.total, 0);
+  const pendingBilled   = po.billingHistory.filter(b => b.status !== 'Confirmed' && b.status !== 'Rejected').reduce((s, b) => s + b.total, 0);
+  const remaining = Math.max(0, total - confirmedBilled - pendingBilled);
+
+  // Header badge
+  document.getElementById('inv-type-badge').innerHTML = `<span style="font-size:11px;font-weight:700;padding:2px 9px;border-radius:6px;${TYPE_BADGE[refType]}">${refType}</span>`;
+  document.getElementById('inv-modal-subtitle').textContent = `Against ${po.id}`;
+
+  // Info grid — 4 columns
+  const refLabel = isPO ? 'PO Number' : (refType === 'Contract' ? 'Contract Ref.' : 'Memo Ref.');
+  const totalLabel = isPO ? 'PO Value' : (refType === 'Contract' ? 'Contract Value' : 'Memo Value');
+  document.getElementById('inv-info-grid').innerHTML = `
+    <div><div class="ig-lbl">${refLabel}</div><div class="ig-val mono">${po.id}</div></div>
+    <div><div class="ig-lbl">Date</div><div class="ig-val">${po.date}</div></div>
+    <div><div class="ig-lbl">Vendor</div><div class="ig-val">${VENDOR_NAME}</div></div>
+    <div><div class="ig-lbl">VAT Rate</div><div class="ig-val">${po.vatRate}%</div></div>
+    <div><div class="ig-lbl">${totalLabel}</div><div class="ig-val fw6">฿ ${total.toLocaleString()}</div></div>
+    <div><div class="ig-lbl">Confirmed Billed</div><div class="ig-val">฿ ${confirmedBilled.toLocaleString()}</div></div>
+    <div><div class="ig-lbl">Pending</div><div class="ig-val">฿ ${pendingBilled.toLocaleString()}</div></div>
+    <div><div class="ig-lbl">Remaining Billable</div><div class="ig-val fw6" style="color:${remaining === 0 ? 'var(--text-muted)' : '#065F46'}">฿ ${remaining.toLocaleString()}</div></div>`;
+
+  // Items title
+  document.getElementById('inv-items-title').textContent = isPO ? 'Line Items to Bill' : 'Billing Lines';
+
+  setRefType(currentRefType);
+
+  const tbody = document.getElementById('inv-items-body');
+  tbody.innerHTML = '';
+  tbody.innerHTML = po.items.map((it, i) => {
+    const poAmt      = it.qty * it.unit;
+    const prevBilled = (po.billingHistory || []).filter(b => b.status !== 'Rejected').reduce((s, b) => s + (b.lineAmounts ? (b.lineAmounts[i] || 0) : 0), 0);
+    const remaining  = Math.max(0, poAmt - prevBilled);
+    const prevPct    = poAmt > 0 ? Math.min(Math.round(prevBilled / poAmt * 100), 100) : 0;
+    const fullyBilled = prevBilled >= poAmt;
+    const remColor   = remaining <= 0 ? 'var(--success)' : 'var(--text-primary)';
+    return `<tr id="inv-row-${i}" style="${fullyBilled ? 'opacity:0.5' : ''}">
+      <td style="padding:10px 8px 10px 16px"><input type="checkbox" class="item-checkbox" data-idx="${i}" onchange="invRowToggle(${i})" ${fullyBilled ? 'disabled' : ''}></td>
+      <td style="padding:10px 12px;font-size:13px;font-weight:600">${it.name}${fullyBilled ? ' <span style="font-size:10px;color:var(--text-muted);font-style:italic">— fully billed</span>' : ''}</td>
+      <td style="padding:10px 12px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums">฿ ${poAmt.toLocaleString()}</td>
+      <td style="padding:10px 12px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums;color:${remColor}">${remaining <= 0 ? '—' : '฿ ' + remaining.toLocaleString()}</td>
+      <td style="padding:6px 12px;text-align:right">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+          <input type="number" class="form-input net-input" data-idx="${i}" data-po-amt="${poAmt}" data-prev="${prevBilled}" data-prev-pct="${prevPct}" min="0" step="0.01" placeholder="0.00" style="width:120px;text-align:right;height:34px" oninput="invRecalcRow(${i})" disabled>
+          <div class="bill-over-msg" id="inv-over-${i}" style="display:none">Exceeds remaining</div>
+        </div>
+      </td>
+      <td style="padding:10px 12px;text-align:right;font-size:13px;color:var(--text-secondary)" id="line-vat-${i}">—</td>
+      <td style="padding:10px 12px;text-align:right;font-size:13px;font-weight:700;color:var(--primary)" id="line-total-${i}">—</td>
+      <td style="padding:10px 16px 10px 12px">
+        <div class="bill-progress-wrap">
+          <div class="bill-progress-track">
+            <div class="bill-bar-prev" id="inv-bar-prev-${i}" style="width:${prevPct}%"></div>
+            <div class="bill-bar-this" id="inv-bar-this-${i}" style="left:${prevPct}%;width:0%"></div>
+          </div>
+          <div class="bill-progress-meta">
+            <span class="bill-progress-pct" id="inv-prog-pct-${i}">${prevPct}%</span>
+            <span id="inv-prog-lbl-${i}" style="font-size:10.5px;color:var(--text-muted)">${fullyBilled ? 'Fully billed' : (remaining > 0 ? 'rem ฿' + remaining.toLocaleString() : 'Fully billed')}</span>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Reset files & fields
+  ['file-tax-drop','file-po-drop','file-delivery-drop'].forEach(id => document.getElementById(id).classList.remove('has-file'));
+  ['file-tax-name','file-po-name','file-delivery-name'].forEach(id => { const e = document.getElementById(id); e.style.display='none'; e.innerHTML=''; });
+  ['file-tax-input','file-po-input','file-delivery-input'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('inv-number').value = '';
+  document.getElementById('inv-remarks').value = '';
+  document.getElementById('inv-ceiling-warn').style.display = 'none';
+
+  recalcTotals();
+  openModal('submitInvModal');
+}
+
+function recalcTotals() {
+  const po = currentPO;
+  let net = 0;
+
+  if (currentRefType === 'PO' && po) {
+    document.querySelectorAll('.net-input').forEach(ni => {
+      const cb = document.querySelector(`.item-checkbox[data-idx="${ni.dataset.idx}"]`);
+      if (cb && cb.checked) net += parseFloat(ni.value) || 0;
+    });
+    // PO ceiling check (invoice-level)
+    const poTotal         = po.items.reduce((s, it) => s + it.qty * it.unit, 0);
+    const confirmedBilled = po.billingHistory.filter(b => b.status === 'Confirmed').reduce((s, b) => s + b.total, 0);
+    const pendingBilled   = po.billingHistory.filter(b => b.status !== 'Confirmed' && b.status !== 'Rejected').reduce((s, b) => s + b.total, 0);
+    const invoiceTotal    = net + Math.round(net * po.vatRate / 100);
+    const cumulative      = confirmedBilled + pendingBilled + invoiceTotal;
+    const remaining       = poTotal - confirmedBilled - pendingBilled;
+    const warnEl = document.getElementById('inv-ceiling-warn');
+    const msgEl  = document.getElementById('inv-ceiling-msg');
+    if (cumulative > poTotal + 1) {
+      warnEl.style.display = '';
+      msgEl.textContent = `This invoice (฿ ${invoiceTotal.toLocaleString()}) would exceed the PO value. Remaining billable: ฿ ${Math.max(0, remaining).toLocaleString()}. Reduce the amount to proceed.`;
+    } else {
+      warnEl.style.display = 'none';
+    }
+  }
+
+  const vatRate = (currentPO) ? currentPO.vatRate : 7;
+  const vat   = Math.round(net * vatRate / 100);
+  const total = net + vat;
+  const vatDisplay = vatRate === 0 ? '—' : `฿ ${vat.toLocaleString()}`;
+  document.getElementById('inv-amount-summary').innerHTML = `
+    <div style="display:flex;justify-content:flex-end;gap:32px;padding:12px 16px;border-top:1px solid var(--border-light)">
+      <div style="text-align:right"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Net Amount</div><div style="font-size:14px;font-weight:600">฿ ${net.toLocaleString()}</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">VAT (${vatRate}%)</div><div style="font-size:14px;font-weight:600">${vatDisplay}</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Invoice Total</div><div style="font-size:16px;font-weight:700;color:var(--text-primary)">฿ ${total.toLocaleString()}</div></div>
+    </div>`;
+}
+
+function doSubmitInvoice() {
+  const invNum  = document.getElementById('inv-number').value.trim();
+  const invDate = document.getElementById('inv-date').value;
+  const taxFile = document.getElementById('file-tax-input').files[0];
+
+  if (!invNum)  { showToast('Invoice Number is required.', 'error'); return; }
+  if (!invDate) { showToast('Invoice Date is required.', 'error'); return; }
+
+  if (currentRefType === 'PO') {
+    const checkedInputs = [...document.querySelectorAll('.item-checkbox:checked')];
+    if (!checkedInputs.length) { showToast('Select at least one line item to bill.', 'error'); return; }
+    const anyAmount = checkedInputs.some(cb => parseFloat(document.querySelector(`.net-input[data-idx="${cb.dataset.idx}"]`)?.value) > 0);
+    if (!anyAmount) { showToast('Enter a net amount for at least one selected item.', 'error'); return; }
+    const poFile = document.getElementById('file-po-input').files[0];
+    if (!poFile) { showToast('Copy of PO (PDF) is required.', 'error'); return; }
+    if (document.getElementById('inv-ceiling-warn').style.display !== 'none') {
+      showToast('Invoice exceeds PO value. Please reduce the amount.', 'error'); return;
+    }
+  } else {
+    const anyChecked = [...document.querySelectorAll('.item-checkbox:checked')].length > 0;
+    if (!anyChecked) { showToast('Select at least one line item to bill.', 'error'); return; }
+    const anyAmount = [...document.querySelectorAll('.item-checkbox:checked')].some(cb => parseFloat(document.querySelector(`.net-input[data-idx="${cb.dataset.idx}"]`)?.value) > 0);
+    if (!anyAmount) { showToast('Enter a net amount for at least one selected item.', 'error'); return; }
+  }
+
+  if (!taxFile) { showToast('Tax Invoice (PDF) is required.', 'error'); return; }
+
+  closeModal('submitInvModal');
+  showToast(`Invoice ${invNum} submitted successfully. Status: Waiting Review.`, 'success');
+}
+
+/* ── INVOICE DETAIL MODAL ── */
+function openInvDetail(invId) {
+  const inv = INVOICES.find(i => i.id === invId);
+  if (!inv) return;
+
+  document.getElementById('invd-title').textContent = inv.id;
+
+  const statusMap = { 'Confirmed':'b-confirmed', 'Waiting Review':'b-pending', 'Rejected':'b-reversal' };
+  const tStyle    = TYPE_BADGE[inv.refType] || '';
+  const refLabel  = inv.refType === 'PO' ? 'PO Number' : inv.refType === 'Contract' ? 'Contract Ref.' : 'Memo Ref.';
+  const vatRate   = inv.vatRate ?? 7;
+
+  // Build line items rows
+  const linesHtml = (inv.lines || []).map(ln => {
+    const vat   = Math.round(ln.net * vatRate / 100);
+    const total = ln.net + vat;
+    return `<tr style="border-bottom:1px solid var(--border-light)">
+      <td style="padding:10px 12px 10px 16px;font-size:13px;font-weight:600">${ln.name}</td>
+      <td style="padding:10px 12px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums">฿ ${ln.net.toLocaleString()}</td>
+      <td style="padding:10px 12px;text-align:right;font-size:13px;color:var(--text-secondary);font-variant-numeric:tabular-nums">${vatRate === 0 ? '—' : '฿ ' + vat.toLocaleString()}</td>
+      <td style="padding:10px 16px 10px 12px;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">฿ ${total.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  const vat = Math.round(inv.net * vatRate / 100);
+  const amtSummary = `
+    <div style="display:flex;justify-content:flex-end;gap:32px;padding:12px 16px;border-top:1px solid var(--border-light)">
+      <div class="ams-item"><div class="ams-label">Net Amount</div><div class="ams-value">฿ ${inv.net.toLocaleString()}</div></div>
+      <div class="ams-item"><div class="ams-label">VAT (${vatRate}%)</div><div class="ams-value">${vatRate === 0 ? '—' : '฿ ' + vat.toLocaleString()}</div></div>
+      <div class="ams-item"><div class="ams-label">Invoice Total</div><div class="ams-value">฿ ${inv.total.toLocaleString()}</div></div>
+    </div>`;
+
+  const rejBlock = inv.status === 'Rejected'
+    ? `<div>
+        <div class="detail-section-title" style="color:var(--danger);border-color:var(--danger)">Rejection Reason</div>
+        <div style="background:var(--danger-light);border:1px solid #FECACA;border-radius:8px;padding:12px 16px;font-size:13px;color:#991B1B;line-height:1.6">${inv.rejectionReason || 'No reason provided.'}</div>
+       </div>` : '';
+
+  const docsLine = inv.refType === 'PO' ? 'Tax Invoice PDF · Copy of PO PDF' : 'Tax Invoice PDF';
+
+  document.getElementById('invd-body').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="info-grid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <div><div class="ig-lbl">Invoice No.</div><div class="ig-val mono">${inv.id}</div></div>
+        <div><div class="ig-lbl">Invoice Date</div><div class="ig-val">${inv.date}</div></div>
+        <div><div class="ig-lbl">${refLabel}</div><div class="ig-val mono">${inv.ref}</div></div>
+        <div><div class="ig-lbl">Type</div><div class="ig-val"><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;${tStyle}">${inv.refType}</span></div></div>
+        <div><div class="ig-lbl">VAT Rate</div><div class="ig-val">${vatRate}%</div></div>
+        <div><div class="ig-lbl">Vendor</div><div class="ig-val">${VENDOR_NAME}</div></div>
+        <div><div class="ig-lbl">Status</div><div class="ig-val"><span class="badge ${statusMap[inv.status]}">${inv.status}</span></div></div>
+      </div>
+
+      ${rejBlock}
+
+      <div>
+        <div class="detail-section-title">Billed Line Items</div>
+        <div class="layer-card" style="margin-bottom:0">
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:var(--bg-secondary);border-bottom:2px solid var(--border)">
+                  <th style="padding:9px 12px 9px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary)">Item Name</th>
+                  <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Net Amount (฿)</th>
+                  <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">VAT (฿)</th>
+                  <th style="padding:9px 16px 9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Total (฿)</th>
+                </tr>
+              </thead>
+              <tbody>${linesHtml}</tbody>
+            </table>
+          </div>
+          ${amtSummary}
+        </div>
+      </div>
+
+      <div>
+        <div class="detail-section-title">Documents</div>
+        <div style="font-size:13px;color:var(--text-secondary)">${docsLine}</div>
+      </div>
+    </div>`;
+
+  openModal('invDetailModal');
+}
+
+/* ── FILE UPLOAD HELPERS ── */
+function triggerFile(inputId) { /* click is on the drop zone itself via onclick */ }
+
+function handleFileChange(input, dropId, nameId) {
+  const file = input.files[0];
+  const drop = document.getElementById(dropId);
+  const nameEl = document.getElementById(nameId);
+  if (file) {
+    drop.classList.add('has-file');
+    nameEl.style.display = 'flex';
+    nameEl.className = 'file-name-tag';
+    nameEl.innerHTML = `<svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"><path d="M12 8v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h3"/><polyline points="7 1 13 1 13 7"/></svg>${file.name}`;
+  } else {
+    drop.classList.remove('has-file');
+    nameEl.style.display = 'none';
+  }
+  recalcTotals && recalcTotals();
+}
+
+function handleDrop(event, inputId, dropId, nameId) {
+  event.preventDefault();
+  const input = document.getElementById(inputId);
+  const dt = event.dataTransfer;
+  if (dt.files.length) {
+    input.files = dt.files;
+    handleFileChange(input, dropId, nameId);
+  }
+}
+
+/* ── MODAL HELPERS ── */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+
+/* ── TOAST ── */
+function showToast(msg, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const iconSvg = type === 'success'
+    ? `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 7 6 11 12 3"/></svg>`
+    : `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><line x1="3" y1="3" x2="11" y2="11"/><line x1="11" y1="3" x2="3" y2="11"/></svg>`;
+  toast.innerHTML = `
+    <div class="toast-icon ${type}">${iconSvg}</div>
+    <div class="toast-body">${msg}</div>
+    <button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('hiding');
+    setTimeout(() => toast.remove(), 220);
+  }, 4000);
+}
+
+/* ── INIT ── */
+renderPOTable();
+renderInvoicesTable();
+
+// PO list is the default active tab — first nav item
+document.querySelector('.nav-item').classList.add('active');
+</script>
+</body>
+</html>

@@ -1,9 +1,9 @@
 # Procurement System — UI Standards
 
 **Primary source of truth:** `asset/MASTER.md`  
-**Reference implementation:** `asset/gr-prototype.html`
+**Reference implementations:** `prototypes/gr-prototype.html` · `prototypes/billing-list-prototype.html`
 
-All HTML prototypes MUST follow these standards. Every value here is derived directly from `MASTER.md`. Do not invent one-off values. When in doubt, read `MASTER.md` first.
+All HTML prototypes live in `prototypes/` — never in `asset/`. All HTML prototypes MUST follow these standards. Every value here is derived directly from `MASTER.md`. Do not invent one-off values. When in doubt, read `MASTER.md` first.
 
 ---
 
@@ -73,49 +73,55 @@ Derived from `MASTER.md §5, §6.1`.
 - **Content max-width:** `max-w-7xl` (≈1280px), page padding 24px
 
 ### Header (top bar)
-- Height: 56px, fixed, `z-index: 40`
+- Height: 56px, fixed, `z-index: 40`, `left: 240px` (sidebar width), `right: 0`
 - Background: `#FFFFFF`
 - Bottom border: `1px solid #CBD5E1`
-- Bottom accent bar: `3px solid #E8518A` (Turbo pink — brand identity)
-- Left: Logo mark + system name + module name
-- Right: User name + role chip + Log out button
+- Bottom accent bar: `3px solid #E8518A` via `::after` pseudo-element (not a separate div)
+- Left: breadcrumb area (`header-breadcrumb`) — system name / module name in `#4B5E85`
+- Right: user name + role in `#4B5E85`, logout button (ghost style with border)
+- **Header body is intentionally lean** — no logo mark here; brand identity lives in the sidebar logo bar
 
 ```html
 <header class="app-header">
-  <div class="brand">
-    <div class="brand-mark">P</div>
-    <span class="brand-text">Procurement</span>
-    <span class="brand-sep">/</span>
-    <span class="brand-module">Module Name</span>
+  <div class="header-breadcrumb">
+    Procurement <span>/</span> Module Name
   </div>
   <div class="header-right">
-    <span class="user-info">Name — Role</span>
-    <button class="btn-logout">Log out</button>
+    <span class="header-user">Phasathon C. — Procurement</span>
+    <button class="btn btn-secondary btn-sm">Log out</button>
   </div>
-  <div class="header-accent-bar"></div><!-- pink bottom bar -->
 </header>
 ```
 
 ```css
 .app-header {
+  position: fixed;
+  top: 0; left: var(--sidebar-width); right: 0;
+  height: var(--header-height);
   background: #FFFFFF;
   border-bottom: 1px solid #CBD5E1;
-  position: relative;
+  z-index: 40;
+  display: flex; align-items: center;
+  padding: 0 24px;
+  justify-content: space-between;
 }
-.header-accent-bar {
+.app-header::after {
+  content: '';
   position: absolute; bottom: 0; left: 0; right: 0;
   height: 3px; background: #E8518A;
 }
 ```
 
 ### Sidebar
-- Width: 240px (expanded), fixed left, `z-index: 50`
+- Width: 240px, fixed left, `z-index: 50`
 - Background: `#FFFFFF`, right border `1px solid #CBD5E1`
-- **Logo bar** (top of sidebar): `background: #1B3068`, white text, NTB tag uses accent pink
-- Nav items: 13px, weight 500, `color: #4B5E85`
+- **Logo bar** (top, height 56px): `background: #1B3068`, contains sidebar-logo-text ("Procurement") + NTB pink tag. No logo mark icon in current implementation.
+- Nav items: 13px, weight 500, `color: #4B5E85`, padding `9px 16px`
 - **Active item:** `background: #1B3068; color: #FFFFFF; font-weight: 600`
 - Hover: `background: #EEF4FF; color: #1B3068`
-- Role chip at bottom: per-role soft bg/text (see `MASTER.md §2.5`)
+- Footer (bottom, border-top): user avatar (32px circle, navy bg, white initials) + user name + role chip + logout button
+- Role chip at bottom: per-role soft bg/text (see `MASTER.md §2.5`). Procurement = `bg:#FFF7ED text:#C2410C`
+- Nav badge (count pill): `bg: #F8FAFC; color: #4B5E85`; on active item: `rgba(255,255,255,0.2)` bg, white text
 
 ---
 
@@ -260,9 +266,21 @@ Dot: `::before { content:''; width:6px; height:6px; border-radius:50%; display:i
 
 ### Type badges (Asset / Expense)
 ```css
-.b-asset   { background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 6px; }
-.b-expense { background: #FFFBEB; color: #92400E; padding: 2px 8px; border-radius: 6px; }
+.b-asset   { background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.b-expense { background: #FFFBEB; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
 ```
+
+### Match Status badges (Billing-specific)
+Three-way match indicator — informational only, never blocks.
+
+```css
+.b-match-ok      { background: #D1FAE5; color: #065F46; } /* Matched */
+.b-match-pending { background: #F1F5F9; color: #475569; } /* GR Pending */
+.b-match-var     { background: #FEF3C7; color: #92400E; } /* Variance */
+```
+
+### Inline row tint for reversal/negative rows
+Do NOT use hardcoded `#FFF8F8`. Use `var(--danger-light)` at low opacity or rely on the red badge + red text alone — color is never the only signal.
 
 ---
 

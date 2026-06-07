@@ -56,7 +56,14 @@ Whenever the user asks to build, update, or fix an HTML prototype or any UI:
 2. **Then read `asset/ui-standards.md`** — this translates MASTER.md into HTML/CSS implementation patterns
 3. Apply every standard exactly: colors (navy `#1B3068` primary, pink `#E8518A` accent), typography (Plus Jakarta Sans + Noto Sans Thai), sidebar layout, toolbar, table, badges, modal, toast
 4. Never use `alert()` — use the toast notification pattern
-5. The reference implementation is `asset/gr-prototype.html`
+5. The reference implementation is `prototypes/gr-prototype.html`
+6. All prototype HTML files live in `prototypes/` — never in `asset/`
+
+## Folder Structure
+```
+asset/          ← UI spec only (MASTER.md, ui-standards.md, images)
+prototypes/     ← all HTML prototype files
+```
 
 ---
 

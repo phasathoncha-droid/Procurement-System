@@ -1,4 +1,4 @@
-# Diagram: Vendor Portal Billing Flow
+# Diagram: Vendor Portal Billing Flow (Phase 2)
 
 ```mermaid
 flowchart TD
@@ -7,19 +7,25 @@ flowchart TD
     C --> D[Vendor logs in to Portal]
 
     D --> E[View PO List]
-    E --> F[Select PO - click Submit Invoice]
-    F --> G[Fill billing form\nInvoice No - Date - Items - Net Amount\nVAT and WHT auto-calculated\nAttach invoice PDF]
-    G --> H[Vendor submits]
+    E --> F[Select PO — click Submit Invoice]
+    F --> G[Fill billing form\nInvoice No · Date · Items · Net Amount\nVAT auto-calculated · Attach invoice PDF]
+    G --> H[Vendor submits\nStatus: Waiting Procurement Review]
 
     H --> I{Procurement Review}
-    I -->|Return to Vendor| J[Vendor sees Returned status\nwith comments - can edit and resubmit]
-    J --> H
-    I -->|Approve| K{Accounting Confirmation}
-    K -->|Reject| L[Returns to Procurement\nwith comments]
-    K -->|Confirm| M[Post to Bookkeeping]
-    M --> N([Billing Confirmed\nVendor sees Confirmed status])
+    I -->|Reject — mandatory comment| RJ([Rejected — dead end\nVendor submits new invoice])
+    I -->|Forward to Accounting| J[Status: Waiting Accounting Confirmation]
+
+    J --> K{Accounting Decision}
+    K -->|Reject — mandatory comment| RJ
+    K -->|Confirm| M[Status: Confirmed\nPost AP to Bookkeeping]
+    M --> N([Vendor sees Confirmed status])
 
     style A fill:#4A90D9,color:#fff
     style N fill:#27AE60,color:#fff
-    style J fill:#E67E22,color:#fff
+    style RJ fill:#EF4444,color:#fff
 ```
+
+## Notes
+- **Return to vendor is not supported in Phase 1.** Incorrect submissions are rejected — vendor submits a new invoice.
+- Vendor-facing statuses: Waiting Review · Waiting Confirmation · Confirmed · Rejected
+- Internal statuses mirror Phase 1 billing: Waiting Procurement Review → Waiting Accounting Confirmation → Confirmed / Rejected

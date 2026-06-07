@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Procurement System — Good Receipt</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+/* ── Design tokens (MASTER.md §2, §5) ── */
+:root {
+  --primary:        #1B3068;
+  --primary-dark:   #142451;
+  --primary-light:  #2A4A99;
+  --primary-bg:     #EEF4FF;
+  --accent:         #E8518A;
+  --accent-dark:    #C93D72;
+  --success:        #10B981;
+  --success-light:  #D1FAE5;
+  --danger:         #EF4444;
+  --danger-dark:    #DC2626;
+  --danger-light:   #FEE2E2;
+  --warning:        #F59E0B;
+  --warning-light:  #FEF3C7;
+  --bg-canvas:      #F0F4F9;
+  --bg-primary:     #FFFFFF;
+  --bg-secondary:   #F8FAFC;
+  --border:         #CBD5E1;
+  --border-light:   #EEF2F7;
+  --text-primary:   #0F1F42;
+  --text-secondary: #4B5E85;
+  --text-muted:     #8799B8;
+  --hover-bg:       #EEF4FF;
+  --sidebar-width:  240px;
+  --header-height:  56px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR  (MASTER.md §5, §6.1)
+══════════════════════════════════════ */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-logo {
+  background: var(--primary);
+  padding: 0 16px;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.sidebar-logo-mark {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: #fff;
+  flex-shrink: 0;
+}
+.sidebar-logo-text {
+  color: #fff; font-size: 14px; font-weight: 700;
+  flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sidebar-ntb-tag {
+  background: var(--accent); color: #fff;
+  font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px;
+  letter-spacing: 0.5px; flex-shrink: 0;
+}
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  user-select: none;
+}
+.nav-item:hover { background: var(--hover-bg); color: var(--primary); }
+.nav-item.active { background: var(--primary); color: #fff; font-weight: 600; }
+.nav-item.active .nav-icon svg { stroke: #fff; }
+.nav-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav-icon svg { stroke: var(--text-secondary); transition: stroke 0.12s; }
+.nav-item:hover .nav-icon svg { stroke: var(--primary); }
+.nav-label { flex: 1; }
+.nav-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 1px 7px; border-radius: 10px;
+  background: var(--bg-secondary); color: var(--text-secondary);
+}
+.nav-item.active .nav-badge { background: rgba(255,255,255,0.2); color: #fff; }
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-user { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 6px 0; }
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.user-info-block { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.role-chip { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; background: #FFF7ED; color: #C2410C; margin-top: 2px; }
+.btn-logout-sidebar {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 8px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: inherit; transition: background 0.12s, color 0.12s;
+}
+.btn-logout-sidebar:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+
+/* ══════════════════════════════════════
+   HEADER  (MASTER.md §5, §6.1)
+══════════════════════════════════════ */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--header-height);
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  justify-content: space-between;
+}
+/* Pink accent bar at bottom of header (MASTER.md §3 row 7) */
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+}
+.header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.header-breadcrumb {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.header-breadcrumb span { color: var(--text-muted); margin: 0 6px; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-user {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════════════ */
+.main-layout {
+  margin-left: var(--sidebar-width);
+  padding-top: var(--header-height);
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-canvas);
+  display: flex;
+  flex-direction: column;
+}
+.page-container {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Page header row */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ══════════════════════════════════════
+   BUTTONS  (MASTER.md §3 rows 8–11)
+══════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+  line-height: 1;
+}
+.btn-primary  { background: var(--primary); color: #fff; }
+.btn-primary:hover  { background: var(--primary-dark); }
+.btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--bg-primary);
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover { background: var(--hover-bg); }
+
+.btn-danger   { background: var(--danger); color: #fff; }
+.btn-danger:hover   { background: var(--danger-dark); }
+.btn-danger:disabled { background: #FECACA; cursor: not-allowed; }
+
+.btn-sm { padding: 0.375rem 0.75rem; font-size: 12px; font-weight: 500; }
+
+/* ══════════════════════════════════════
+   CARD  (MASTER.md §3 row 12, §5)
+══════════════════════════════════════ */
+.card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27,48,104,.08), 0 4px 12px rgba(27,48,104,.06);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.card-scroll {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* ══════════════════════════════════════
+   TOOLBAR  (MASTER.md ui-standards §Toolbar)
+══════════════════════════════════════ */
+.table-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+  background: var(--bg-primary);
+}
+.toolbar-left  { display: flex; align-items: center; gap: 8px; flex: 1; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* Filter bar — row 2 (MASTER.md ui-standards §Toolbar) */
+.filter-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  flex-wrap: wrap;
+}
+.filter-bar-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-right: 4px; white-space: nowrap;
+}
+.filter-bar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+/* Search input */
+.search-wrap { position: relative; min-width: 200px; max-width: 300px; flex: 1; }
+.search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; display: flex; align-items: center;
+}
+.search-input {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 2.4rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.search-input::placeholder { color: var(--text-muted); }
+.search-clear {
+  position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 14px; cursor: pointer; display: none; padding: 2px; line-height: 1;
+}
+.search-clear:hover { color: var(--danger); }
+.search-clear.visible { display: block; }
+
+/* Filter controls */
+.fi {
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 0 10px;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.fi:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+select.fi {
+  padding-right: 28px;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234B5E85'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.date-sep { font-size: 12px; color: var(--text-secondary); }
+
+/* View toggle */
+.view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.vbtn {
+  padding: 6px 14px; font-size: 12px; font-weight: 500;
+  cursor: pointer; border: none;
+  background: var(--bg-primary); color: var(--text-secondary);
+  transition: all 0.15s; font-family: inherit;
+}
+.vbtn.active { background: var(--primary); color: #fff; font-weight: 600; }
+
+/* ══════════════════════════════════════
+   TABLE  (MASTER.md §3 row 13, ui-standards §Table)
+══════════════════════════════════════ */
+.table-wrapper { overflow-x: visible; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--bg-secondary); border-bottom: 2px solid var(--border); }
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  background: var(--bg-secondary);
+}
+tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.12s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr.main-row:hover { background: var(--hover-bg); cursor: pointer; }
+tbody td { padding: 13px 16px; font-size: 14px; color: var(--text-primary); vertical-align: middle; }
+
+/* Table utilities */
+.link { color: var(--primary); font-weight: 600; cursor: pointer; }
+.link:hover { text-decoration: underline; color: var(--primary-dark); }
+.link.red { color: var(--danger); }
+.tr  { text-align: right; }
+.tm  { color: var(--text-secondary); }
+.fw6 { font-weight: 600; }
+.red { color: var(--danger); }
+.mono { font-size: 12px; font-weight: 600; }
+
+/* Sub-row (expandable) */
+.sub-row { display: none; }
+.sub-row.open { display: table-row; }
+.sub-wrap { background: var(--bg-secondary); border-top: 1px solid var(--border); }
+.sub-label {
+  padding: 8px 16px 4px 52px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+.sub-table { width: 100%; border-collapse: collapse; }
+.sub-table th {
+  background: var(--bg-secondary);
+  padding: 7px 16px;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.sub-table td { padding: 9px 16px; font-size: 13px; border-bottom: 1px solid var(--border-light); }
+.sub-table tbody tr:last-child td { border-bottom: none; }
+.sub-table tbody tr:hover td { background: var(--hover-bg); }
+
+/* View panels */
+.vp { display: none; }
+.vp.active { display: block; }
+
+/* Expand button */
+.expand-btn {
+  width: 22px; height: 22px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg-primary);
+  color: var(--text-secondary); font-size: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.expand-btn:hover { background: var(--bg-secondary); border-color: #B0B7C3; }
+
+/* Reversal / bin button */
+.btn-reverse {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 1px solid #FECACA; background: var(--danger-light);
+  color: var(--danger);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: all 0.15s;
+}
+.btn-reverse:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+.btn-view {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg-secondary);
+  color: var(--text-secondary);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: all 0.15s;
+}
+.btn-view:hover { background: var(--hover-bg); color: var(--primary); border-color: var(--primary); }
+.action-cell { display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+/* GR Detail modal */
+.detail-section-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--text-secondary);
+  padding-bottom: 8px; border-bottom: 2px solid var(--border);
+  margin-bottom: 14px;
+}
+.detail-attachment {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg-secondary);
+  font-size: 13px; color: var(--primary); font-weight: 600; cursor: pointer;
+  transition: background 0.12s;
+}
+.detail-attachment:hover { background: var(--hover-bg); }
+.detail-no-attachment { font-size: 13px; color: var(--text-muted); font-style: italic; }
+.detail-remarks { font-size: 13px; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; }
+.detail-remarks.empty { color: var(--text-muted); font-style: italic; }
+
+/* ══════════════════════════════════════
+   STATUS BADGES  (MASTER.md §2.4, ui-standards §StatusBadges)
+══════════════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.b-confirmed { background: var(--success-light); color: #065F46; }
+.b-confirmed::before { content:''; background: var(--success); border-radius: 50%; width:6px; height:6px; display:inline-block; flex-shrink:0; }
+.b-reversed  { background: #F1F5F9; color: #475569; }
+.b-reversed::before  { content:''; background: #94A3B8; border-radius: 50%; width:6px; height:6px; display:inline-block; flex-shrink:0; }
+.b-reversal  { background: var(--danger-light); color: #991B1B; }
+.b-reversal::before  { content:''; background: var(--danger); border-radius: 50%; width:6px; height:6px; display:inline-block; flex-shrink:0; }
+
+/* Type badges */
+.b-asset   { background: #EFF6FF; color: #1D4ED8; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.b-expense { background: #FFFBEB; color: #92400E; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+
+/* ══════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════ */
+.empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+
+/* ══════════════════════════════════════
+   TOAST  (MASTER.md §3 row 23, ui-standards §Toast)
+══════════════════════════════════════ */
+#toastContainer {
+  position: fixed; top: 68px; right: 24px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  min-width: 280px; max-width: 400px;
+  padding: 14px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  background: var(--bg-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+  border-left: 4px solid var(--success);
+  pointer-events: all;
+  animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.hiding { animation: toastOut 0.2s ease forwards; }
+@keyframes toastIn  { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateX(40px); } }
+.toast-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--success); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.toast-body { flex: 1; line-height: 1.45; color: var(--text-primary); }
+.toast-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: var(--text-secondary); opacity: 0.6; line-height: 1; padding: 0;
+}
+.toast-close:hover { opacity: 1; }
+
+/* ══════════════════════════════════════
+   MODAL  (MASTER.md §3 row 18, ui-standards §Modal)
+══════════════════════════════════════ */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 1000;
+  align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem; overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  width: 100%; max-width: 480px;
+  box-shadow: 0 20px 60px rgba(27,48,104,0.18);
+  animation: modalIn 0.2s ease;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+.modal-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.modal-lg { max-width: 1100px; }
+@keyframes modalIn { from { opacity:0; transform: scale(0.96); } to { opacity:1; transform: scale(1); } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px 12px 0 0;
+}
+.modal-title    { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.modal-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.modal-close {
+  background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary);
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.modal-close:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+.modal-body   { padding: 1.5rem; }
+.modal-footer {
+  display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border-radius: 0 0 12px 12px;
+}
+
+/* Reversal modal specifics */
+.info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+}
+.ig-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 3px; }
+.ig-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.warn-box {
+  background: var(--warning-light); border: 1px solid var(--warning); border-radius: 8px;
+  padding: 11px 14px; font-size: 12px; color: #92400E;
+  display: flex; gap: 9px; line-height: 1.55; margin-bottom: 16px;
+}
+.warn-ico { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; display: block; }
+.form-label-muted { font-weight: 400; color: var(--text-secondary); font-size: 12px; margin-left: 4px; }
+.req { color: var(--danger); margin-left: 2px; }
+.form-ta {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+  resize: vertical; min-height: 90px; outline: none;
+  color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.15s;
+}
+.form-ta:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.form-ta::placeholder { color: var(--text-muted); }
+
+/* ── Record GR Modal ── */
+.po-search-wrap { position: relative; margin-bottom: 8px; }
+.po-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--bg-primary); border: 1px solid var(--border); border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.13); z-index: 999;
+  overflow: hidden; display: none;
+}
+.po-dropdown.open { display: block; }
+.po-empty-hint { padding: 14px 16px; font-size: 13px; color: var(--text-secondary); text-align: center; }
+.pr-option {
+  padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border);
+  transition: background 0.12s; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.pr-option:last-child { border-bottom: none; }
+.pr-option:hover { background: var(--hover-bg); }
+.pr-opt-left { display: flex; flex-direction: column; gap: 3px; }
+.pr-opt-num  { font-size: 13px; font-weight: 700; color: var(--primary); }
+.pr-opt-topic { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.pr-opt-meta { font-size: 11px; color: var(--text-secondary); }
+.pr-opt-right { text-align: right; flex-shrink: 0; }
+.pr-opt-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--hover-bg); color: var(--primary); }
+.dropdown-group-label {
+  padding: 7px 16px 4px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-secondary); background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.dropdown-group-label:not(:first-child) { border-top: 1px solid var(--border); }
+
+/* Selected PR card */
+.selected-pr-card {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 16px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.selected-pr-left { display: flex; flex-direction: column; gap: 2px; }
+.selected-pr-num { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.selected-pr-topic { font-size: 12px; color: var(--text-secondary); }
+
+/* PO list */
+.po-list-wrap { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+.po-list-header {
+  background: var(--bg-secondary); padding: 8px 16px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary);
+}
+.po-list-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s; gap: 12px;
+}
+.po-list-item:last-child { border-bottom: none; }
+.po-list-item:hover { background: var(--hover-bg); }
+.po-list-left { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.po-list-num { font-size: 13px; font-weight: 700; color: var(--primary); }
+.po-list-vendor { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+.po-list-meta { font-size: 11px; color: var(--text-secondary); }
+.po-list-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.po-list-total { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.po-list-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: var(--hover-bg); color: var(--primary); }
+
+/* Selected PO card */
+.selected-po-card {
+  background: var(--hover-bg); border: 1.5px solid var(--primary);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.selected-po-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px; flex: 1; }
+.spi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+.spi-value { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-top: 2px; }
+.btn-clear-po {
+  background: none; border: none; cursor: pointer; color: var(--text-secondary);
+  font-size: 18px; line-height: 1; padding: 4px; opacity: 0.6; transition: all 0.15s; flex-shrink: 0;
+}
+.btn-clear-po:hover { opacity: 1; color: var(--danger); }
+
+/* Layer cards (MASTER.md ui-standards §LayerCards) */
+.layer-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg-primary); margin-bottom: 16px; overflow: hidden;
+}
+.layer-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.layer-card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-secondary); }
+.layer-card-hint { font-size: 11px; color: var(--text-secondary); }
+
+/* GR items table (inside modal) */
+.gr-items-wrap { overflow-x: auto; }
+.gr-items-table { width: 100%; border-collapse: collapse; }
+.gr-items-table thead tr { background: var(--bg-secondary); border-bottom: 2px solid var(--border); }
+.gr-items-table th {
+  padding: 9px 12px; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary);
+  white-space: nowrap; text-align: left;
+}
+.gr-items-table th.tr { text-align: right; }
+.gr-items-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.gr-items-table tbody tr:last-child td { border-bottom: none; }
+.gr-items-table tbody tr:hover { background: var(--hover-bg); }
+.gr-items-table tbody tr.fully-received { opacity: 0.45; }
+
+.qty-cell { text-align: right; }
+.qty-input {
+  width: 80px; border: 1px solid var(--border); border-radius: 6px;
+  padding: 5px 8px; font-size: 13px; font-family: inherit;
+  text-align: right; outline: none; background: var(--bg-primary); color: var(--text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.qty-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.qty-input:disabled { background: var(--bg-secondary); color: var(--text-secondary); cursor: not-allowed; }
+.qty-input.over { border-color: var(--danger); background: var(--danger-light); box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+.qty-over-msg { font-size: 10.5px; color: var(--danger); margin-top: 3px; }
+
+/* Progress bar — cumulative GR progress (already received + this GR) */
+.recv-progress-wrap { display: flex; flex-direction: column; gap: 5px; min-width: 130px; }
+.recv-progress-bar-track {
+  height: 8px; border-radius: 100px;
+  background: var(--border-light);
+  overflow: hidden;
+  position: relative;
+}
+/* already-received segment (grey, from left) */
+.recv-bar-prev {
+  position: absolute; top: 0; left: 0; height: 100%;
+  background: #CBD5E1;
+  border-radius: 100px 0 0 100px;
+  transition: width 0.2s ease;
+}
+/* this-GR segment (navy, immediately after prev) */
+.recv-bar-this {
+  position: absolute; top: 0; height: 100%;
+  background: var(--primary);
+  transition: left 0.2s ease, width 0.2s ease, background 0.2s;
+}
+.recv-bar-this.over  { background: var(--danger); }
+.recv-bar-this.full  { background: var(--success); border-radius: 0 100px 100px 0; }
+.recv-progress-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 10.5px; color: var(--text-muted);
+}
+.recv-progress-pct { font-weight: 700; color: var(--text-primary); font-size: 11px; }
+.recv-progress-pct.over { color: var(--danger); }
+
+.received-pill { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; background: var(--success-light); color: #065F46; }
+.received-pill.partial { background: var(--warning-light); color: #92400E; }
+.received-pill.none    { background: var(--bg-secondary); color: var(--text-secondary); }
+
+/* Form elements */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-input {
+  height: 36px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 0 12px; font-size: 13px; font-family: inherit; outline: none;
+  color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(27,48,104,0.15); }
+.form-input::placeholder { color: var(--text-muted); }
+
+/* File drop zone */
+.file-drop {
+  border: 1.5px dashed var(--border); border-radius: 8px;
+  padding: 18px; text-align: center; cursor: pointer;
+  transition: all 0.15s; background: var(--bg-secondary);
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.file-drop:hover { border-color: var(--primary); background: var(--hover-bg); border-style: solid; }
+.file-drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.file-drop-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.file-name-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--hover-bg); border: 1px solid var(--primary);
+  border-radius: 6px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+  margin-top: 4px;
+}
+
+/* Totals row */
+.totals-row {
+  display: flex; justify-content: flex-end;
+  padding: 10px 16px; border-top: 2px solid var(--border);
+  background: var(--bg-secondary); gap: 32px;
+}
+.totals-item { text-align: right; }
+.totals-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); }
+.totals-value { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+.totals-value.accent { color: var(--primary); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span class="sidebar-logo-text">Procurement</span>
+    <span class="sidebar-ntb-tag">NTB</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-item active">
+      <span class="nav-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 8 5 12 15 4"/>
+        </svg>
+      </span>
+      <span class="nav-label">Good Receipt</span>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">PC</div>
+      <div class="user-info-block">
+        <div class="user-name">Phasathon C.</div>
+        <span class="role-chip">Procurement</span>
+      </div>
+    </div>
+    <button class="btn-logout-sidebar">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 13H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h3"/><polyline points="9 10 13 7 9 4"/><line x1="13" y1="7" x2="5" y2="7"/>
+      </svg>
+      Log out
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════
+     HEADER  (MASTER.md §6.1)
+══════════════════════════════════════ -->
+<header class="app-header">
+</header>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
+<div class="main-layout">
+  <div class="page-container">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Good Receipt</div>
+      </div>
+    </div>
+
+    <!-- Card: Toolbar + Table -->
+    <div class="card">
+
+      <!-- Row 1: Search + Actions -->
+      <div class="table-toolbar">
+        <div class="toolbar-left">
+          <div class="search-wrap">
+            <span class="search-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <circle cx="5.5" cy="5.5" r="4" stroke="var(--primary)" stroke-width="1.5"/>
+                <line x1="8.7" y1="8.7" x2="11.5" y2="11.5" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input class="search-input" type="text" placeholder="Search GR number, PO, or vendor…"
+              id="searchInput" oninput="onSearch(this.value)" autocomplete="off" />
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" title="Clear">✕</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-secondary btn-sm" onclick="exportGR()">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M6.5 1v8M3 6l3.5 3.5L10 6" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M1 10.5h11" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Export
+          </button>
+          <div class="view-toggle">
+            <button class="vbtn active" onclick="switchView('doc', this)">Document View</button>
+            <button class="vbtn" onclick="switchView('line', this)">Line Item View</button>
+          </div>
+          <button class="btn btn-primary" onclick="openRecordGRModal()">+ Record GR</button>
+        </div>
+      </div>
+
+      <!-- Row 2: Filters -->
+      <div class="filter-bar">
+        <span class="filter-bar-label">Filter</span>
+        <input class="fi" type="date" value="2026-06-01" style="width:130px" />
+        <span class="date-sep">–</span>
+        <input class="fi" type="date" value="2026-06-05" style="width:130px" />
+        <div class="filter-bar-sep"></div>
+        <select class="fi" style="width:115px;display:none" id="typeFilter">
+          <option value="">All Types</option>
+          <option value="Asset">Asset</option>
+          <option value="Expense">Expense</option>
+        </select>
+        <select class="fi" style="width:125px" id="statusFilter" onchange="filterStatus(this.value)">
+          <option value="">All Status</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Reversed">Reversed</option>
+          <option value="Reversal">Reversal</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Reset</button>
+      </div>
+
+      <!-- Scrollable area -->
+      <div class="card-scroll" id="cardScroll">
+
+        <!-- Document View -->
+        <div class="vp active" id="vp-doc">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:44px"></th>
+                  <th>GR Date</th>
+                  <th>GR Number</th>
+                  <th>PO Number</th>
+                  <th>Vendor</th>
+                  <th style="text-align:center">Items</th>
+                  <th style="text-align:right">Total Amount</th>
+                  <th>Delivery Note</th>
+                  <th>Status</th>
+                  <th style="width:60px;text-align:center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="doc-tbody"></tbody>
+            </table>
+          </div>
+        </div><!-- /vp-doc -->
+
+        <!-- Line Item View -->
+        <div class="vp" id="vp-line">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>GR Date</th><th>GR Number</th><th>PO Number</th><th>Vendor</th>
+                  <th>Item Name</th><th>Type</th><th>Asset No. / GL Code</th>
+                  <th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th>
+                  <th style="text-align:right">Amount</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="line-tbody"></tbody>
+            </table>
+          </div>
+        </div><!-- /vp-line -->
+
+        <!-- Lazy-load sentinel -->
+        <div id="loadSentinel" style="height:48px;display:flex;align-items:center;justify-content:center;">
+          <span id="loadingMsg" style="font-size:12px;color:var(--text-muted);display:none">Loading more…</span>
+        </div>
+
+      </div><!-- /card-scroll -->
+
+    </div><!-- /card -->
+
+  </div><!-- /page-container -->
+</div><!-- /main-layout -->
+
+<!-- ══════════════════════════════════════
+     REVERSAL MODAL
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="reversalModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Reverse GR Record</div>
+        <div class="modal-subtitle">A reversal document will be created and posted to Bookkeeping</div>
+      </div>
+      <button class="modal-close" onclick="closeReversalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-grid">
+        <div><div class="ig-lbl">GR Number</div><div class="ig-val mono" id="m-gr"></div></div>
+        <div><div class="ig-lbl">GR Date</div><div class="ig-val" id="m-date"></div></div>
+        <div><div class="ig-lbl">PO Number</div><div class="ig-val mono" id="m-po"></div></div>
+        <div><div class="ig-lbl">Total Amount</div><div class="ig-val" id="m-amt"></div></div>
+        <div style="grid-column:1/-1"><div class="ig-lbl">Vendor</div><div class="ig-val" id="m-vendor"></div></div>
+      </div>
+      <div class="warn-box">
+        <span class="warn-ico">⚠️</span>
+        <span>Reversal document <strong id="m-rev"></strong> will be created dated <strong id="m-rev-date"></strong> (same as original GR date) with negative quantities and amounts. An offsetting accounting transaction will be sent to Bookkeeping. <strong>This action cannot be undone.</strong></span>
+      </div>
+      <label class="form-label">Reason for Reversal <span class="req">*</span></label>
+      <textarea class="form-ta" id="reasonInput" placeholder="Describe why this GR is being reversed…" oninput="checkReason()"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeReversalModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirmBtn" disabled onclick="doReversal()">Confirm Reversal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     GR DETAIL MODAL (read-only)
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="grDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="d-title">GR-0001</div>
+        <div class="modal-subtitle" id="d-subtitle">Read-only — confirmed records cannot be edited</div>
+      </div>
+      <button class="modal-close" onclick="closeGRDetailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Header info grid -->
+      <div class="info-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div><div class="ig-lbl">GR Number</div><div class="ig-val mono" id="d-gr"></div></div>
+        <div><div class="ig-lbl">GR Date</div><div class="ig-val" id="d-date"></div></div>
+        <div><div class="ig-lbl">Status</div><div class="ig-val" id="d-status"></div></div>
+        <div><div class="ig-lbl">PO Number</div><div class="ig-val mono" id="d-po"></div></div>
+        <div><div class="ig-lbl">Vendor</div><div class="ig-val" id="d-vendor"></div></div>
+        <div><div class="ig-lbl">Total Amount</div><div class="ig-val" id="d-amt"></div></div>
+        <div><div class="ig-lbl">Delivery Note No.</div><div class="ig-val mono" id="d-dn"></div></div>
+      </div>
+
+      <!-- Line items -->
+      <div class="detail-section-title">Items Received</div>
+      <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:20px">
+        <table style="width:100%;border-collapse:collapse" id="d-items-table">
+          <thead>
+            <tr style="background:var(--bg-secondary);border-bottom:2px solid var(--border)">
+              <th style="padding:9px 12px 9px 16px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:left;width:260px">Item Name</th>
+              <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:left">Type</th>
+              <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:left">Asset No. / GL Code</th>
+              <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Qty</th>
+              <th style="padding:9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Unit Price</th>
+              <th style="padding:9px 16px 9px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-secondary);text-align:right">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="d-items-body"></tbody>
+        </table>
+      </div>
+
+      <!-- Receipt details -->
+      <div class="detail-section-title">Receipt Details</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div>
+          <div class="ig-lbl" style="margin-bottom:6px">Delivery Document</div>
+          <div id="d-attachment"></div>
+        </div>
+        <div>
+          <div class="ig-lbl" style="margin-bottom:6px">Remarks</div>
+          <div id="d-remarks"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeGRDetailModal()">Close</button>
+      <button class="btn btn-danger" id="d-cancel-btn" style="display:none" onclick="triggerReversalFromDetail()">Cancel GR</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     RECORD GR MODAL
+══════════════════════════════════════ -->
+<div class="modal-backdrop" id="recordGRModal">
+  <div class="modal" id="recordGRModalDialog">
+
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Record Goods Receipt</div>
+        <div class="modal-subtitle" id="rgr-subtitle">Search for a Purchase Order to begin</div>
+      </div>
+      <button class="modal-close" onclick="closeRecordGRModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Step 1: Search -->
+      <div id="rgr-search-section">
+        <label class="form-label">Search <span class="req">*</span></label>
+        <div class="po-search-wrap">
+          <div class="search-wrap" style="max-width:100%">
+            <span class="search-icon">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <circle cx="5.5" cy="5.5" r="4" stroke="var(--primary)" stroke-width="1.5"/>
+                <line x1="8.7" y1="8.7" x2="11.5" y2="11.5" stroke="var(--primary)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <input class="search-input" id="prSearchInput" type="text"
+              placeholder="Search by PR number, PO number, or vendor…"
+              oninput="searchPR(this.value)"
+              autocomplete="off"
+              style="font-size:14px;padding:0.6rem 1rem 0.6rem 2.6rem" />
+          </div>
+          <div class="po-dropdown" id="prDropdown"></div>
+        </div>
+        <p style="font-size:11.5px;color:var(--text-secondary);margin-top:8px;">
+          Search by PR number to see all POs under it, or enter a PO number to go directly.
+        </p>
+      </div>
+
+      <!-- Step 2: Selected PR + PO list -->
+      <div id="rgr-pr-section" style="display:none">
+        <div class="selected-pr-card">
+          <div class="selected-pr-left">
+            <div class="selected-pr-num" id="rgr-pr-num"></div>
+            <div class="selected-pr-topic" id="rgr-pr-topic"></div>
+          </div>
+          <button class="btn-clear-po" onclick="clearSelectedPR()" title="Search again">✕</button>
+        </div>
+        <label class="form-label">Select Purchase Order <span class="req">*</span></label>
+        <div class="po-list-wrap">
+          <div class="po-list-header">Purchase Orders in this PR</div>
+          <div id="rgr-po-list"></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Selected PO card -->
+      <div id="rgr-po-card" style="display:none">
+        <div class="selected-po-card">
+          <div class="selected-po-grid">
+            <div><div class="spi-label">PO Number</div><div class="spi-value mono" id="rgr-po-num"></div></div>
+            <div><div class="spi-label">Vendor</div><div class="spi-value" id="rgr-vendor"></div></div>
+            <div><div class="spi-label">PO Date</div><div class="spi-value" id="rgr-po-date"></div></div>
+            <div><div class="spi-label">PO Total</div><div class="spi-value" id="rgr-po-total"></div></div>
+          </div>
+          <button class="btn-clear-po" onclick="clearSelectedPO()" title="Select a different PO">✕</button>
+        </div>
+      </div>
+
+      <!-- Items + Receipt Details -->
+      <div id="rgr-items-section" style="display:none">
+
+        <div class="layer-card">
+          <div class="layer-card-header">
+            <span class="layer-card-title">Items to Receive</span>
+            <span class="layer-card-hint" id="rgr-items-hint"></span>
+          </div>
+          <div class="gr-items-wrap">
+            <table class="gr-items-table">
+              <thead>
+                <tr>
+                  <th style="width:36px;padding-left:16px">#</th>
+                  <th>Item Name</th>
+                  <th>Type</th>
+                  <th>GL / Asset No.</th>
+                  <th class="tr">Line Total</th>
+                  <th class="tr">Ordered Qty</th>
+                  <th class="tr">Remaining Qty</th>
+                  <th class="tr" style="width:100px">Qty to Receive</th>
+                  <th style="width:160px;padding-right:16px">GR Progress</th>
+                </tr>
+              </thead>
+              <tbody id="rgr-items-body"></tbody>
+            </table>
+          </div>
+          <div class="totals-row" id="rgr-totals" style="display:none">
+            <div class="totals-item">
+              <div class="totals-label">Est. Amount</div>
+              <div class="totals-value" id="rgr-total-amt">฿ 0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="layer-card">
+          <div class="layer-card-header">
+            <span class="layer-card-title">Receipt Details</span>
+          </div>
+          <div style="padding:1rem 1rem 0.5rem">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Receipt Date <span class="req">*</span></label>
+                <input class="form-input" type="date" id="rgrDate" value="2026-06-07" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Delivery Note No. <span class="form-label-muted">(optional)</span></label>
+                <input class="form-input" type="text" id="rgrDeliveryNo" placeholder="e.g. DN-2024-001" />
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:14px">
+              <label class="form-label">Delivery Document <span class="form-label-muted">(optional)</span></label>
+              <div class="file-drop" id="fileDrop" ondragover="event.preventDefault()" ondrop="handleFileDrop(event)">
+                <input type="file" accept=".pdf,.jpg,.png" onchange="handleFileSelect(this)" />
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" style="margin-bottom:4px">
+                  <path d="M10 13V3M6 7l4-4 4 4"/><path d="M3 17h14"/>
+                </svg>
+                <div class="file-drop-text">
+                  Click to attach or drag &amp; drop<br>
+                  <span style="font-size:11px;color:var(--text-muted)">PDF, JPG, PNG · max 10 MB</span>
+                </div>
+                <div id="fileNameTag" style="display:none"></div>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:1rem">
+              <label class="form-label">Remarks <span class="form-label-muted">(optional)</span></label>
+              <textarea class="form-ta" id="rgrRemarks" placeholder="Any notes about this receipt…" style="min-height:70px"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /rgr-items-section -->
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <span id="rgr-footer-hint" style="font-size:12px;color:var(--text-secondary);flex:1"></span>
+      <button class="btn btn-secondary" onclick="closeRecordGRModal()">Cancel</button>
+      <button class="btn btn-primary" id="rgrSubmitBtn" disabled onclick="doRecordGR()">Confirm Receipt</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   MOCK DATA — 50 GR records
+══════════════════════════════════════ */
+const BIN_SVG = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 3 13 3"/><path d="M5 3V2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/><rect x="2" y="3" width="10" height="10" rx="1"/><line x1="5" y1="6" x2="5" y2="10"/><line x1="9" y1="6" x2="9" y2="10"/></svg>`;
+const PENCIL_SVG = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5l2 2L4 12H2v-2L9.5 2.5z"/><path d="M8 4l2 2"/></svg>`;
+const SUB_HDR = `<tr><th style="padding-left:52px;width:270px">Item Name</th><th>Type</th><th>Asset No. / GL Code</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right;padding-right:16px">Amount</th></tr>`;
+
+const VENDORS = [
+  'ABC Co., Ltd.', 'XYZ Supply Co.', 'DEF Solutions', 'Infotech Systems Co., Ltd.',
+  'Office Depot (Thailand) Ltd.', 'TechSupply Co., Ltd.', 'DataCom Systems Ltd.',
+  'Pro Equipment Co.', 'Siamtech Ltd.', 'Global Parts Co., Ltd.',
+  'Premiere Office Supply', 'Digital Hub Thailand', 'Smart Devices Co.',
+  'Bangkok IT Solutions', 'Uni-Office Supplies'
+];
+const PO_POOL = ['PO-0038','PO-0042','PO-0043','PO-0050','PO-0053','PO-0054','PO-0055',
+                 'PO-0060','PO-0061','PO-0062','PO-0063','PO-0064','PO-0065','PO-0066','PO-0067'];
+
+const ITEM_POOL = [
+  { name: 'Laptop Dell XPS 15',        type: 'Asset',   cls: 'b-asset',   code: 'A-20240012', up: 55000 },
+  { name: 'MacBook Pro 14"',           type: 'Asset',   cls: 'b-asset',   code: 'A-2024009X', up: 52000 },
+  { name: 'iPhone 15 Pro',             type: 'Asset',   cls: 'b-asset',   code: 'A-2024010X', up: 16000 },
+  { name: 'Ergonomic Office Chair',    type: 'Asset',   cls: 'b-asset',   code: 'A-2024011X', up: 3800  },
+  { name: 'Network Switch 24-port',    type: 'Asset',   cls: 'b-asset',   code: 'A-2024012X', up: 43500 },
+  { name: 'Server Rack Unit 2U',       type: 'Asset',   cls: 'b-asset',   code: 'A-20240033', up: 132500},
+  { name: 'UPS Power Backup 1000VA',   type: 'Asset',   cls: 'b-asset',   code: 'A-20240041', up: 8900  },
+  { name: 'External HDD 4TB',          type: 'Asset',   cls: 'b-asset',   code: 'A-20240055', up: 4200  },
+  { name: 'Projector Epson EB-X51',    type: 'Asset',   cls: 'b-asset',   code: 'A-20240061', up: 22000 },
+  { name: 'HDMI Cable 3m',             type: 'Expense', cls: 'b-expense', code: '5210600010', up: 500   },
+  { name: 'USB-C Hub',                 type: 'Expense', cls: 'b-expense', code: '5210600011', up: 3250  },
+  { name: 'Wireless Mouse Logitech',   type: 'Expense', cls: 'b-expense', code: '5210500040', up: 1250  },
+  { name: 'Lightning Cable 2m',        type: 'Expense', cls: 'b-expense', code: '5210600020', up: 350   },
+  { name: 'Cat6 Cable (box 100m)',     type: 'Expense', cls: 'b-expense', code: '5210600030', up: 6800  },
+  { name: 'Desk Pad A3 (pack 10)',     type: 'Expense', cls: 'b-expense', code: '5210400030', up: 350   },
+  { name: 'Keyboard Mechanical TKL',   type: 'Expense', cls: 'b-expense', code: '5210500041', up: 2800  },
+  { name: 'Monitor 27" 4K LG',         type: 'Asset',   cls: 'b-asset',   code: 'A-20240070', up: 18500 },
+  { name: 'Webcam Logitech C920',      type: 'Expense', cls: 'b-expense', code: '5210500042', up: 2200  },
+  { name: 'USB Flash Drive 64GB (5pk)',type: 'Expense', cls: 'b-expense', code: '5210600031', up: 850   },
+  { name: 'Printer Cartridge HP 85A',  type: 'Expense', cls: 'b-expense', code: '5210400031', up: 1400  },
+];
+
+/* deterministic seeded shuffle so data looks natural */
+function seeded(n) { return ((n * 1664525 + 1013904223) & 0x7fffffff) / 0x7fffffff; }
+
+function pickVendor(seed)  { return VENDORS[Math.floor(seeded(seed * 7) * VENDORS.length)]; }
+function pickPO(seed)      { return PO_POOL[Math.floor(seeded(seed * 13) * PO_POOL.length)]; }
+function pickItems(seed, count) {
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    const idx = Math.floor(seeded(seed * 17 + i * 31) * ITEM_POOL.length);
+    const qty = 1 + Math.floor(seeded(seed * 11 + i * 23) * 9);
+    result.push({ ...ITEM_POOL[idx], qty });
+  }
+  return result;
+}
+
+/* Generate 50 records with explicit status coverage */
+function buildMockGRs() {
+  const records = [];
+  /*
+   * Status layout across 50 rows (repeating pattern of 5):
+   *   Confirmed, Confirmed, Confirmed, Reversed, Reversal
+   * = 30 Confirmed · 10 Reversed · 10 Reversal
+   * Every Reversed row has a matching Reversal row nearby — realistic pairing.
+   */
+  const PATTERN = ['Confirmed','Confirmed','Confirmed','Reversed','Reversal'];
+  const statuses = Array.from({length: 50}, (_, i) => PATTERN[i % PATTERN.length]);
+
+  /* Generate dates — spread across May–Jun 2026, newest first */
+  function dateStr(i) {
+    const baseDay = 7; /* 2026-06-07 */
+    const dayOffset = Math.floor(seeded(i * 5 + 1) * 40); /* up to 40 days back */
+    const d = new Date(2026, 5, baseDay - dayOffset); /* month is 0-indexed */
+    return d.toISOString().slice(0, 10);
+  }
+
+  for (let i = 1; i <= 50; i++) {
+    const num = String(i).padStart(4, '0');
+    const status = statuses[i - 1];
+    const isReversal = status === 'Reversal';
+    const vendor = pickVendor(i);
+    const po = pickPO(i);
+    const itemCount = 1 + Math.floor(seeded(i * 19) * 3); /* 1–3 items */
+    const items = pickItems(i, itemCount);
+    const total = items.reduce((s, it) => s + it.qty * it.up, 0);
+    const grNum = isReversal ? `GR-${String(i - 1).padStart(4,'0')}-R` : `GR-${num}`;
+    const hasDN = seeded(i * 41) > 0.25; /* ~75% have a delivery note */
+    const deliveryNote = hasDN ? `DN-2026-${String(Math.floor(seeded(i * 37) * 9000) + 1000).padStart(4,'0')}` : '—';
+    records.push({ id: i, grNum, po, vendor, date: dateStr(i), status, items, total, isReversal, deliveryNote });
+  }
+  /* Sort newest date first */
+  records.sort((a, b) => b.date.localeCompare(a.date));
+  return records;
+}
+
+const MOCK_GRS = buildMockGRs();
+
+
+/* ── Lazy load state ── */
+const PAGE_SIZE = 20;
+let docPage = 0;
+let linePage = 0;
+let currentView = 'doc';
+
+function renderDocBatch() {
+  const start = docPage * PAGE_SIZE;
+  const batch = MOCK_GRS.slice(start, start + PAGE_SIZE);
+  if (batch.length === 0) return false;
+  const tbody = document.getElementById('doc-tbody');
+  let html = '';
+  batch.forEach((gr, batchIdx) => {
+    const idx = start + batchIdx;
+    const rowId = 'dr' + idx;
+    const isConfirmed = gr.status === 'Confirmed';
+    const isReversal  = gr.status === 'Reversal';
+    const badgeClass  = gr.status === 'Confirmed' ? 'b-confirmed' :
+                        gr.status === 'Reversed'  ? 'b-reversed'  : 'b-reversal';
+    const amtFmt = (isReversal ? '-' : '') + Math.abs(gr.total).toLocaleString();
+    const amtClass = isReversal ? 'red fw6' : (isConfirmed ? 'fw6' : 'tm');
+    const grNumHtml = isReversal
+      ? `<span class="link mono red">${gr.grNum}</span>`
+      : `<span class="link mono">${gr.grNum}</span>`;
+    const actionCell = `<div class="action-cell">
+      <button class="btn-view" title="View details" onclick="event.stopPropagation();openGRDetailModal(${idx})">${PENCIL_SVG}</button>
+    </div>`;
+    const subRows = gr.items.map((it, idx) => {
+      const amt = it.qty * it.up;
+      const sign = isReversal ? -1 : 1;
+      const qtyStr = sign < 0 ? `-${it.qty}` : String(it.qty);
+      const amtStr = sign < 0 ? `-${amt.toLocaleString()}` : amt.toLocaleString();
+      const qCls = isReversal ? 'tr red' : 'tr tm';
+      const aCls = isReversal ? 'tr red' : 'tr tm';
+      return `<tr>
+        <td style="padding-left:52px" class="tm">${it.name}</td>
+        <td><span class="${it.cls}">${it.type}</span></td>
+        <td class="mono tm">${it.code}</td>
+        <td class="${qCls}">${qtyStr}</td>
+        <td class="tr tm">${it.up.toLocaleString()}</td>
+        <td class="${aCls}" style="padding-right:16px">${amtStr}</td>
+      </tr>`;
+    }).join('');
+    html += `
+      <tr class="main-row" onclick="toggleRow('${rowId}')">
+        <td><button class="expand-btn" id="btn-${rowId}">▶</button></td>
+        <td class="tm">${gr.date}</td>
+        <td>${grNumHtml}</td>
+        <td><span class="link mono">${gr.po}</span></td>
+        <td>${gr.vendor}</td>
+        <td style="text-align:center" class="tm">${gr.items.length}</td>
+        <td style="text-align:right" class="${amtClass}">${amtFmt}</td>
+        <td class="mono tm" style="font-size:12px">${gr.deliveryNote}</td>
+        <td><span class="badge ${badgeClass}">${gr.status}</span></td>
+        <td style="text-align:center">${actionCell}</td>
+      </tr>
+      <tr class="sub-row" id="${rowId}"><td colspan="10" style="padding:0">
+        <div class="sub-wrap">
+          <table class="sub-table"><thead>${SUB_HDR}</thead><tbody>${subRows}</tbody></table>
+        </div>
+      </td></tr>`;
+  });
+  tbody.insertAdjacentHTML('beforeend', html);
+  docPage++;
+  return batch.length === PAGE_SIZE;
+}
+
+function renderLineBatch() {
+  const start = linePage * PAGE_SIZE;
+  const batch = MOCK_GRS.slice(start, start + PAGE_SIZE);
+  if (batch.length === 0) return false;
+  const tbody = document.getElementById('line-tbody');
+  let html = '';
+  batch.forEach(gr => {
+    const isReversal  = gr.status === 'Reversal';
+    const badgeClass  = gr.status === 'Confirmed' ? 'b-confirmed' :
+                        gr.status === 'Reversed'  ? 'b-reversed'  : 'b-reversal';
+    const rowBg = isReversal ? ' style="background:#FFF8F8"' : '';
+    const grNumHtml = isReversal
+      ? `<span class="link mono red">${gr.grNum}</span>`
+      : `<span class="link mono">${gr.grNum}</span>`;
+    gr.items.forEach(it => {
+      const amt = it.qty * it.up;
+      const sign = isReversal ? -1 : 1;
+      const qtyStr = sign < 0 ? `-${it.qty}` : String(it.qty);
+      const amtStr = sign < 0 ? `-${amt.toLocaleString()}` : amt.toLocaleString();
+      const qCls = isReversal ? 'tr red' : 'tr';
+      const aCls = isReversal ? 'tr red fw6' : 'tr fw6';
+      html += `<tr${rowBg}>
+        <td class="tm">${gr.date}</td>
+        <td>${grNumHtml}</td>
+        <td><span class="link mono">${gr.po}</span></td>
+        <td>${gr.vendor}</td>
+        <td>${it.name}</td>
+        <td><span class="${it.cls}">${it.type}</span></td>
+        <td class="mono tm">${it.code}</td>
+        <td class="${qCls}">${qtyStr}</td>
+        <td class="tr tm">${it.up.toLocaleString()}</td>
+        <td class="${aCls}">${amtStr}</td>
+        <td><span class="badge ${badgeClass}">${gr.status}</span></td>
+      </tr>`;
+    });
+  });
+  tbody.insertAdjacentHTML('beforeend', html);
+  linePage++;
+  return batch.length === PAGE_SIZE;
+}
+
+function loadMore() {
+  const hasMore = currentView === 'doc' ? renderDocBatch() : renderLineBatch();
+  const sentinel = document.getElementById('loadSentinel');
+  const msg = document.getElementById('loadingMsg');
+  if (!hasMore) {
+    sentinel.style.display = 'none';
+  } else {
+    sentinel.style.display = 'flex';
+    msg.style.display = 'none';
+  }
+}
+
+/* IntersectionObserver watches the sentinel inside the card scroll area */
+const observer = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    document.getElementById('loadingMsg').style.display = 'block';
+    setTimeout(loadMore, 150);
+  }
+}, { root: document.getElementById('cardScroll'), threshold: 0.1 });
+
+observer.observe(document.getElementById('loadSentinel'));
+
+/* Initial load */
+loadMore();
+
+/* ── GR List interactions ── */
+function toggleRow(id) {
+  const row = document.getElementById(id);
+  const btn = document.getElementById('btn-' + id);
+  btn.textContent = row.classList.toggle('open') ? '▼' : '▶';
+}
+
+function switchView(v, el) {
+  document.querySelectorAll('.vp').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+  document.getElementById('vp-' + v).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('typeFilter').style.display = v === 'line' ? '' : 'none';
+  if (v === 'doc') document.getElementById('typeFilter').selectedIndex = 0;
+  currentView = v;
+  /* Load first batch of line view on first switch */
+  if (v === 'line' && linePage === 0) loadMore();
+  document.getElementById('cardScroll').scrollTop = 0;
+}
+
+function filterStatus(val) {
+  document.querySelectorAll('#vp-doc tbody .main-row').forEach(row => {
+    const badge = row.querySelector('.badge');
+    const status = badge ? badge.textContent.trim() : '';
+    row.style.display = (!val || status === val) ? '' : 'none';
+  });
+}
+
+function onSearch(val) {
+  document.getElementById('searchClear').classList.toggle('visible', !!val);
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').classList.remove('visible');
+}
+function resetFilters() {
+  clearSearch();
+  document.getElementById('statusFilter').selectedIndex = 0;
+  document.getElementById('typeFilter').selectedIndex = 0;
+  filterStatus('');
+}
+function exportGR() { showToast('GR list exported to Excel.'); }
+
+/* ── Reversal Modal ── */
+let curGr = '';
+function openReversalModal(gr, po, vendor, amt, date) {
+  curGr = gr;
+  document.getElementById('m-gr').textContent = gr;
+  document.getElementById('m-po').textContent = po;
+  document.getElementById('m-vendor').textContent = vendor;
+  document.getElementById('m-amt').textContent = '฿ ' + amt;
+  document.getElementById('m-date').textContent = date;
+  document.getElementById('m-rev').textContent = gr + '-R';
+  document.getElementById('m-rev-date').textContent = date;
+  document.getElementById('reasonInput').value = '';
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('reversalModal').classList.add('open');
+}
+function closeReversalModal() { document.getElementById('reversalModal').classList.remove('open'); }
+function checkReason() {
+  document.getElementById('confirmBtn').disabled =
+    document.getElementById('reasonInput').value.trim().length < 5;
+}
+function doReversal() {
+  closeReversalModal();
+  showToast('GR Reversal ' + curGr + '-R created and posted to Bookkeeping.');
+}
+document.getElementById('reversalModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('reversalModal')) closeReversalModal();
+});
+
+/* ── GR Detail Modal ── */
+const MOCK_REMARKS = [
+  'Received in good condition. All items checked against delivery slip.',
+  'Partial delivery — remaining items expected next week.',
+  'Items received with minor packaging damage. Goods intact.',
+  '', '', '' /* some records have no remarks */
+];
+const MOCK_ATTACHMENTS = [
+  'DN-Scan-2026.pdf', 'DeliverySlip_ABC.jpg', 'Receipt_Photo.png', '', '', ''
+];
+
+let detailGR = null;
+function openGRDetailModal(idx) {
+  const gr = MOCK_GRS[idx];
+  detailGR = gr;
+  const isReversal = gr.status === 'Reversal';
+  const isConfirmed = gr.status === 'Confirmed';
+  const badgeClass = gr.status === 'Confirmed' ? 'b-confirmed' :
+                     gr.status === 'Reversed'  ? 'b-reversed'  : 'b-reversal';
+  const amtSign = isReversal ? '-' : '';
+
+  document.getElementById('d-cancel-btn').style.display = isConfirmed ? 'inline-flex' : 'none';
+
+  document.getElementById('d-title').textContent = gr.grNum;
+  document.getElementById('d-subtitle').textContent =
+    gr.status === 'Reversal' ? 'Reversal document — read only' :
+    gr.status === 'Reversed' ? 'Reversed — read only' :
+    'Confirmed — read only';
+  document.getElementById('d-gr').textContent = gr.grNum;
+  document.getElementById('d-date').textContent = gr.date;
+  document.getElementById('d-status').innerHTML = `<span class="badge ${badgeClass}">${gr.status}</span>`;
+  document.getElementById('d-po').textContent = gr.po;
+  document.getElementById('d-vendor').textContent = gr.vendor;
+  document.getElementById('d-amt').textContent = amtSign + '฿ ' + Math.abs(gr.total).toLocaleString();
+  document.getElementById('d-dn').textContent = gr.deliveryNote;
+
+  /* Line items */
+  document.getElementById('d-items-body').innerHTML = gr.items.map(it => {
+    const amt = it.qty * it.up;
+    const sign = isReversal ? -1 : 1;
+    return `<tr style="border-bottom:1px solid var(--border-light)">
+      <td style="padding:10px 12px 10px 16px;font-size:13px">${it.name}</td>
+      <td style="padding:10px 12px;font-size:13px"><span class="${it.cls}">${it.type}</span></td>
+      <td style="padding:10px 12px;font-size:12px;font-family:inherit;color:var(--text-secondary)">${it.code}</td>
+      <td style="padding:10px 12px;font-size:13px;text-align:right;font-weight:600;color:${isReversal ? 'var(--danger)' : 'var(--text-primary)'}">${sign < 0 ? '-' : ''}${it.qty}</td>
+      <td style="padding:10px 12px;font-size:13px;text-align:right;color:var(--text-secondary)">${it.up.toLocaleString()}</td>
+      <td style="padding:10px 16px 10px 12px;font-size:13px;text-align:right;font-weight:600;color:${isReversal ? 'var(--danger)' : 'var(--text-primary)'}">${sign < 0 ? '-' : ''}${amt.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+
+  /* Attachment — deterministic mock based on index */
+  const attachName = MOCK_ATTACHMENTS[idx % MOCK_ATTACHMENTS.length];
+  const attachEl = document.getElementById('d-attachment');
+  if (attachName) {
+    attachEl.innerHTML = `<div class="detail-attachment">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5L9 1z"/><polyline points="9 1 9 5 13 5"/></svg>
+      ${attachName}
+    </div>`;
+  } else {
+    attachEl.innerHTML = `<span class="detail-no-attachment">No attachment</span>`;
+  }
+
+  /* Remarks */
+  const remarks = MOCK_REMARKS[idx % MOCK_REMARKS.length];
+  const remarksEl = document.getElementById('d-remarks');
+  if (remarks) {
+    remarksEl.className = 'detail-remarks';
+    remarksEl.textContent = remarks;
+  } else {
+    remarksEl.className = 'detail-remarks empty';
+    remarksEl.textContent = 'No remarks';
+  }
+
+  document.getElementById('grDetailModal').classList.add('open');
+}
+function closeGRDetailModal() { document.getElementById('grDetailModal').classList.remove('open'); }
+function triggerReversalFromDetail() {
+  closeGRDetailModal();
+  openReversalModal(detailGR.grNum, detailGR.po, detailGR.vendor, Math.abs(detailGR.total).toLocaleString(), detailGR.date);
+}
+document.getElementById('grDetailModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('grDetailModal')) closeGRDetailModal();
+});
+
+/* ── Record GR Modal — data ── */
+const PR_DATA = [
+  {
+    num: 'PR-0021', topic: 'IT Equipment Q2 2026', requester: 'Somchai P.',
+    pos: [{
+      num: 'PO-0043', vendor: 'Infotech Systems Co., Ltd.', date: '2026-05-28', total: '฿ 198,000',
+      items: [
+        { name: 'MacBook Pro 14"',    type: 'Asset',   typeClass: 'b-asset',   code: 'A-2024009X', ordered: 3,  received: 0, unitPrice: 52000 },
+        { name: 'iPhone 15 Pro',      type: 'Asset',   typeClass: 'b-asset',   code: 'A-2024010X', ordered: 5,  received: 2, unitPrice: 16000 },
+        { name: 'Lightning Cable 2m', type: 'Expense', typeClass: 'b-expense', code: '5210600020', ordered: 20, received: 0, unitPrice: 350   },
+      ]
+    }]
+  },
+  {
+    num: 'PR-0024', topic: 'Office Supplies Replenishment', requester: 'Nattaya K.',
+    pos: [{
+      num: 'PO-0050', vendor: 'Office Depot (Thailand) Ltd.', date: '2026-06-01', total: '฿ 45,500',
+      items: [
+        { name: 'Ergonomic Office Chair', type: 'Asset',   typeClass: 'b-asset',   code: 'A-2024011X', ordered: 10, received: 4, unitPrice: 3800 },
+        { name: 'Desk Pad A3 (pack 10)', type: 'Expense', typeClass: 'b-expense', code: '5210400030', ordered: 50, received: 0, unitPrice: 350  },
+      ]
+    }]
+  },
+  {
+    num: 'PR-0026', topic: 'Network Infrastructure Upgrade', requester: 'Thanawat R.',
+    pos: [
+      {
+        num: 'PO-0053', vendor: 'TechSupply Co., Ltd.', date: '2026-06-03', total: '฿ 87,000',
+        items: [
+          { name: 'Network Switch 24-port', type: 'Asset', typeClass: 'b-asset', code: 'A-2024012X', ordered: 2, received: 0, unitPrice: 43500 },
+        ]
+      },
+      {
+        num: 'PO-0054', vendor: 'DataCom Systems Ltd.', date: '2026-06-03', total: '฿ 34,000',
+        items: [
+          { name: 'Cat6 Cable (box 100m)', type: 'Expense', typeClass: 'b-expense', code: '5210600030', ordered: 5, received: 0, unitPrice: 6800 },
+        ]
+      }
+    ]
+  }
+];
+
+let selectedPR = null;
+let selectedPO = null;
+
+function openRecordGRModal() {
+  selectedPR = null; selectedPO = null;
+  document.getElementById('prSearchInput').value = '';
+  document.getElementById('prDropdown').classList.remove('open');
+  document.getElementById('rgr-search-section').style.display = '';
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  document.getElementById('rgr-po-card').style.display = 'none';
+  document.getElementById('rgr-items-section').style.display = 'none';
+  document.getElementById('recordGRModalDialog').classList.remove('modal-lg');
+  document.getElementById('rgrSubmitBtn').disabled = true;
+  document.getElementById('rgr-subtitle').textContent = 'Search for a Purchase Request to begin';
+  document.getElementById('rgr-footer-hint').textContent = '';
+  document.getElementById('rgrDate').value = '2026-06-07';
+  document.getElementById('rgrDeliveryNo').value = '';
+  document.getElementById('rgrRemarks').value = '';
+  document.getElementById('fileNameTag').style.display = 'none';
+  document.getElementById('recordGRModal').classList.add('open');
+  setTimeout(() => document.getElementById('prSearchInput').focus(), 120);
+}
+function closeRecordGRModal() {
+  document.getElementById('recordGRModal').classList.remove('open');
+  document.getElementById('prDropdown').classList.remove('open');
+}
+document.getElementById('recordGRModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('recordGRModal')) closeRecordGRModal();
+  if (!e.target.closest('.po-search-wrap')) document.getElementById('prDropdown').classList.remove('open');
+});
+
+/* ── Step 1: Search ── */
+function searchPR(q) {
+  const dropdown = document.getElementById('prDropdown');
+  const query = q.toLowerCase().trim();
+  if (!query) { dropdown.classList.remove('open'); return; }
+
+  const prMatches = PR_DATA.filter(pr =>
+    pr.num.toLowerCase().includes(query) ||
+    pr.topic.toLowerCase().includes(query) ||
+    pr.requester.toLowerCase().includes(query)
+  );
+  const poMatches = [];
+  PR_DATA.forEach(pr => {
+    pr.pos.forEach(po => {
+      if (po.num.toLowerCase().includes(query) || po.vendor.toLowerCase().includes(query))
+        poMatches.push({ pr, po });
+    });
+  });
+
+  if (prMatches.length === 0 && poMatches.length === 0) {
+    dropdown.innerHTML = '<div class="po-empty-hint">No matching PR or PO found</div>';
+    dropdown.classList.add('open'); return;
+  }
+
+  let html = '';
+  if (prMatches.length > 0) {
+    html += '<div class="dropdown-group-label">Purchase Requests</div>';
+    html += prMatches.map(pr => {
+      const poCount = pr.pos.length;
+      const remaining = pr.pos.reduce((s, po) => s + po.items.reduce((ss, it) => ss + (it.ordered - it.received), 0), 0);
+      return `<div class="pr-option" onclick="selectPR('${pr.num}')">
+        <div class="pr-opt-left">
+          <div class="pr-opt-num">${pr.num}</div>
+          <div class="pr-opt-topic">${pr.topic}</div>
+          <div class="pr-opt-meta">By ${pr.requester} &nbsp;·&nbsp; ${poCount} PO${poCount > 1 ? 's' : ''}</div>
+        </div>
+        <div class="pr-opt-right"><span class="pr-opt-badge">${remaining} remaining</span></div>
+      </div>`;
+    }).join('');
+  }
+  if (poMatches.length > 0) {
+    html += '<div class="dropdown-group-label">Purchase Orders</div>';
+    html += poMatches.map(({ pr, po }) => {
+      const remaining = po.items.reduce((s, it) => s + (it.ordered - it.received), 0);
+      return `<div class="pr-option" onclick="selectPODirect('${pr.num}','${po.num}')">
+        <div class="pr-opt-left">
+          <div class="pr-opt-num">${po.num}</div>
+          <div class="pr-opt-topic">${po.vendor}</div>
+          <div class="pr-opt-meta">From ${pr.num} &nbsp;·&nbsp; ${po.date}</div>
+        </div>
+        <div class="pr-opt-right"><span class="pr-opt-badge">${remaining} remaining</span></div>
+      </div>`;
+    }).join('');
+  }
+  dropdown.innerHTML = html;
+  dropdown.classList.add('open');
+}
+
+function selectPODirect(prNum, poNum) {
+  selectedPR = PR_DATA.find(p => p.num === prNum);
+  document.getElementById('prDropdown').classList.remove('open');
+  document.getElementById('rgr-search-section').style.display = 'none';
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  selectPO(poNum);
+}
+
+function selectPR(prNum) {
+  selectedPR = PR_DATA.find(p => p.num === prNum);
+  if (!selectedPR) return;
+  document.getElementById('prDropdown').classList.remove('open');
+  document.getElementById('rgr-search-section').style.display = 'none';
+  document.getElementById('rgr-pr-num').textContent = selectedPR.num + ' — ' + selectedPR.topic;
+  document.getElementById('rgr-pr-topic').textContent = 'Requested by ' + selectedPR.requester;
+
+  const listEl = document.getElementById('rgr-po-list');
+  listEl.innerHTML = selectedPR.pos.map(po => {
+    const remaining = po.items.reduce((s, it) => s + (it.ordered - it.received), 0);
+    return `<div class="po-list-item" onclick="selectPO('${po.num}')">
+      <div class="po-list-left">
+        <div class="po-list-num">${po.num}</div>
+        <div class="po-list-vendor">${po.vendor}</div>
+        <div class="po-list-meta">${po.date} &nbsp;·&nbsp; ${po.items.length} item${po.items.length > 1 ? 's' : ''}</div>
+      </div>
+      <div class="po-list-right">
+        <span class="po-list-total">${po.total}</span>
+        <span class="po-list-badge">${remaining} remaining</span>
+        <button class="btn btn-secondary btn-sm">Select</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rgr-pr-section').style.display = '';
+  document.getElementById('rgr-subtitle').textContent = selectedPR.num + ' — Select a PO';
+}
+
+function clearSelectedPR() {
+  selectedPR = null; selectedPO = null;
+  document.getElementById('rgr-search-section').style.display = '';
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  document.getElementById('rgr-po-card').style.display = 'none';
+  document.getElementById('rgr-items-section').style.display = 'none';
+  document.getElementById('rgrSubmitBtn').disabled = true;
+  document.getElementById('rgr-subtitle').textContent = 'Search for a Purchase Request to begin';
+  document.getElementById('rgr-footer-hint').textContent = '';
+  setTimeout(() => document.getElementById('prSearchInput').focus(), 60);
+}
+
+/* ── Step 2: PO Selection ── */
+function selectPO(poNum) {
+  if (!selectedPR) return;
+  selectedPO = selectedPR.pos.find(p => p.num === poNum);
+  if (!selectedPO) return;
+  document.getElementById('rgr-pr-section').style.display = 'none';
+  document.getElementById('rgr-po-card').style.display = '';
+  document.getElementById('rgr-po-num').textContent = selectedPO.num;
+  document.getElementById('rgr-vendor').textContent = selectedPO.vendor;
+  document.getElementById('rgr-po-date').textContent = selectedPO.date;
+  document.getElementById('rgr-po-total').textContent = selectedPO.total;
+  renderItemsTable(selectedPO);
+  document.getElementById('rgr-items-section').style.display = '';
+  document.getElementById('recordGRModalDialog').classList.add('modal-lg');
+  document.getElementById('rgr-subtitle').textContent = selectedPR.num + ' / ' + selectedPO.num + ' — ' + selectedPO.vendor;
+  document.getElementById('rgr-totals').style.display = 'none';
+  updateTotals();
+}
+
+function clearSelectedPO() {
+  selectedPO = null;
+  document.getElementById('rgr-po-card').style.display = 'none';
+  document.getElementById('rgr-items-section').style.display = 'none';
+  document.getElementById('recordGRModalDialog').classList.remove('modal-lg');
+  document.getElementById('rgrSubmitBtn').disabled = true;
+  document.getElementById('rgr-footer-hint').textContent = '';
+  document.getElementById('rgr-pr-section').style.display = '';
+  document.getElementById('rgr-subtitle').textContent = selectedPR.num + ' — Select a PO';
+}
+
+/* ── Build items table ── */
+function renderItemsTable(po) {
+  const totalItems = po.items.length;
+  const fullyReceived = po.items.filter(it => it.ordered === it.received).length;
+  document.getElementById('rgr-items-hint').textContent =
+    fullyReceived > 0 ? `${fullyReceived} of ${totalItems} item${totalItems > 1 ? 's' : ''} fully received (100%)` : '';
+
+  document.getElementById('rgr-items-body').innerHTML = po.items.map((it, i) => {
+    const lineTotal = it.ordered * it.unitPrice;
+    const receivedPct = it.ordered > 0 ? Math.round((it.received / it.ordered) * 100) : 0;
+    const remainingPct = 100 - receivedPct;
+    const remainingQty = it.ordered - it.received;
+    const isFull = remainingPct === 0;
+    const inputsHtml = isFull
+      ? `<td class="qty-cell"><span style="font-size:12px;color:var(--text-secondary)">—</span></td>
+         <td style="padding-right:16px">
+           <div class="recv-progress-wrap">
+             <div class="recv-progress-bar-track">
+               <div class="recv-bar-prev" style="width:100%"></div>
+               <div class="recv-bar-this full" style="left:100%;width:0%"></div>
+             </div>
+             <div class="recv-progress-meta">
+               <span class="recv-progress-pct" style="color:var(--success)">100% received</span>
+             </div>
+           </div>
+         </td>`
+      : `<td class="qty-cell">
+           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+             <input class="qty-input" type="number" min="0" max="${remainingQty}" step="1"
+               value="" id="qty-${i}" style="width:76px" placeholder="0"
+               oninput="onQtyChange(${i},${remainingQty},${it.ordered},${lineTotal},${receivedPct})"
+               onchange="onQtyChange(${i},${remainingQty},${it.ordered},${lineTotal},${receivedPct})" />
+             <span style="font-size:10px;color:var(--text-muted)">max ${remainingQty}</span>
+             <div class="qty-over-msg" id="over-${i}" style="display:none"></div>
+           </div>
+         </td>
+         <td style="padding-right:16px">
+           <div class="recv-progress-wrap" id="prog-wrap-${i}">
+             <div class="recv-progress-bar-track">
+               <div class="recv-bar-prev" id="prog-prev-${i}" style="width:${receivedPct}%"></div>
+               <div class="recv-bar-this" id="prog-fill-${i}" style="left:${receivedPct}%;width:0%"></div>
+             </div>
+             <div class="recv-progress-meta">
+               <span class="recv-progress-pct" id="prog-pct-${i}">${receivedPct > 0 ? receivedPct + '% prev' : '0%'}</span>
+               <span id="prog-label-${i}">${receivedPct > 0 ? 'already received' : 'of PO'}</span>
+             </div>
+           </div>
+         </td>`;
+    return `<tr class="${isFull ? 'fully-received' : ''}">
+      <td style="padding-left:16px;color:var(--text-secondary)">${i + 1}</td>
+      <td style="font-weight:${isFull ? 400 : 600}">${it.name}</td>
+      <td><span class="${it.typeClass}">${it.type}</span></td>
+      <td class="mono tm">${it.code}</td>
+      <td class="qty-cell" style="color:var(--text-secondary);font-size:12px">฿ ${lineTotal.toLocaleString()}</td>
+      <td class="qty-cell" style="color:var(--text-secondary)">${it.ordered}</td>
+      <td class="qty-cell" style="font-weight:${remainingQty > 0 ? 600 : 400};color:${remainingQty > 0 ? 'var(--text-primary)' : 'var(--text-muted)'}">
+        ${remainingQty}
+      </td>
+      ${inputsHtml}
+    </tr>`;
+  }).join('');
+}
+
+/* ── Validation + cumulative progress bar ── */
+function onQtyChange(i, maxQty, orderedQty, lineTotal, prevPct) {
+  const qtyInput  = document.getElementById('qty-' + i);
+  const overEl    = document.getElementById('over-' + i);
+  const progFill  = document.getElementById('prog-fill-' + i);
+  const progPct   = document.getElementById('prog-pct-' + i);
+  const progLabel = document.getElementById('prog-label-' + i);
+
+  const qty    = parseFloat(qtyInput.value) || 0;
+  const isOver = qty > maxQty;
+
+  // this GR as % of total ordered
+  const thisGrPct = orderedQty > 0 ? Math.round((qty / orderedQty) * 100) : 0;
+  // cumulative after this GR
+  const totalPct  = prevPct + thisGrPct;
+
+  if (qty > 0) {
+    // navy bar starts right after the grey prev segment
+    progFill.style.left  = prevPct + '%';
+    progFill.style.width = Math.min(thisGrPct, 100 - prevPct) + '%';
+    progPct.textContent  = totalPct + '%';
+    progLabel.textContent = isOver ? 'exceeds 100%' : 'total received after this GR';
+    progFill.classList.toggle('over', isOver);
+    progFill.classList.remove('full');
+    progPct.classList.toggle('over', isOver);
+  } else {
+    progFill.style.left  = prevPct + '%';
+    progFill.style.width = '0%';
+    progPct.textContent  = prevPct > 0 ? prevPct + '% prev' : '0%';
+    progLabel.textContent = prevPct > 0 ? 'already received' : 'of PO';
+    progFill.classList.remove('over', 'full');
+    progPct.classList.remove('over');
+  }
+
+  if (isOver) {
+    qtyInput.classList.add('over');
+    overEl.style.display = 'inline';
+    overEl.textContent   = 'Max ' + maxQty;
+  } else {
+    qtyInput.classList.remove('over');
+    overEl.style.display = 'none';
+  }
+  updateTotals();
+}
+
+
+function updateTotals() {
+  if (!selectedPO) return;
+  let totalItems = 0, totalAmt = 0, totalQty = 0, hasOver = false;
+  let totalPctOfOrdered = 0;
+  selectedPO.items.forEach((it, i) => {
+    const qtyInput = document.getElementById('qty-' + i);
+    if (!qtyInput) return;
+    const qty = parseFloat(qtyInput.value) || 0;
+    const remainingQty = it.ordered - it.received;
+    if (qty > remainingQty) hasOver = true;
+    if (qty > 0) {
+      totalItems++;
+      totalQty += qty;
+      totalAmt += qty * it.unitPrice;
+      totalPctOfOrdered += it.ordered > 0 ? Math.round((qty / it.ordered) * 100) : 0;
+    }
+  });
+
+  const avgPct = totalItems > 0 ? Math.round(totalPctOfOrdered / totalItems) : 0;
+
+  const totalsEl = document.getElementById('rgr-totals');
+  if (totalItems > 0) {
+    totalsEl.style.display = 'flex';
+    document.getElementById('rgr-total-amt').textContent = '฿ ' + Math.round(totalAmt).toLocaleString();
+  } else {
+    totalsEl.style.display = 'none';
+  }
+
+  const submitBtn = document.getElementById('rgrSubmitBtn');
+  const footerHint = document.getElementById('rgr-footer-hint');
+  if (hasOver) {
+    submitBtn.disabled = true;
+    footerHint.textContent = 'Quantity exceeds remaining for one or more items.';
+    footerHint.style.color = 'var(--danger)';
+  } else if (totalItems === 0) {
+    submitBtn.disabled = true;
+    footerHint.textContent = 'Enter a quantity for at least one item to proceed.';
+    footerHint.style.color = 'var(--text-secondary)';
+  } else {
+    submitBtn.disabled = false;
+    footerHint.textContent = totalItems + ' item' + (totalItems > 1 ? 's' : '') + ' · ' + totalQty + ' units · avg ' + avgPct + '% · Est. ฿ ' + Math.round(totalAmt).toLocaleString();
+    footerHint.style.color = 'var(--primary)';
+  }
+}
+
+/* ── File handling ── */
+function handleFileSelect(input) { if (input.files && input.files[0]) showFileName(input.files[0].name); }
+function handleFileDrop(e) { e.preventDefault(); if (e.dataTransfer.files && e.dataTransfer.files[0]) showFileName(e.dataTransfer.files[0].name); }
+function showFileName(name) {
+  const tag = document.getElementById('fileNameTag');
+  tag.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--primary)" stroke-width="1.5"><path d="M7 1H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5L7 1z"/><polyline points="7 1 7 5 11 5"/></svg><span>' + name + '</span>';
+  tag.style.display = 'inline-flex';
+  tag.className = 'file-name-tag';
+}
+
+/* ── Submit ── */
+function doRecordGR() {
+  const po = selectedPO;
+  const date = document.getElementById('rgrDate').value;
+  closeRecordGRModal();
+  showToast('GR recorded against ' + po.num + ' (' + po.vendor.split(' ')[0] + ') on ' + date + ' — posted to Bookkeeping.');
+}
+
+/* ── Toast (MASTER.md §3 row 23 — never alert()) ── */
+function showToast(msg) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <div class="toast-icon">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 7l4 4 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="toast-body">${msg}</div>
+    <button class="toast-close" onclick="dismissToast(this.parentElement)">✕</button>`;
+  container.appendChild(toast);
+  setTimeout(() => dismissToast(toast), 5000);
+}
+function dismissToast(el) {
+  el.classList.add('hiding');
+  setTimeout(() => el.remove(), 200);
+}
+</script>
+</body>
+</html>

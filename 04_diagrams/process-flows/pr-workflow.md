@@ -9,36 +9,51 @@ flowchart TD
     C -->|Reject| B
     C -->|Approve| D[Procurement Team Reviews PR]
     D --> E[Collect Vendor Quotations\n& Compare Pricing]
-    E --> F[Assign Document Type per Line Item]
+
+    E --> EV{Winning vendor\nin master?}
+    EV -->|Yes — Search & Select| EV1[Vendor code + Tax ID locked]
+    EV -->|No — Manual Entry| EV2[Name + Tax ID recorded\nas unconfirmed]
+    EV1 --> F[Assign Document Type per Line Item]
+    EV2 --> F
 
     F --> G1[Type: Contract]
     F --> G2[Type: Memo]
     F --> G3[Type: Online Payment]
     F --> G4[Type: PO]
 
-    G1 --> H1([Contract Created ✓])
-    G2 --> H2([Memo Created ✓])
-    G3 --> H3([Online Payment Created ✓])
+    G1 --> I{Procurement Manager\nApproval}
+    G2 --> I
+    G3 --> I
+    G4 --> I
 
-    G4 --> I{Procurement Manager\nApproval}
     I -->|Reject| E
     I -->|Approve| J{CFO Approval}
     J -->|Reject| E
-    J -->|Approve| K[Accountant: Assign Cost Center]
+    J -->|Approve| J1[[Vendor identity\nfrozen per line item]]
 
-    K --> L{Item Type?}
-    L -->|Asset| M[Assign Asset Number]
-    L -->|Expense| N[Assign GL Account]
-    M --> O[Status: Waiting Create PO]
-    N --> O
+    J1 --> K[Accountant: Assign Cost Center\n+ GL or Asset Number]
+    K --> O[Status: Waiting Create PO]
 
-    O --> P[→ Proceed to PO Workflow]
+    O --> VQ{Vendor confirmed\nfrom master?}
+    VQ -->|Yes — selected at Price Comparison| DOC[Create Document]
+    VQ -->|No — manually entered| VS[Search vendor master\nby Tax ID]
+    VS --> VM{Match found?}
+    VM -->|Yes| DOC
+    VM -->|No| VR[Register vendor in\nVendor Management]
+    VR --> VS
+
+    DOC --> D1([PO Created ✓])
+    DOC --> D2([Contract Created ✓])
+    DOC --> D3([Memo Created ✓])
+    DOC --> D4([Online Payment Created ✓])
 
     style A fill:#4A90D9,color:#fff
-    style H1 fill:#27AE60,color:#fff
-    style H2 fill:#27AE60,color:#fff
-    style H3 fill:#27AE60,color:#fff
-    style P fill:#F39C12,color:#fff
+    style J1 fill:#E8518A,color:#fff
+    style D1 fill:#27AE60,color:#fff
+    style D2 fill:#27AE60,color:#fff
+    style D3 fill:#27AE60,color:#fff
+    style D4 fill:#27AE60,color:#fff
+    style VR fill:#F39C12,color:#fff
 ```
 
 ## PR States
