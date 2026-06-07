@@ -12,35 +12,37 @@ Full context: [`.context/system.md`](.context/system.md) · [`.context/company.m
 ---
 
 ## Where We Left Off
-*(Last updated: 2026-06-04)*
+*(Last updated: 2026-06-07)*
 
 - PR module is already built — currently in **enhancement phase**
-- PO, GR, and Billing feature specs have been **drafted** — pending review and correction
+- PO and GR feature specs drafted — pending review
+- Billing (internal) feature spec drafted — pending review
+- **Vendor Portal Billing (Phase 2) — feature spec complete + HTML prototype built**
 - Vendor Management is already built — not in current scope
-- Contract / Memo / Online Payment downstream flows — **not yet designed**
 - Bookkeeping transaction payload — **TBD with Bookkeeping team**
 
 ---
 
 ## Module Status
 
-| Module | Status | Feature File |
-|---|---|---|
-| Purchase Request (PR) | Done + Enhancement planned | [001-pr-creation-and-approval.md](02_features/PR-Purchase-Request/001-pr-creation-and-approval.md) |
-| Purchase Order (PO) | Draft — pending review | [001-po-creation-and-approval.md](02_features/PO-Purchase-Order/001-po-creation-and-approval.md) |
-| Good Receipt (GR) | Draft — pending review | [001-gr-recording.md](02_features/GR-Good-Receipt/001-gr-recording.md) |
-| Billing | Draft — pending review | [001-billing-creation.md](02_features/Billing/001-billing-creation.md) |
-| Vendor Management | Done | — |
-| Approval Workflow Engine | In design | — |
+| Module | Status | Feature File | Prototype |
+|---|---|---|---|
+| Purchase Request (PR) | Done + Enhancement planned | [001-pr-creation-and-approval.md](02_features/PR-Purchase-Request/001-pr-creation-and-approval.md) | — |
+| Purchase Order (PO) | Draft — pending review | [001-po-creation-and-approval.md](02_features/PO-Purchase-Order/001-po-creation-and-approval.md) | — |
+| Good Receipt (GR) | Draft — pending review | [001-gr-recording.md](02_features/GR-Good-Receipt/001-gr-recording.md) | [gr-prototype.html](prototypes/gr-prototype.html) |
+| Billing — Internal | Draft — pending review | [001-billing-creation.md](02_features/Billing/001-billing-creation.md) | [billing-list-prototype.html](prototypes/billing-list-prototype.html) |
+| Billing — Vendor Portal | Spec complete + Prototype done | [002-vendor-portal-billing.md](02_features/Billing/002-vendor-portal-billing.md) | [vendor-portal-billing.html](prototypes/vendor-portal-billing.html) |
+| Vendor Management | Done | — | — |
+| Approval Workflow Engine | Not yet designed | — | — |
 
 ---
 
 ## What to Work on Next
 
-- [ ] Review and approve the 3 drafted feature files (PO, GR, Billing)
-- [ ] Design the Contract / Memo / Online Payment flow
+- [ ] Review and approve PO and GR feature specs
+- [ ] Review and approve Billing — Internal feature spec
 - [ ] Define Bookkeeping transaction payload with the Bookkeeping team
-- [ ] Define cost center integration — procurement system reads cost center master data from Bookkeeping (API or sync approach TBD)
+- [ ] Define cost center integration — procurement system reads cost center master data from Bookkeeping
 - [ ] Design GL code master list config screen — Accounting team needs a UI to manage GL codes
 - [ ] Write PR enhancement requirements
 - [ ] Design Approval Workflow Engine (configurable rules, delegation, escalation)
