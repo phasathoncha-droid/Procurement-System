@@ -123,11 +123,36 @@ Enforces that the vendor approved at Price Comparison is the vendor on the final
 
 ---
 
-### Phase 3 — Remove SAP from the PO Step
+### Phase 3 — Advanced Reporting and Credit Note *(TBC)*
+
+**Goal:** Give finance and management full visibility into procurement spend, and handle vendor credit notes as a formal document type within the billing flow.
+
+#### 3A — Advanced Report
+
+- [ ] **Procurement spend report** — aggregated view by vendor, department, entity, and period
+- [ ] **PO status report** — open POs, partial receipts, pending billings
+- [ ] **GR aging report** — time between PO creation and GR confirmation
+- [ ] **Billing aging report** — time between GR and invoice confirmation
+- [ ] **Export** — export to Excel/CSV; filters by date range, entity, department, vendor, status
+- [ ] **Role-based access** — Procurement Manager, CFO, and Accounting can access; Procurement and Requester have limited scope
+
+#### 3B — Credit Note
+
+- [ ] **Credit Note as document type** — vendor issues a credit note against a confirmed billing; Accounting creates a Credit Note record linked to the original invoice
+- [ ] **Negative amount posting** — Credit Note generates a negative AP adjustment entry uploaded to Bookkeeping via S3
+- [ ] **Partial credit support** — credit note may cover one or more line items, not necessarily the full invoice amount
+- [ ] **Status flow** — Credit Note follows its own status: Waiting Accounting Confirmation → Confirmed / Rejected
+- [ ] **Linked on Billing List** — Credit Note record visible on the Billing List page, linked to the original invoice
+
+**Exit criterion for Phase 3:** Finance team can pull a full spend report for any period without exporting from multiple screens. Credit notes are recorded and posted to Bookkeeping without manual workarounds.
+
+---
+
+### Phase 4 — Remove SAP from the PO Step
 
 **Goal:** Generate and approve POs entirely inside this system. This is the SAP retirement step — executed only after Phase 2 proves the accounting backbone is reliable.
 
-#### 3A — PO Approval Process
+#### 4A — PO Approval Process
 
 - [ ] **PO number auto-generation** — format `PO-{BE year}/{5-digit sequence}`, assigned at Draft, never changes. Replaces manual SAP PO number entry.
 - [ ] **Approval chain** — Financial Controller approves; CFO approves only when PO total exceeds configurable threshold
@@ -135,13 +160,13 @@ Enforces that the vendor approved at Price Comparison is the vendor on the final
 - [ ] **CFO threshold config** — CFO sets the amount threshold; applies to new POs only
 - [ ] **PO cancellation flow** — Procurement initiates with mandatory reason; requires approval chain; blocked if GR or confirmed Billing exists
 
-**SAP cutover:** Once 3A is live and validated, the PO number field switches from manual SAP entry to auto-generated. This is a deliberate, coordinated cutover — not automatic.
+**SAP cutover:** Once 4A is live and validated, the PO number field switches from manual SAP entry to auto-generated. This is a deliberate, coordinated cutover — not automatic.
 
-**Exit criterion for Phase 3:** First PO is created, approved, and issued inside this system with no SAP step. SAP is no longer on the critical path for procurement.
+**Exit criterion for Phase 4:** First PO is created, approved, and issued inside this system with no SAP step. SAP is no longer on the critical path for procurement.
 
 ---
 
-### Phase 4 — Vendor Self-Service *(Future)*
+### Phase 5 — Vendor Self-Service *(Future)*
 
 **Goal:** Reduce Procurement workload, give vendors visibility into their own transactions.
 
@@ -158,7 +183,7 @@ Enforces that the vendor approved at Price Comparison is the vendor on the final
 | Finance Coding master data source | Phase 1B blocked until Bookkeeping API/sync is defined | Agree on integration approach (real-time API call vs. periodic sync) early |
 | Asset number still in SAP | Minor — accountant manually enters free text | Accept as known limitation; revisit when SAP retirement is broader |
 | Entity field missing from current PR | All Bookkeeping records will lack entity tag | Fix in Phase 1A before any accounting recording is built |
-| Accounting pipeline not proven before SAP cutover | Risk of financial recording gaps if Phase 3 ships before Phase 2 is stable | Phase sequencing enforces this: Phase 2 exit criterion must be met before Phase 3 begins |
+| Accounting pipeline not proven before SAP cutover | Risk of financial recording gaps if Phase 4 ships before Phase 2 is stable | Phase sequencing enforces this: Phase 2 exit criterion must be met before Phase 4 begins |
 
 ---
 

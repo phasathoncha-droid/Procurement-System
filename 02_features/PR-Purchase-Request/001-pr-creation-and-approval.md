@@ -6,18 +6,21 @@ PR — Purchase Request
 ## Status
 Built — enhancements planned (see Enhancements section)
 
-## What Is Already Built
-- PR form: type, topic, department/branch, line items, attachments
-- Full approval chain: Manager → Procurement Review → Price Comparison → Procurement Manager → CFO → Finance Coding
-- Price Comparison: vendor quote attachments, price entry, VAT flag, document type assignment, vendor free-text or select from master (UI only — no system enforcement)
-- Finance Coding: cost center and GL code as free-text copy-paste; asset number as free text
-- Kanban board with SLA flagging
-- PR cancellation before manager approval
+## Implementation Status
 
-## What Is Not Yet Built
-- Entity field on PR form (NTB / NTBX / NTBI / NTBPL)
-- Finance Coding: smart search against Bookkeeping master for cost center and GL code (currently free text)
-- Vendor linkage enforcement: E2 lock after CFO approval, E3 tax ID match check, E4 read-only vendor on document
+| # | Feature | Status |
+|---|---------|--------|
+| — | PR form (type, topic, dept, items, attachments) | Built |
+| — | Full approval chain (Manager → CFO → Finance Coding) | Built |
+| — | Price Comparison: quotes, prices, VAT flag, doc type | Built |
+| — | Finance Coding: cost center and GL code (free text) | Built |
+| — | Kanban board with SLA flagging | Built |
+| — | PR cancellation before manager approval | Built |
+| E1 | Entity field on PR form (NTB / NTBX / NTBI / NTBPL) | Pending |
+| E2 | Finance Coding: smart search for cost center and GL code | Pending |
+| E3 | Vendor locked after CFO approval and read-only on documents | Pending |
+| E4 | Vendor code confirmation for Manual Entry vendors | Pending |
+| E5 | Expected delivery date per line item | Pending |
 
 ## Overview
 Requesters create a Purchase Request ticket to initiate a procurement. The PR moves through a defined approval chain — Manager → Procurement Review → Price Comparison → Procurement Manager → CFO → Finance Coding — before becoming ready for PO creation. Each stage has a configurable SLA. Procurement and Finance teams manage all PRs through a Kanban board view.
@@ -45,10 +48,10 @@ After submission the PR moves through these stages in order:
 4. **Procurement Manager Approval** — Approves or returns. Cannot edit pricing or vendor selection.
 5. **CFO Approval** — Approves or returns. Cannot edit pricing or vendor selection.
 6. **Finance Coding** — Any accountant on the team can pick up the PR. They must code all line items before the PR can advance. Two actions are required:
-   - **Cost Center** — one per PR. Accountant uses smart search against Bookkeeping master data (type to search, live results). Currently free text copy-paste — smart search is a planned enhancement.
+   - **Cost Center** — one per PR. Accountant uses smart search against Bookkeeping master data directly (type to search, live results). Currently free text copy-paste — see E2.
    - **Per line item:** classify as Asset or Expense
      - **Asset** → accountant manually enters the asset number (free text, sourced from SAP — SAP still generates asset numbers)
-     - **Expense** → accountant uses smart search to select a GL code from Bookkeeping master data (code + description, e.g., `5210400010 ค่าเช่าตึก`). Currently free text copy-paste — smart search is a planned enhancement.
+     - **Expense** → accountant uses smart search to select a GL code from the GL Expense Config master (code + description, e.g., `5210400010 ค่าเช่าตึก`). Currently free text copy-paste — see E2.
 
    All line items must be coded before advancing. Partial save is not allowed. Once all items are coded, the accountant clicks **Submit** to move the PR forward.
 
@@ -90,12 +93,12 @@ A requester can cancel their PR only before the manager approves it. Once approv
 - **Cancellation:** Requester can cancel only while the PR is in "Waiting Manager Approval" state. Once the manager approves, cancellation is locked.
 - **Finance Coding:** All line items must be coded before the PR can advance. Partial coding is not allowed. The accountant manually clicks Submit after all items are coded.
 - **Entity:** Defaults to NTB when form opens. User can change to NTBX, NTBI, or NTBPL before submitting.
-- **Cost center:** One cost center per PR. Smart search against Bookkeeping master data. Enhancement — currently free text.
+- **Cost center:** One cost center per PR. Smart search directly against Bookkeeping master data. Currently free text — see E2.
 - **Asset items:** Accountant manually enters the asset number as free text (sourced from SAP).
-- **Expense items:** Accountant uses smart search to select a GL code from Bookkeeping master data. Enhancement — currently free text.
+- **Expense items:** Accountant uses smart search to select a GL code from GL Expense Config master in this system. Currently free text — see E2.
 - **Finance Coding return:** Accountant can return the PR to Procurement with comments if there is an issue. Procurement can then fix or return it further to the requester.
 - **Document type:** Each line item must have a document type assigned before the PR can advance past price comparison.
-- **Expected delivery date:** Each line item must have an expected delivery date filled in when the winning vendor is selected at Price Comparison. Mandatory — PR cannot advance without it. Locked after CFO approval. Pre-populated on PO creation.
+- **Expected delivery date:** Each line item must have an expected delivery date filled in when the winning vendor is selected at Price Comparison. Mandatory — PR cannot advance without it. Editable by Procurement up until PO creation. Locked once the PO is created — pre-populated on the PO as read-only.
 - **VAT flag:** Each line item must have a VAT flag selected (7% or 0%) at price comparison. This flag is locked after price comparison and flows to the PO and billing stages unchanged.
 - **PR completion:** PR status = Complete only when every line item has a purchasing document.
 - **SLA flag:** If a PR exceeds the configured SLA for its current stage, the "เกิน SLA" tag appears on the board card automatically.
@@ -111,67 +114,165 @@ flowchart TD
     RQ --> B
     C -->|Approve| D[Procurement Review]
     D -->|Return| RQ
-    D -->|Advance| E[Price Comparison\nAttach quotes - Enter prices\nAssign vendor and document type per item]
+    D -->|Advance| E[Price Comparison\nAttach quotes - Enter prices\nAssign vendor and document type per item\nSelect winning vendor - Set expected delivery date]
     E --> F{Procurement Manager Approval}
     F -->|Return| RQ
     F -->|Approve| G{CFO Approval}
     G -->|Return| RQ
-    G -->|Approve| H[Finance Coding\nCost Center - GL or Asset Number]
+    G -->|Approve| LOCK[Vendor locked]
+    LOCK --> H[Finance Coding\nCost Center - GL or Asset Number]
     H --> I[Status: Waiting Create PO]
 
-    I --> J1[Items type = PO\ngo to PO Workflow]
-    I --> J2[Items type = Contract / Memo\nor Online Payment\nDocument Created]
+    I --> VM{Vendor status\nper line item?}
+    VM -->|Search & Select\nConfirmed| J1
+    VM -->|Manual Entry\nPending Registration| VX[Search vendor master\nby Tax ID]
+    VX -->|Match found| VC[Vendor confirmed]
+    VC --> J1
+    VX -->|No match| VR[Register vendor\nin Vendor Management]
+    VR --> VX
+
+    J1{Document type?}
+    J1 -->|PO| K1[PO Workflow]
+    J1 -->|Contract / Memo\nor Online Payment| K2[Document Created]
 
     style A fill:#4A90D9,color:#fff
-    style J1 fill:#F39C12,color:#fff
-    style J2 fill:#27AE60,color:#fff
+    style LOCK fill:#8E44AD,color:#fff
+    style K1 fill:#F39C12,color:#fff
+    style K2 fill:#27AE60,color:#fff
+    style VR fill:#E74C3C,color:#fff
 ```
 
 ## Enhancements
 
-### Vendor Linkage at Price Comparison and Document Creation
+### Context
 
-**Background:** Vendor Management and PR operate as separate modules. The linkage point is when Procurement selects the winning vendor per line item during Price Comparison. The winning vendor is locked after CFO approval — no substitution is allowed at document creation.
-
-**Enhancement list:**
-
-- [ ] **E1 — Two vendor input modes at Price Comparison** *(UI already supports both modes — enforcement is the gap)*
-  At Price Comparison, Procurement selects the winning vendor per line item using one of two modes:
-  - **Search & Select** — vendor exists in vendor master. Procurement searches by name or tax ID and selects. The vendor code and tax ID are locked immediately. No further vendor check is needed at document creation.
-  - **Manual Entry** — vendor is not yet in vendor master. Procurement enters vendor name and tax ID from the quote. These are recorded as unconfirmed and flagged as "Pending Vendor Registration."
-
-- [ ] **E2 — Vendor identity locked after CFO approval**
-  Once CFO approves, the winning vendor per line item (whether selected from master or manually entered) is frozen. Procurement cannot change the vendor at any later stage. This applies to vendor code, tax ID, and name.
-
-- [ ] **E3 — Vendor match check at Waiting Create PO (manual entry path only)**
-  If the winning vendor was entered manually at Price Comparison, the system requires a vendor master search before the document can be created:
-  - Procurement searches vendor master by tax ID
-  - System matches on **tax ID only** (name is display only — variations are acceptable)
-  - If match found → vendor code confirmed → Procurement can create PO / Contract / Memo / Online Payment
-  - If no match → Procurement must register the vendor in Vendor Management first, then search again
-  - If the vendor was selected from master at Price Comparison → this step is skipped entirely, document creation is available immediately
-
-- [ ] **E4 — Vendor field on document is read-only**
-  On PO / Contract / Memo / Online Payment creation, the vendor field is pre-populated from the confirmed vendor code and is not editable. Procurement cannot substitute a different vendor at this stage.
-
-- [ ] **E5 — Expected delivery date per winning vendor at Price Comparison**
-  When Procurement selects the winning vendor for a line item at Price Comparison, they must also fill in the **Expected Delivery Date** for that line item. This represents the delivery commitment agreed with the vendor based on their quote.
-
-  - One expected delivery date per line item (not one per PR)
-  - Different line items assigned to different vendors can have different expected delivery dates
-  - Mandatory before the PR can advance past Price Comparison
-  - The date is locked after CFO approval alongside the vendor (same lock as E2)
-  - Carries through to the PO automatically when the PO is created — pre-populated and read-only on the PO form
-  - Visible on the PO detail and GR recording screens so the warehouse team knows when to expect delivery
+E1 and E2 complete the PR form and Finance Coding stage. E3–E5 enforce vendor linkage: locked after CFO approval, verified at Waiting Create PO (manual-entry path only), and read-only on all documents. The two vendor input modes at Price Comparison are already built and serve as the foundation for E3 and E4.
 
 ---
 
-## Open Questions
-- [ ] **GL code master list config** — how does the Accounting team manage the GL code list in the system? (add / edit / deactivate codes). Needs a config screen design.
-- [ ] **Cost center integration** — the cost center dropdown is sourced from Bookkeeping's master data. Integration approach (API call, sync, etc.) to be defined with the Bookkeeping team.
+### E1 — Entity Field on PR Form
 
-## Backlog
-- **Notifications:** Notify the task owner when a PR moves to their stage (e.g. notify manager when PR is waiting for their approval). Channel TBD — email / in-app. Added to backlog.
+**Status:** Pending
+
+Adds a mandatory **Entity** dropdown to the PR creation form (above PR Type). Defaults to NTB. Read-only after submission. The selected entity is carried through to all accounting data sent to Bookkeeping.
+
+| Option | Entity |
+|--------|--------|
+| NTB | Ngern Turbo Co., Ltd. |
+| NTBX | TBC |
+| NTBI | TBC |
+| NTBPL | TBC |
+
+**Acceptance Criteria:**
+- Defaults to NTB. Requester can change before submitting. Mandatory.
+- Read-only after submission at all stages.
+- Displayed on PR detail and all downstream documents.
+- Included in all accounting data sent to Bookkeeping.
+
+---
+
+### E2 — Finance Coding: Smart Search for Cost Center and GL Code
+
+**Status:** Pending
+
+**Background**
+This system maintains a **GL Expense Config** master — a local table where each record pairs a GL code (sourced from Bookkeeping) with an expense description meaningful to the Procurement/Accounting team (e.g., `5210400010 — Office Rent`). GL codes are populated from Bookkeeping via sync; the expense description is managed in this system. Finance Coding searches this local master — it does not call Bookkeeping directly.
+
+Replaces free-text entry with live search against the GL Expense Config master for both coding fields at Finance Coding.
+
+- **Cost center** — one per PR. Accountant types to search directly against Bookkeeping master data (live API call). Must select from results — free text not allowed.
+- **GL code** — per Expense line item. Accountant searches by code or description (e.g. `5210400010 ค่าเช่าตึก`). Must select from results.
+- **Asset number** — unaffected. Remains free text.
+
+Both fields are locked after Finance Coding is submitted.
+
+**Acceptance Criteria:**
+- Cost center and GL code fields are live search inputs. Free-text entry is not allowed.
+- Cost center searches Bookkeeping master data directly (live API call). Only cost centers present in Bookkeeping can be selected.
+- GL code searches the local GL Expense Config master (synced from Bookkeeping). Only codes present in GL Expense Config can be selected.
+- Search results show code + description. Accountant can search by either.
+- Asset number field is not changed.
+
+---
+
+### E3 — Vendor Locked After CFO Approval and Read-Only on Documents
+
+**Status:** Pending
+
+**Background**
+At Price Comparison, Procurement selects the winning vendor per line item using one of two modes — both already built:
+- **Search & Select** — vendor exists in master. Code, name, and tax ID pulled from master. No further check needed downstream.
+- **Manual Entry** — vendor not yet in master. Procurement types name and tax ID from the quote. Status: **Pending Vendor Registration**. Requires E4 match check before document creation.
+
+**Lock at CFO approval**
+Once the CFO approves, all vendor fields per line item are frozen — name, tax ID, and input mode. For Search & Select vendors, the vendor code is also locked. For Manual Entry vendors, the name and tax ID are locked as entered — vendor code is still pending and will be resolved via E4.
+
+To correct a vendor after CFO approval, the PR must be returned to Price Comparison and re-approved.
+
+**Read-only on document creation**
+On PO / Contract / Memo / Online Payment creation forms, the vendor field is pre-populated from the confirmed vendor code and is not editable. For Manual Entry vendors, the vendor code must be confirmed via E4 before the PO can be created — this is enforced as a validation check at PO creation.
+
+**Acceptance Criteria:**
+- Vendor fields become read-only immediately after CFO approves.
+- Lock persists through Finance Coding, Waiting Create PO, and document creation.
+- On all document creation forms, vendor is pre-populated and read-only — no edit control is rendered.
+- PO creation is blocked if the vendor code is not yet confirmed. Procurement must complete E4 first.
+- If a return occurs after CFO approval, vendor fields stay locked unless the PR re-enters Price Comparison.
+
+---
+
+### E4 — Vendor Code Confirmation for Manual Entry Vendors
+
+**Status:** Pending
+
+For Manual Entry vendors, the vendor code must be confirmed against the vendor master before the PO can be created. This is enforced as a validation check at PO creation — Procurement must complete this step first.
+
+**Flow:**
+1. Procurement searches the vendor master by tax ID at Waiting Create PO
+2. Match on **tax ID only** (name variations are acceptable)
+   - **Match found** → vendor code confirmed and stored. Pending Vendor Registration badge removed. PO creation available.
+   - **No match** → Procurement registers the vendor in Vendor Management, then searches again.
+
+Search & Select line items skip this step — vendor code is already confirmed.
+
+Once the vendor code is confirmed, it is carried through to the PO and included in accounting transactions sent to Bookkeeping at GR confirmation and Billing approval.
+
+**Acceptance Criteria:**
+- PO creation is blocked for Manual Entry line items until the vendor code is confirmed.
+- Procurement must search and confirm the vendor code before creating the PO.
+- Match is by tax ID only.
+- On match: vendor code stored, Pending Vendor Registration badge removed, PO creation available.
+- On no match: Procurement registers the vendor in Vendor Management, then searches again.
+- Confirmed vendor code is included in accounting transactions sent to Bookkeeping at GR and Billing.
+
+---
+
+### E5 — Expected Delivery Date per Line Item
+
+**Status:** Pending
+
+When Procurement selects the winning vendor for a line item at Price Comparison, an **Expected Delivery Date** field appears and is mandatory. The PR cannot advance past Price Comparison without it.
+
+- One date per line item — different items can have different dates
+- Editable by Procurement through Finance Coding and Waiting Create PO
+- Locked when the PO is created — pre-populated on the PO as read-only
+- Visible on PO detail page and GR recording screen
+
+**Acceptance Criteria:**
+- Field appears per line item when a winning vendor is selected. Mandatory before Price Comparison can be submitted.
+- Editable after CFO approval, up until PO creation.
+- Pre-populated on the PO at creation. Read-only on PO and all stages after.
+- Visible on PO detail and GR recording screen.
+- Field not shown for line items with no winning vendor selected.
+
+---
+
+## Decisions Log
+- **GL Expense Config** — ✅ This system maintains a GL Expense Config master table. GL codes are sourced from Bookkeeping (sync approach TBD); expense descriptions are managed locally in this system. Finance Coding searches this local master — it does not call Bookkeeping directly.
+- **Cost center integration** — ✅ Cost center data is sourced from Bookkeeping via integration. Approach (API call, sync, etc.) to be defined with the Bookkeeping team during implementation.
+
+## Open Questions
+None outstanding.
 
 ## Related Features
 - [PO Creation and Approval](../../02_features/PO-Purchase-Order/001-po-creation-and-approval.md)

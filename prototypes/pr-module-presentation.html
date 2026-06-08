@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PR Module — Spec Alignment | Ngern Turbo Procurement</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary:       #1B3068;
+  --primary-dark:  #142451;
+  --primary-light: #2A4A99;
+  --primary-bg:    #EEF4FF;
+  --accent:        #E8518A;
+  --success:       #10B981;
+  --success-light: #D1FAE5;
+  --success-dark:  #065F46;
+  --danger:        #EF4444;
+  --danger-light:  #FEE2E2;
+  --danger-dark:   #991B1B;
+  --warning:       #F59E0B;
+  --warning-light: #FEF3C7;
+  --warning-dark:  #92400E;
+  --purple:        #7C3AED;
+  --purple-light:  #EDE9FE;
+  --purple-dark:   #5B21B6;
+  --orange:        #F97316;
+  --orange-light:  #FFEDD5;
+  --orange-dark:   #9A3412;
+  --bg-canvas:     #F0F4F9;
+  --bg-primary:    #FFFFFF;
+  --bg-secondary:  #F8FAFC;
+  --border:        #CBD5E1;
+  --border-light:  #EEF2F7;
+  --text-primary:  #0F1F42;
+  --text-secondary:#4B5E85;
+  --text-muted:    #8799B8;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Nav ── */
+.deck-nav {
+  position: fixed; top: 0; left: 0; right: 0; height: 52px;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.deck-nav::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo { width: 30px; height: 30px; border-radius: 7px; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #fff; }
+.nav-brand-text { color: #fff; font-size: 14px; font-weight: 700; }
+.nav-tag { background: var(--accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 100px; }
+.nav-links { display: flex; gap: 4px; }
+.nav-link { color: rgba(255,255,255,0.7); background: none; border: none; font-family: inherit; font-size: 12px; font-weight: 500; padding: 6px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+.nav-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.nav-link.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+.nav-meta { color: rgba(255,255,255,0.55); font-size: 11px; }
+
+/* ── Layout ── */
+.deck { max-width: 1080px; margin: 0 auto; padding: 84px 24px 80px; }
+
+/* ── Slide ── */
+.slide {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(27,48,104,.08), 0 8px 24px rgba(27,48,104,.06);
+  margin-bottom: 28px;
+  overflow: hidden;
+  scroll-margin-top: 76px;
+}
+
+/* ── Cover ── */
+.slide-cover {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  padding: 56px 48px; position: relative; overflow: hidden;
+}
+.slide-cover::before { content: ''; position: absolute; top: -60px; right: -60px; width: 320px; height: 320px; border-radius: 50%; background: rgba(255,255,255,0.04); }
+.slide-cover::after  { content: ''; position: absolute; bottom: -80px; right: 80px; width: 200px; height: 200px; border-radius: 50%; background: rgba(232,81,138,0.12); }
+.cover-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 14px; }
+.cover-title { font-size: 36px; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 14px; }
+.cover-title span { color: var(--accent); }
+.cover-subtitle { font-size: 16px; color: rgba(255,255,255,0.72); max-width: 540px; line-height: 1.6; margin-bottom: 32px; }
+.cover-meta { display: flex; gap: 24px; align-items: center; }
+.cover-meta-item { font-size: 12px; color: rgba(255,255,255,0.55); }
+.cover-meta-item strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+.cover-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.2); }
+.cover-badge { background: rgba(232,81,138,0.2); border: 1px solid rgba(232,81,138,0.35); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
+
+/* ── Slide header ── */
+.slide-header {
+  padding: 26px 36px 20px; border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.slide-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 5px; }
+.slide-title { font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1.25; }
+.slide-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+.slide-body { padding: 26px 36px 32px; }
+
+/* ── Tags ── */
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; white-space: nowrap; }
+.tag-built   { background: var(--success-light); color: var(--success-dark); }
+.tag-pending { background: var(--warning-light); color: var(--warning-dark); }
+.tag-module  { background: var(--primary-bg);    color: var(--primary); }
+
+/* ── Grid ── */
+.two-col  { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.col-6040 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+
+/* ── Section label ── */
+.section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-muted); margin-bottom: 10px; }
+
+/* ── Bullet list (minimal use — for short supporting points) ── */
+.bullet-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.bullet-list li { display: flex; align-items: flex-start; gap: 9px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.bullet-list li::before { content: ''; flex-shrink: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
+.bullet-list li strong { color: var(--text-primary); }
+
+/* ════════════════════════════════════════
+   FLOW DIAGRAM PRIMITIVES
+   ════════════════════════════════════════ */
+
+/* Generic box */
+.box {
+  border-radius: 10px; padding: 10px 14px;
+  font-size: 12px; font-weight: 600;
+  text-align: center; line-height: 1.35;
+  border: 1.5px solid;
+  position: relative;
+}
+.box-sub { font-size: 10px; font-weight: 400; margin-top: 2px; opacity: 0.8; }
+
+/* Box variants */
+.box-navy    { background: var(--primary);      border-color: var(--primary);      color: #fff; }
+.box-blue    { background: var(--primary-bg);   border-color: var(--primary-light); color: var(--primary); }
+.box-green   { background: var(--success-light);border-color: #6EE7B7;             color: var(--success-dark); }
+.box-amber   { background: var(--warning-light);border-color: #FCD34D;             color: var(--warning-dark); }
+.box-red     { background: var(--danger-light); border-color: #FCA5A5;             color: var(--danger-dark); }
+.box-purple  { background: var(--purple-light); border-color: #C4B5FD;             color: var(--purple-dark); }
+.box-gray    { background: var(--bg-secondary); border-color: var(--border);       color: var(--text-primary); }
+.box-orange  { background: var(--orange-light); border-color: #FDBA74;             color: var(--orange-dark); }
+.box-pink    { background: #FCE7F3;             border-color: #F9A8D4;             color: #9D174D; }
+
+/* Arrow between boxes — horizontal */
+.arrow-h {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 18px; flex-shrink: 0;
+  padding: 0 4px;
+}
+.arrow-label { font-size: 10px; color: var(--text-muted); text-align: center; margin-top: 2px; }
+
+/* Horizontal flow row */
+.hflow {
+  display: flex; align-items: center; gap: 0;
+  flex-wrap: nowrap;
+}
+.hflow .box { flex: 1; min-width: 0; }
+.hflow .arrow-h { flex: 0 0 32px; }
+
+/* Vertical flow */
+.vflow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+.vflow .box { width: 100%; }
+.arrow-v { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 18px; line-height: 1; padding: 3px 0; }
+.arrow-v-label { font-size: 10px; color: var(--text-muted); margin: 1px 0; }
+
+/* Branch — two outcomes side by side */
+.branch-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+
+/* Flow card wrapper */
+.flow-card {
+  border: 1px solid var(--border-light); border-radius: 12px;
+  overflow: hidden; background: #fff;
+}
+.flow-card-header {
+  padding: 12px 16px 10px; border-bottom: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.flow-card-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.flow-card-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 2px; }
+.flow-card-body { padding: 16px; }
+
+/* E-number badge */
+.e-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 10px; font-weight: 800; flex-shrink: 0; }
+
+/* Status table */
+.status-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.status-table th { text-align: left; padding: 8px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+.status-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.status-table tr:last-child td { border-bottom: none; }
+.status-table tr:hover td { background: #FAFBFF; }
+.status-table .row-e td { background: #FAFBFF; }
+
+/* Callout */
+.callout { border-radius: 10px; padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+.callout.blue   { background: var(--primary-bg);  border-left: 3px solid var(--primary); }
+.callout.orange { background: var(--orange-light); border-left: 3px solid var(--orange); }
+.callout.green  { background: var(--success-light);border-left: 3px solid var(--success); }
+.callout.purple { background: var(--purple-light); border-left: 3px solid var(--purple); }
+.callout-icon { font-size: 14px; line-height: 1; flex-shrink: 0; margin-top: 1px; }
+.callout-text { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.callout-text strong { color: var(--text-primary); }
+
+/* Timeline */
+.timeline { display: flex; flex-direction: column; }
+.tl-item { display: flex; gap: 12px; align-items: flex-start; }
+.tl-left { display: flex; flex-direction: column; align-items: center; }
+.tl-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.tl-dot.built   { background: var(--success-light); color: var(--success-dark); }
+.tl-dot.pending { background: var(--warning-light); color: var(--warning-dark); }
+.tl-dot.lock    { background: var(--purple-light);  color: var(--purple-dark); }
+.tl-line { width: 2px; flex: 1; background: var(--border-light); min-height: 14px; margin: 3px 0; }
+.tl-content { padding-bottom: 16px; flex: 1; }
+.tl-title { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 1px; }
+.tl-desc  { font-size: 11px; color: var(--text-secondary); line-height: 1.5; }
+
+/* Agenda */
+.agenda { display: flex; flex-direction: column; gap: 10px; }
+.agenda-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--bg-secondary); }
+.agenda-num { width: 28px; height: 28px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.agenda-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.agenda-desc  { font-size: 12px; color: var(--text-secondary); }
+
+/* Decision table */
+.decision-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.decision-table th { text-align: left; padding: 7px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); background: var(--bg-secondary); border-bottom: 1px solid var(--border); }
+.decision-table td { padding: 9px 12px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+.decision-table tr:last-child td { border-bottom: none; }
+.check-icon { color: var(--success); font-weight: 700; }
+
+/* Lock banner */
+.lock-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--purple-light); border: 1px solid #C4B5FD;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; font-weight: 700; color: var(--purple-dark);
+}
+
+/* Divider */
+.divider { height: 1px; background: var(--border-light); margin: 18px 0; }
+
+/* Spacing helpers */
+.mt8  { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mt16 { margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav class="deck-nav">
+  <div class="nav-brand">
+    <div class="nav-logo">NT</div>
+    <span class="nav-brand-text">Procurement System</span>
+    <span class="nav-tag">PR Module</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="#s1">Cover</a>
+    <a class="nav-link" href="#s2">Agenda</a>
+    <a class="nav-link" href="#s1">Cover</a>
+    <a class="nav-link" href="#s4">Flow</a>
+    <a class="nav-link" href="#s5">E1</a>
+    <a class="nav-link" href="#s5b">E2</a>
+    <a class="nav-link" href="#s6">E3</a>
+    <a class="nav-link" href="#s7">E4</a>
+    <a class="nav-link" href="#s8">E5 + Decisions</a>
+  </div>
+  <span class="nav-meta">Spec Alignment — June 2026</span>
+</nav>
+
+<div class="deck">
+
+<!-- ══════════════════════ SLIDE 1 — COVER ══════════════════════ -->
+<div class="slide" id="s1">
+  <div class="slide-cover" style="display:flex;align-items:center;justify-content:center;min-height:260px;text-align:center;padding:72px 48px;">
+    <div style="position:relative;z-index:1">
+      <div class="cover-eyebrow" style="text-align:center">Ngern Turbo Procurement System</div>
+      <div class="cover-title" style="font-size:42px">Purchase Request <span>(PR)</span><br>Module Enhancements</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 2 — FLOW ══════════════════════ -->
+<div class="slide" id="s4">
+  <div class="slide-header">
+    <div>
+      <div class="slide-label">Slide 2 of 7</div>
+      <div class="slide-title">End-to-End PR Flow</div>
+      <div class="slide-subtitle">From PR creation to document creation — with enhancement touchpoints highlighted</div>
+    </div>
+  </div>
+  <div class="slide-body" style="padding:18px 28px 24px">
+    <div style="display:flex;gap:20px;align-items:flex-start">
+
+      <!-- Main vertical flow -->
+      <div style="flex:1;min-width:0">
+        <div class="vflow">
+
+          <div class="box box-blue" style="font-size:11px;padding:7px 12px;width:100%">Requester fills PR form<div class="box-sub">Type · Topic · Items · Attachments</div></div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+          <div class="box box-gray" style="font-size:11px;padding:7px 12px;width:100%">Submit PR</div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+
+          <div style="display:grid;grid-template-columns:1fr auto;gap:8px;width:100%;align-items:center">
+            <div class="box box-gray" style="font-size:11px;padding:7px 12px">Manager Approval</div>
+            <div class="box box-gray" style="font-size:10px;padding:5px 8px;white-space:nowrap">↩ Return</div>
+          </div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0"><div class="arrow-v-label">Approve</div></div>
+
+          <div class="box box-gray" style="font-size:11px;padding:7px 12px;width:100%">Procurement Review</div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0"><div class="arrow-v-label">Advance</div></div>
+
+          <div class="box box-navy" style="font-size:11px;padding:7px 12px;width:100%">Price Comparison<div class="box-sub">Quotes · Prices · Vendor &amp; doc type per item · Winning vendor · Delivery date &nbsp;<span style="color:#E8518A;font-weight:700">E3 · E5</span></div></div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+
+          <div class="box box-gray" style="font-size:11px;padding:7px 12px;width:100%">Procurement Manager Approval</div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0"><div class="arrow-v-label">Approve</div></div>
+
+          <div class="box box-navy" style="font-size:11px;padding:7px 12px;width:100%">CFO Approval <span style="color:#E8518A;font-size:10px;font-weight:700">← Vendor lock (E3)</span></div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0"><div class="arrow-v-label">Approve</div></div>
+
+          <div class="box box-purple" style="font-size:11px;padding:7px 12px;width:100%">🔒 Vendor Locked — Code · Name · Tax ID frozen</div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+
+          <div class="box box-navy" style="font-size:11px;padding:7px 12px;width:100%">Finance Coding<div class="box-sub">Cost Center · GL or Asset Number &nbsp;<span style="color:#E8518A;font-weight:700">E2</span><br><span style="opacity:0.75">Search from GL Expense Config master</span></div></div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+
+          <div class="box box-gray" style="font-size:11px;padding:7px 12px;width:100%">Status: Waiting Create PO</div>
+          <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+
+          <div class="box box-blue" style="font-size:11px;padding:7px 12px;width:100%">Vendor status? <span style="font-weight:400;font-size:10px">(per line item)</span></div>
+        </div>
+
+        <!-- Vendor branch -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px">
+
+          <!-- Path A: Search & Select -->
+          <div class="vflow">
+            <div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:3px">Search &amp; Select</div>
+            <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+            <div class="box box-green" style="font-size:11px;padding:7px 12px;width:100%">✓ Vendor Confirmed</div>
+            <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+            <div class="box box-blue" style="font-size:11px;padding:7px 12px;width:100%">Document type?</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;margin-top:6px">
+              <div class="vflow">
+                <div class="arrow-v" style="font-size:13px;padding:1px 0"><div class="arrow-v-label">PO</div></div>
+                <div class="box box-amber" style="font-size:10px;padding:6px 8px;width:100%">PO Workflow</div>
+              </div>
+              <div class="vflow">
+                <div class="arrow-v" style="font-size:13px;padding:1px 0"><div class="arrow-v-label" style="white-space:nowrap">Contract / Memo</div></div>
+                <div class="box box-green" style="font-size:10px;padding:6px 8px;width:100%">Document Created</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Path B: Manual Entry -->
+          <div class="vflow">
+            <div style="font-size:10px;color:var(--text-muted);text-align:center;margin-bottom:3px">Manual Entry</div>
+            <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+            <div class="box box-blue" style="font-size:11px;padding:7px 12px;width:100%">Search vendor master by Tax ID</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%;margin-top:6px">
+              <div class="vflow">
+                <div class="arrow-v" style="font-size:13px;padding:1px 0"><div class="arrow-v-label">Match found</div></div>
+                <div class="box box-green" style="font-size:11px;padding:7px 12px;width:100%">✓ Vendor Confirmed</div>
+                <div class="arrow-v" style="font-size:14px;padding:1px 0">↓</div>
+                <div class="box box-blue" style="font-size:11px;padding:7px 12px;width:100%">Document type?</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%;margin-top:5px">
+                  <div class="vflow">
+                    <div class="arrow-v" style="font-size:13px;padding:1px 0">↓</div>
+                    <div class="box box-amber" style="font-size:10px;padding:5px 6px;width:100%">PO Workflow</div>
+                  </div>
+                  <div class="vflow">
+                    <div class="arrow-v" style="font-size:13px;padding:1px 0">↓</div>
+                    <div class="box box-green" style="font-size:10px;padding:5px 6px;width:100%">Doc Created</div>
+                  </div>
+                </div>
+              </div>
+              <div class="vflow">
+                <div class="arrow-v" style="font-size:13px;padding:1px 0"><div class="arrow-v-label">No match</div></div>
+                <div class="box box-red" style="font-size:11px;padding:7px 12px;width:100%">Register vendor</div>
+                <div class="arrow-v" style="font-size:13px;padding:1px 0">↓</div>
+                <div style="font-size:10px;color:var(--text-muted);text-align:center">↑ search again</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Return path (right side) -->
+      <div style="flex:0 0 110px;display:flex;flex-direction:column;align-items:center;padding-top:72px;gap:5px">
+        <div class="box box-gray" style="font-size:10px;padding:6px 8px;width:100%;text-align:center">↩ Back to Requester<div class="box-sub">with comments</div></div>
+        <div style="font-size:10px;color:var(--text-muted);text-align:center;line-height:1.5;margin-top:4px">Manager · Procurement<br>Proc. Mgr · CFO</div>
+        <div style="font-size:16px;color:var(--border);margin-top:2px">↺</div>
+        <div style="font-size:10px;color:var(--text-muted)">Revise &amp; resubmit</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 5 — E1 ══════════════════════ -->
+<div class="slide" id="s5">
+  <div class="slide-header">
+    <div>
+      <div class="slide-label">Slide 3 of 7</div>
+      <div class="slide-title">E1 — Entity Field on PR Form</div>
+      <div class="slide-subtitle">Adding legal entity to the PR so every procurement is correctly attributed to the right company in Bookkeeping</div>
+    </div>
+    <span class="tag tag-pending">Pending</span>
+  </div>
+  <div class="slide-body">
+
+    <!-- Main flow -->
+    <div class="section-label">Flow</div>
+    <div class="hflow mt8" style="margin-bottom:24px">
+      <div class="box box-blue" style="font-size:12px;padding:14px 16px">Requester<br>selects Entity<div class="box-sub">Dropdown on PR form<br>Default: <strong>NTB</strong></div></div>
+      <div class="arrow-h">→</div>
+      <div class="box box-navy" style="font-size:12px;padding:14px 16px">PR Submitted<div class="box-sub">Entity locked<br>Read-only at all stages</div></div>
+      <div class="arrow-h">→</div>
+      <div class="box box-green" style="font-size:12px;padding:14px 16px">All Downstream<br>Documents<div class="box-sub">PO · Contract<br>Memo · Billing</div></div>
+      <div class="arrow-h">→</div>
+      <div class="box box-purple" style="font-size:12px;padding:14px 16px">Bookkeeping<div class="box-sub">Entity included in<br>every accounting file</div></div>
+    </div>
+
+    <!-- Entity options + rules side by side -->
+    <div class="two-col">
+      <div>
+        <div class="section-label">Entity Options</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="box box-navy" style="text-align:left;padding:12px 14px">
+            <div style="font-size:13px;font-weight:800">NTB</div>
+            <div style="font-size:11px;opacity:0.85;font-weight:400;margin-top:2px">Ngern Turbo Co., Ltd.</div>
+            <div style="font-size:10px;margin-top:6px;background:rgba(255,255,255,0.18);border-radius:4px;padding:2px 8px;display:inline-block;font-weight:700">Default</div>
+          </div>
+          <div class="box box-blue" style="text-align:left;padding:12px 14px">
+            <div style="font-size:13px;font-weight:800">NTBX</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px">Full name TBC</div>
+          </div>
+          <div class="box box-blue" style="text-align:left;padding:12px 14px">
+            <div style="font-size:13px;font-weight:800">NTBI</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px">Full name TBC</div>
+          </div>
+          <div class="box box-blue" style="text-align:left;padding:12px 14px">
+            <div style="font-size:13px;font-weight:800">NTBPL</div>
+            <div style="font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px">Full name TBC</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Rules</div>
+        <ul class="bullet-list mt8">
+          <li>Mandatory — PR cannot be submitted without selecting an entity</li>
+          <li>Defaults to <strong>NTB</strong> when form opens</li>
+          <li>Requester can change before submitting</li>
+          <li><strong>Read-only after submission</strong> — locked at all stages</li>
+          <li>Displayed on PR detail and all downstream documents</li>
+          <li>Included in all accounting data sent to Bookkeeping</li>
+        </ul>
+        <div class="callout orange mt12">
+          <div class="callout-icon">⚠</div>
+          <div class="callout-text"><strong>Open:</strong> Full legal names for NTBX, NTBI, NTBPL to be confirmed before build.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 6 — E2 ══════════════════════ -->
+<div class="slide" id="s5b">
+  <div class="slide-header">
+    <div>
+      <div class="slide-label">Slide 4 of 7</div>
+      <div class="slide-title">E2 — Finance Coding Smart Search</div>
+      <div class="slide-subtitle">Cost Center searches Bookkeeping directly · GL Code searches GL Expense Config master (synced from Bookkeeping)</div>
+    </div>
+    <span class="tag tag-pending">Pending</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="two-col">
+      <div>
+        <!-- Cost center flow -->
+        <div class="section-label">Cost Center — 1 per PR</div>
+        <div class="vflow mt8" style="margin-bottom:20px">
+          <div class="box box-purple" style="font-size:12px;padding:12px 16px">Bookkeeping<div class="box-sub">Cost center master — live API call</div></div>
+          <div class="arrow-v">↓<div class="arrow-v-label">direct search</div></div>
+          <div class="box box-blue" style="font-size:12px;padding:12px 16px">Finance Coding — Smart Search<div class="box-sub">Accountant types · Results appear live</div></div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-green" style="font-size:12px;padding:12px 16px">✓ Valid Cost Center Selected<div class="box-sub">Locked on Finance Coding submit</div></div>
+        </div>
+
+        <!-- GL code flow -->
+        <div class="section-label">GL Code — per Expense Line Item</div>
+        <div class="vflow mt8">
+          <div class="box box-navy" style="font-size:12px;padding:12px 16px">GL Expense Config<div class="box-sub">e.g. 5210400010 — ค่าเช่าตึก</div></div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-blue" style="font-size:12px;padding:12px 16px">Finance Coding — Smart Search<div class="box-sub">Search by code or description</div></div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-green" style="font-size:12px;padding:12px 16px">✓ Valid GL Code Selected<div class="box-sub">Locked on Finance Coding submit</div></div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Asset: no change -->
+        <div class="section-label">Asset Number — No Change</div>
+        <div class="vflow mt8" style="margin-bottom:20px">
+          <div class="box box-gray" style="font-size:12px;padding:12px 16px">SAP<div class="box-sub">Generates asset number</div></div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-gray" style="font-size:12px;padding:12px 16px">Accountant types manually<div class="box-sub">Free text — unchanged</div></div>
+        </div>
+
+        <div class="section-label">Rules</div>
+        <ul class="bullet-list mt8">
+          <li>Free-text entry is <strong>not allowed</strong> for cost center and GL code</li>
+          <li>Cost center — searched <strong>directly from Bookkeeping</strong> (live API)</li>
+          <li>GL code — searched from <strong>GL Expense Config</strong> master (synced from Bookkeeping)</li>
+          <li>Search results show <strong>GL code + expense description</strong></li>
+          <li>Both fields locked after Finance Coding is submitted</li>
+          <li>Asset number remains free text — SAP still generates it</li>
+        </ul>
+
+        <div class="callout blue mt12">
+          <div class="callout-icon">ℹ</div>
+          <div class="callout-text"><strong>Cost center</strong> — live search against Bookkeeping directly. &nbsp;<strong>GL code</strong> — search against GL Expense Config master in this system (GL codes synced from Bookkeeping; expense descriptions managed locally).</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 6 — E3 ══════════════════════ -->
+<div class="slide" id="s6">
+  <div class="slide-header">
+    <div>
+      <div class="slide-label">Slide 5 of 7</div>
+      <div class="slide-title">E3 — Vendor Lock After CFO Approval</div>
+      <div class="slide-subtitle">Vendor identity frozen at CFO approval · Pre-populated and read-only on all documents</div>
+    </div>
+    <span class="tag tag-pending">Pending</span>
+  </div>
+  <div class="slide-body">
+    <div class="col-6040">
+
+      <div>
+        <!-- Two input modes (built) -->
+        <div class="section-label">Background — Vendor Input Modes (Already Built)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 16px">
+          <div class="vflow">
+            <div class="box box-green" style="font-size:11px">Mode A<br>Search &amp; Select<div class="box-sub">Vendor in master</div></div>
+            <div class="arrow-v">↓</div>
+            <div class="box box-green" style="font-size:11px">Code + Name + Tax ID<br>confirmed from master</div>
+          </div>
+          <div class="vflow">
+            <div class="box box-amber" style="font-size:11px">Mode B<br>Manual Entry<div class="box-sub">Vendor not in master</div></div>
+            <div class="arrow-v">↓</div>
+            <div class="box box-amber" style="font-size:11px">Name + Tax ID<br>stored as entered<div class="box-sub">Pending Registration badge</div></div>
+          </div>
+        </div>
+
+        <!-- Lock flow -->
+        <div class="section-label">What E3 Adds — Lock at CFO Approval</div>
+        <div class="vflow mt8">
+          <div class="box box-navy" style="font-size:11px">CFO clicks Approve</div>
+          <div class="arrow-v">↓</div>
+          <div class="lock-banner">🔒 Vendor fields frozen — Name · Tax ID · Input Mode (+ Code for Mode A)</div>
+          <div class="arrow-v">↓</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+            <div class="box box-green" style="font-size:11px">Mode A<br>Code + Name locked<div class="box-sub">PO creation available</div></div>
+            <div class="box box-amber" style="font-size:11px">Mode B<br>Name + Tax ID locked<div class="box-sub">Vendor code still pending<br>Resolved via E4</div></div>
+          </div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-gray" style="font-size:11px;width:100%">All Documents (PO / Contract / Memo / Online Payment)<div class="box-sub">Vendor field pre-populated · Read-only · No edit control rendered</div></div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div>
+        <div class="section-label">Vendor Field — Lifecycle</div>
+        <div class="timeline mt8">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot built">✓</div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-title">Price Comparison</div><div class="tl-desc">Procurement selects vendor (Mode A or B). Can change anytime until CFO approves.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot built">✓</div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-title">Proc. Manager Approval</div><div class="tl-desc">Vendor visible but not editable by approver. Procurement can still change.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot lock">🔒</div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-title">CFO Approval <span style="color:var(--accent)">← Lock event</span></div>
+              <div class="tl-desc">All vendor fields frozen. No change without returning to Price Comparison and re-approval.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot pending">—</div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-title">Finance Coding</div><div class="tl-desc">Vendor visible, read-only.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot pending">—</div><div class="tl-line"></div></div>
+            <div class="tl-content"><div class="tl-title">Waiting Create PO</div><div class="tl-desc">Mode B: vendor code confirmed via E4 before PO creation.</div></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot pending">—</div></div>
+            <div class="tl-content"><div class="tl-title">Document Creation</div><div class="tl-desc">Vendor pre-populated from confirmed code. Not editable on form.</div></div>
+          </div>
+        </div>
+
+        <div class="section-label mt12">Rules</div>
+        <ul class="bullet-list mt8">
+          <li>Vendor fields become <strong>read-only immediately after CFO approves</strong></li>
+          <li>Lock persists through Finance Coding, Waiting Create PO, and document creation</li>
+          <li>On all document forms, vendor is <strong>pre-populated and read-only</strong> — no edit control rendered</li>
+          <li>To correct a vendor after lock, PR must be returned to Price Comparison and re-approved</li>
+          <li>Mode B vendor code resolved via E4 before PO creation</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 7 — E4 ══════════════════════ -->
+<div class="slide" id="s7">
+  <div class="slide-header">
+    <div>
+      <div class="slide-label">Slide 6 of 7</div>
+      <div class="slide-title">E4 — Vendor Code Confirmation (Manual Entry Path)</div>
+      <div class="slide-subtitle">Tax ID match required before PO creation · Vendor code included in GR and Billing transactions to Bookkeeping</div>
+    </div>
+    <span class="tag tag-pending">Pending</span>
+  </div>
+  <div class="slide-body">
+    <div class="two-col">
+
+      <!-- Left: full flow -->
+      <div>
+        <div class="section-label">Vendor Code Confirmation Flow</div>
+        <div class="vflow mt8">
+          <div class="box box-amber" style="font-size:11px">Manual Entry Vendor<br>at Waiting Create PO<div class="box-sub">Name + Tax ID only — no vendor code</div></div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-blue" style="font-size:11px">Procurement searches<br>Vendor Master by Tax ID</div>
+          <div class="arrow-v">↓</div>
+          <div class="branch-row">
+            <div class="vflow">
+              <div class="box box-green" style="font-size:11px">✓ Match found<div class="box-sub">Tax ID matched<br>Name variations OK</div></div>
+              <div class="arrow-v">↓</div>
+              <div class="box box-green" style="font-size:11px">Vendor code<br>confirmed &amp; stored<div class="box-sub">Badge removed</div></div>
+              <div class="arrow-v">↓</div>
+              <div class="box box-navy" style="font-size:11px">PO creation<br>available</div>
+            </div>
+            <div class="vflow">
+              <div class="box box-red" style="font-size:11px">✗ No match<div class="box-sub">Vendor not in master</div></div>
+              <div class="arrow-v">↓</div>
+              <div class="box box-orange" style="font-size:11px">Register vendor in<br>Vendor Management</div>
+              <div class="arrow-v">↓<div class="arrow-v-label">then search again</div></div>
+              <div class="box box-blue" style="font-size:11px">Search master<br>by Tax ID</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: downstream + rules -->
+      <div>
+        <div class="section-label">Downstream — Bookkeeping</div>
+        <div class="vflow mt8" style="margin-bottom:16px">
+          <div class="box box-navy" style="font-size:11px">Vendor Code Confirmed</div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-gray" style="font-size:11px">PO Created</div>
+          <div class="arrow-v">↓</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+            <div class="vflow">
+              <div class="box box-green" style="font-size:11px">GR Confirmation<div class="box-sub">Accounting tx<br>→ Bookkeeping</div></div>
+            </div>
+            <div class="vflow">
+              <div class="box box-green" style="font-size:11px">Billing Approval<div class="box-sub">Accounting tx<br>→ Bookkeeping</div></div>
+            </div>
+          </div>
+          <div class="arrow-v">↓</div>
+          <div class="box box-purple" style="font-size:11px">Bookkeeping<div class="box-sub">Vendor code included<br>in both transactions</div></div>
+        </div>
+
+        <div class="section-label">Key Rules</div>
+        <ul class="bullet-list mt8">
+          <li><strong>PO blocked</strong> for Manual Entry vendors until vendor code confirmed</li>
+          <li><strong>Contract / Memo / Online Payment</strong> not blocked — no vendor code required</li>
+          <li>Confirmation is <strong>per line item</strong> — can create other docs while one is pending</li>
+          <li>Match by <strong>Tax ID only</strong> — name variations are acceptable</li>
+        </ul>
+
+        <div class="callout orange mt12">
+          <div class="callout-icon">⚠</div>
+          <div class="callout-text"><strong>Open:</strong> Should Contract/Memo also require vendor code confirmation before GR/Billing? Needs decision.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════ SLIDE 8 — E5 + DECISIONS ══════════════════════ -->
+<div class="slide" id="s8">
+  <div class="slide-header">
+    <div>
+      <div class="slide-label">Slide 7 of 7</div>
+      <div class="slide-title">E5 — Expected Delivery Date per Line Item</div>
+      <div class="slide-subtitle">Delivery commitment captured at Price Comparison · Locked at PO creation</div>
+    </div>
+  </div>
+  <div class="slide-body">
+    <div class="two-col">
+
+      <!-- E5 -->
+      <div class="flow-card">
+        <div class="flow-card-header">
+          <div><div class="flow-card-eyebrow">E5 · Price Comparison</div><div class="flow-card-title">Expected Delivery Date per Line Item</div></div>
+          <span class="tag tag-pending">Pending</span>
+        </div>
+        <div class="flow-card-body">
+          <div class="vflow">
+            <div class="box box-navy" style="font-size:11px">Price Comparison<div class="box-sub">Procurement selects winning vendor</div></div>
+            <div class="arrow-v">↓</div>
+            <div class="box box-blue" style="font-size:11px">Expected Delivery Date field appears<div class="box-sub">Per line item · Mandatory · Calendar picker</div></div>
+            <div class="arrow-v">↓</div>
+            <div class="box box-gray" style="font-size:11px">Editable through Finance Coding<br>and Waiting Create PO<div class="box-sub">Procurement can update if vendor revises</div></div>
+            <div class="arrow-v">↓</div>
+            <div class="box box-purple" style="font-size:11px">🔒 PO Created → Date locked<div class="box-sub">Pre-populated on PO · Read-only</div></div>
+            <div class="arrow-v">↓</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+              <div class="box box-green" style="font-size:11px">PO Detail Page<div class="box-sub">Visible</div></div>
+              <div class="box box-green" style="font-size:11px">GR Recording Screen<div class="box-sub">Visible — warehouse knows expected date</div></div>
+            </div>
+          </div>
+          <div class="callout blue mt12">
+            <div class="callout-icon">ℹ</div>
+            <div class="callout-text">One date per line item — different vendors can have different delivery dates on the same PR.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decisions -->
+      <div>
+        <div class="section-label">Rules</div>
+        <ul class="bullet-list mt8">
+          <li>Field appears per line item when a <strong>winning vendor is selected</strong> at Price Comparison</li>
+          <li><strong>Mandatory</strong> — Price Comparison cannot be submitted without it</li>
+          <li>One date per line item — different items can have different dates</li>
+          <li>Editable by Procurement through Finance Coding and Waiting Create PO</li>
+          <li><strong>Locked when the PO is created</strong> — pre-populated on PO as read-only</li>
+          <li>Visible on PO detail page and GR recording screen</li>
+          <li>Not shown for line items with no winning vendor selected</li>
+        </ul>
+
+        <div class="callout orange mt12">
+          <div class="callout-icon">⚠</div>
+          <div class="callout-text">
+            <strong>Open items for today:</strong><br>
+            1. Full legal names for NTBX, NTBI, NTBPL (E1)<br>
+            2. Should Contract/Memo require vendor code before GR/Billing? (E4)
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const slides = document.querySelectorAll('.slide[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3, rootMargin: '-60px 0px 0px 0px' });
+slides.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

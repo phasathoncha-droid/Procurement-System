@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Procurement System — Product Strategy Presentation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary:        #1B3068;
+  --primary-dark:   #142451;
+  --primary-light:  #2A4A99;
+  --primary-bg:     #EEF4FF;
+  --accent:         #E8518A;
+  --accent-dark:    #C93D72;
+  --success:        #10B981;
+  --success-light:  #D1FAE5;
+  --danger:         #EF4444;
+  --danger-light:   #FEE2E2;
+  --warning:        #F59E0B;
+  --warning-light:  #FEF3C7;
+  --bg-canvas:      #F0F4F9;
+  --bg-primary:     #FFFFFF;
+  --bg-secondary:   #F8FAFC;
+  --border:         #CBD5E1;
+  --border-light:   #EEF2F7;
+  --text-primary:   #0F1F42;
+  --text-secondary: #4B5E85;
+  --text-muted:     #8799B8;
+  --hover-bg:       #EEF4FF;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Thai', sans-serif;
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Slide deck layout ── */
+.deck {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+/* ── Top nav bar ── */
+.deck-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 52px;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.deck-nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-mark {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: #fff;
+}
+.nav-brand-text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+.nav-tag {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 100px;
+  letter-spacing: 0.3px;
+}
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+.nav-link {
+  color: rgba(255,255,255,0.7);
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.nav-link:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.nav-link.active { background: rgba(255,255,255,0.18); color: #fff; font-weight: 600; }
+.nav-meta {
+  color: rgba(255,255,255,0.55);
+  font-size: 11px;
+}
+
+/* ── Main content area ── */
+.deck-body {
+  padding-top: 76px;
+}
+
+/* ── Slide ── */
+.slide {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(27,48,104,.08), 0 8px 24px rgba(27,48,104,.06);
+  margin-bottom: 32px;
+  overflow: hidden;
+  scroll-margin-top: 76px;
+}
+
+/* ── Slide header band ── */
+.slide-header {
+  padding: 28px 36px 22px;
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+.slide-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.slide-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+.slide-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.slide-phase-tag {
+  position: absolute;
+  top: 28px; right: 36px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.tag-now  { background: #DBEAFE; color: #1D4ED8; }
+.tag-p1   { background: #D1FAE5; color: #065F46; }
+.tag-p2   { background: #FEF3C7; color: #92400E; }
+.tag-p3   { background: #EDE9FE; color: #5B21B6; }
+.tag-p4   { background: #FCE7F3; color: #9D174D; }
+
+/* ── Slide body ── */
+.slide-body {
+  padding: 28px 36px 32px;
+}
+
+/* ── Two-col layout ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+.four-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+/* ── Info box ── */
+.info-box {
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 16px 18px;
+  background: var(--bg-secondary);
+}
+.info-box-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.info-box p, .info-box li {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.info-box ul {
+  list-style: none;
+  padding: 0;
+}
+.info-box ul li::before {
+  content: '→';
+  color: var(--primary);
+  margin-right: 6px;
+  font-weight: 600;
+}
+
+/* ── Accent box (objective highlight) ── */
+.accent-box {
+  background: linear-gradient(135deg, #1B3068 0%, #2A4A99 100%);
+  border-radius: 12px;
+  padding: 20px 24px;
+  color: #fff;
+}
+.accent-box .abox-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 8px;
+}
+.accent-box .abox-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #fff;
+}
+.accent-box .abox-note {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  margin-top: 8px;
+}
+
+/* ── Pink accent callout ── */
+.accent-callout {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: 12px;
+  padding: 18px 22px;
+  color: #fff;
+}
+.accent-callout .ac-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 6px;
+}
+.accent-callout .ac-text {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* ── North star big quote ── */
+.north-star {
+  text-align: center;
+  padding: 32px 48px;
+  border: 2px solid var(--primary-bg);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  margin-bottom: 24px;
+}
+.north-star blockquote {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1.4;
+  font-style: italic;
+}
+.north-star cite {
+  display: block;
+  font-size: 12px;
+  font-style: normal;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+/* ── Phase roadmap row ── */
+.roadmap-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.roadmap-phase {
+  padding: 20px 18px;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+.roadmap-phase:last-child { border-right: none; }
+.rp-num {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.rp-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.rp-sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.rp-status {
+  margin-top: 10px;
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+.phase-p1 { background: #F0FDF4; }
+.phase-p1 .rp-num { color: #10B981; }
+.phase-p1 .rp-status { background: var(--success-light); color: #065F46; }
+.phase-p2 { background: #FFFBEB; }
+.phase-p2 .rp-num { color: #F59E0B; }
+.phase-p2 .rp-status { background: var(--warning-light); color: #92400E; }
+.phase-p3 { background: #F5F3FF; }
+.phase-p3 .rp-num { color: #7C3AED; }
+.phase-p3 .rp-status { background: #EDE9FE; color: #5B21B6; }
+.phase-p4 { background: #FFF1F2; }
+.phase-p4 .rp-num { color: var(--accent); }
+.phase-p4 .rp-status { background: #FCE7F3; color: #9D174D; }
+
+/* ── Feature item list ── */
+.feature-list {
+  list-style: none;
+  padding: 0;
+}
+.feature-list li {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.feature-list li:last-child { border-bottom: none; }
+.feature-list li .fi-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+.fi-built  { background: var(--success-light); color: #065F46; }
+.fi-todo   { background: var(--primary-bg); color: var(--primary); }
+.fi-risk   { background: var(--warning-light); color: #92400E; }
+.fi-text { color: var(--text-primary); flex: 1; }
+.fi-text .fi-note { color: var(--text-muted); font-size: 11px; }
+
+/* ── Dev spec table ── */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.spec-table th {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+.spec-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+  color: var(--text-primary);
+}
+.spec-table tr:last-child td { border-bottom: none; }
+.spec-table tr:hover td { background: var(--hover-bg); }
+.spec-table .td-code {
+  font-family: 'Plus Jakarta Sans', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+}
+.spec-table .td-muted { color: var(--text-muted); font-size: 11px; }
+.spec-table .req-yes  { color: var(--success); font-weight: 600; }
+.spec-table .req-no   { color: var(--text-muted); }
+
+/* ── Status machine ── */
+.status-machine {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.sm-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.sm-node {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 110px;
+}
+.sm-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  color: var(--text-muted);
+  font-size: 16px;
+  padding-top: 12px;
+  flex-shrink: 0;
+}
+.sm-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  text-align: center;
+}
+.sn-draft      { background: #F1F5F9; color: #475569; }
+.sn-pending    { background: var(--warning-light); color: #92400E; }
+.sn-approved   { background: var(--success-light); color: #065F46; }
+.sn-rejected   { background: var(--danger-light); color: #991B1B; }
+.sn-confirmed  { background: var(--success-light); color: #065F46; }
+.sn-reversed   { background: #F1F5F9; color: #475569; }
+.sn-reversal   { background: var(--danger-light); color: #991B1B; }
+.sn-waiting    { background: #DBEAFE; color: #1D4ED8; }
+
+/* ── Rule chips ── */
+.rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rule-chip {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border: 1px solid #C7D8FF;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.rule-chip.danger  { background: var(--danger-light); color: #991B1B; border-color: #FECACA; }
+.rule-chip.success { background: var(--success-light); color: #065F46; border-color: #A7F3D0; }
+.rule-chip.warning { background: var(--warning-light); color: #92400E; border-color: #FDE68A; }
+
+/* ── Divider ── */
+.slide-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 24px 0;
+}
+
+/* ── Who-it-impacts row ── */
+.audience-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.audience-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ab-procurement { background: #FFF7ED; color: #C2410C; }
+.ab-accounting  { background: #ECFEFF; color: #0E7490; }
+.ab-requester   { background: #EFF6FF; color: #1D4ED8; }
+.ab-cfo         { background: #F5F3FF; color: #6D28D9; }
+.ab-vendor      { background: #FCE7F3; color: #9D174D; }
+.ab-dev         { background: #F1F5F9; color: #334155; }
+.ab-mgr         { background: #FEF3C7; color: #92400E; }
+
+/* ── Gap indicator table ── */
+.gap-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.gap-table th {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
+}
+.gap-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+}
+.gap-table tr:last-child td { border-bottom: none; }
+.gap-table .col-mod { font-weight: 600; color: var(--primary); }
+.gap-table .col-exists { color: var(--text-secondary); font-size: 12px; }
+.gap-table .col-gap { color: var(--danger); font-size: 12px; }
+.gt-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ── Integration diagram ── */
+.int-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 8px 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+.int-node {
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-align: center;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+.int-node .in-title {
+  font-size: 12px;
+  font-weight: 700;
+}
+.int-node .in-sub {
+  font-size: 10px;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.in-proc    { background: var(--primary-bg); border: 2px solid var(--primary); color: var(--primary); }
+.in-s3      { background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; }
+.in-book    { background: var(--success-light); border: 2px solid var(--success); color: #065F46; }
+.in-sap     { background: #F1F5F9; border: 2px dashed var(--border); color: var(--text-muted); }
+.in-vendor  { background: #FCE7F3; border: 2px solid var(--accent); color: #9D174D; }
+.int-arr {
+  font-size: 18px;
+  color: var(--text-muted);
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+.int-arr-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.int-arr-label .arr-icon { font-size: 16px; color: var(--text-secondary); }
+.int-arr-label .arr-text { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Risk table ── */
+.risk-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 2fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  align-items: start;
+}
+.risk-row:last-child { border-bottom: none; }
+.risk-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.risk-impact {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  text-align: center;
+  align-self: start;
+}
+.risk-high    { background: var(--danger-light); color: #991B1B; }
+.risk-med     { background: var(--warning-light); color: #92400E; }
+.risk-low     { background: var(--success-light); color: #065F46; }
+.risk-mit { font-size: 12px; color: var(--text-secondary); }
+
+/* ── Summary stat cards ── */
+.stat-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 16px 18px;
+  text-align: center;
+}
+.stat-num {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stat-navy  { color: var(--primary); }
+.stat-green { color: var(--success); }
+.stat-amber { color: var(--warning); }
+.stat-pink  { color: var(--accent); }
+
+/* ── Enhancement E-tag ── */
+.e-tag {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Scope out-of box ── */
+.oos-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.oos-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.oos-item::before {
+  content: '✕';
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* ── Progress indicator (slide number) ── */
+.slide-counter {
+  float: right;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Footer ── */
+.deck-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Print / full-screen helper ── */
+@media print {
+  .deck-nav { display: none; }
+  .deck-body { padding-top: 16px; }
+  .slide { page-break-inside: avoid; margin-bottom: 16px; box-shadow: none; border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── TOP NAV ─── -->
+<nav class="deck-nav">
+  <div class="nav-brand">
+    <div class="nav-logo-mark">P</div>
+    <span class="nav-brand-text">Procurement System</span>
+    <span class="nav-tag">NTB</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link active" href="#slide-context">Context</a>
+    <a class="nav-link" href="#slide-current">Current State</a>
+    <a class="nav-link" href="#slide-roadmap">Roadmap</a>
+    <a class="nav-link" href="#slide-phase1">Phase 1</a>
+    <a class="nav-link" href="#slide-phase2">Phase 2</a>
+    <a class="nav-link" href="#slide-phase3">Phase 3</a>
+    <a class="nav-link" href="#slide-phase4">Phase 4</a>
+    <a class="nav-link" href="#slide-integration">Integration</a>
+    <a class="nav-link" href="#slide-risks">Risks</a>
+  </div>
+  <div class="nav-meta">Phasathon C. &nbsp;·&nbsp; 2026-06-08</div>
+</nav>
+
+<!-- ─── DECK BODY ─── -->
+<div class="deck">
+<div class="deck-body">
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 1 — TITLE / CONTEXT
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-context">
+  <div class="slide-header">
+    <div class="slide-label">Product Strategy — June 2026</div>
+    <div class="slide-title">Ngern Turbo Procurement System</div>
+    <div class="slide-subtitle">Replacing SAP PO module &amp; manual procurement processes with a purpose-built internal platform</div>
+    <span class="slide-counter">1 / 9</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="north-star">
+      <blockquote>"Every procurement transaction — from request to payment recording — lives in one system. SAP is completely off the critical path."</blockquote>
+      <cite>North Star goal of this system</cite>
+    </div>
+
+    <div class="four-col">
+      <div class="stat-card">
+        <div class="stat-num stat-navy">5</div>
+        <div class="stat-label">Core Modules</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num stat-green">3</div>
+        <div class="stat-label">Phases Planned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num stat-amber">4</div>
+        <div class="stat-label">Legal Entities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num stat-pink">0</div>
+        <div class="stat-label">SAP on Critical Path<br><span style="font-size:9px;color:var(--text-muted)">(target state)</span></div>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-label">End-to-End Flow (in scope)</div>
+        <ul class="feature-list">
+          <li><div class="fi-icon fi-built">✓</div><div class="fi-text">Purchase Request (PR) — creation, approval chain, price comparison, finance coding</div></li>
+          <li><div class="fi-icon fi-built">✓</div><div class="fi-text">Purchase Order (PO) — creates PO / Contract / Memo / Online Payment from approved PR</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Good Receipt (GR) — standalone module with Bookkeeping posting</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Billing / Invoice — standalone module with Accounting flow + Bookkeeping posting</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Vendor Portal — vendor self-service invoice submission</div></li>
+        </ul>
+      </div>
+      <div>
+        <div class="section-label">Out of Scope (this system)</div>
+        <ul class="oos-list">
+          <li class="oos-item">WHT (Withholding Tax) generation</li>
+          <li class="oos-item">e-Tax invoice integration</li>
+          <li class="oos-item">Payment execution</li>
+          <li class="oos-item">Asset number generation (remains in SAP)</li>
+        </ul>
+        <div style="height:12px"></div>
+        <div class="section-label">Affected Roles</div>
+        <div class="audience-row">
+          <span class="audience-badge ab-requester">Requester</span>
+          <span class="audience-badge ab-procurement">Procurement</span>
+          <span class="audience-badge ab-mgr">Proc. Manager</span>
+          <span class="audience-badge ab-cfo">CFO</span>
+          <span class="audience-badge ab-accounting">Accounting</span>
+          <span class="audience-badge ab-vendor">Vendor</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 2 — CURRENT STATE & GAPS
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-current">
+  <div class="slide-header">
+    <div class="slide-label">Where We Are Now</div>
+    <div class="slide-title">Current State &amp; Gaps</div>
+    <div class="slide-subtitle">What exists in the system today and what is missing before we can retire SAP</div>
+    <span class="slide-counter">2 / 9</span>
+    <span class="slide-phase-tag tag-now">As of June 2026</span>
+  </div>
+  <div class="slide-body">
+
+    <table class="gap-table">
+      <thead>
+        <tr>
+          <th style="width:120px">Module</th>
+          <th>What Exists Today</th>
+          <th>Critical Gap</th>
+          <th style="width:90px">Phase</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="col-mod">PR</td>
+          <td class="col-exists">Full flow built: creation, approval chain (Manager → Proc → Price Comparison → Proc Mgr → CFO → Finance Coding), vendor free-text / select (UI only)</td>
+          <td class="col-gap">Entity field missing; finance coding not master-driven; vendor linkage enforcement (E2/E3/E4) not built</td>
+          <td><span class="gt-pill" style="background:#D1FAE5;color:#065F46">Phase 1</span></td>
+        </tr>
+        <tr>
+          <td class="col-mod">PO</td>
+          <td class="col-exists">Creates PO, Contract, Memo, Online Payment — items pre-filled from PR. SAP PO number entered manually → status instantly "Created"</td>
+          <td class="col-gap">No in-system approval; PO number from SAP; no cancellation flow</td>
+          <td><span class="gt-pill" style="background:#EDE9FE;color:#5B21B6">Phase 3</span></td>
+        </tr>
+        <tr>
+          <td class="col-mod">GR</td>
+          <td class="col-exists">Inside PO page: qty received, GR date, remark, attachment, partial receipt</td>
+          <td class="col-gap">No Bookkeeping posting; no reversal; not a standalone module; no delivery note field</td>
+          <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td class="col-mod">Billing</td>
+          <td class="col-exists">Inside PO page: invoice date, amount, attachment, remark, partial billing</td>
+          <td class="col-gap">No invoice number field; Accounting outside system (email); no reversal; no Bookkeeping posting</td>
+          <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">Phase 2</span></td>
+        </tr>
+        <tr>
+          <td class="col-mod">Vendor Mgmt</td>
+          <td class="col-exists">Full scope, built</td>
+          <td class="col-gap">—</td>
+          <td><span class="gt-pill" style="background:#D1FAE5;color:#065F46">Done</span></td>
+        </tr>
+        <tr>
+          <td class="col-mod">Bookkeeping</td>
+          <td class="col-exists">Not started — S3 upload pattern agreed</td>
+          <td class="col-gap">File format TBD with Bookkeeping team — longest lead-time item</td>
+          <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">Phase 2</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">What SAP Is Still Doing Today</div>
+    <div class="three-col">
+      <div class="info-box">
+        <div class="info-box-title">PO Approval</div>
+        <p>Currently done in SAP. Replacement: build approval process in this system in Phase 3.</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">PO Number Generation</div>
+        <p>Manually entered from SAP today. System will generate its own in Phase 3: <strong>PO-{BE year}/{5-digit seq}</strong> e.g. PO-2569/00001</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Asset Number</div>
+        <p>Remains in SAP permanently (current plan). Accountant enters asset number from SAP as free text.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 3 — ROADMAP OVERVIEW
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-roadmap">
+  <div class="slide-header">
+    <div class="slide-label">Strategy</div>
+    <div class="slide-title">Four-Phase Roadmap</div>
+    <div class="slide-subtitle">Each phase has a clear exit criterion before the next can begin — no shortcuts</div>
+    <span class="slide-counter">3 / 9</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="roadmap-row">
+      <div class="roadmap-phase phase-p1">
+        <div class="rp-num">1</div>
+        <div class="rp-title">Make the System Reliable</div>
+        <div class="rp-sub">Fix PR data quality. Enforce vendor linkage. Make every PR record ready for Bookkeeping.</div>
+        <span class="rp-status">Highest Priority</span>
+      </div>
+      <div class="roadmap-phase phase-p2">
+        <div class="rp-num">2</div>
+        <div class="rp-title">Complete the Accounting Pipeline</div>
+        <div class="rp-sub">GR and Billing become standalone modules that post reliably to Bookkeeping via S3.</div>
+        <span class="rp-status">After Phase 1</span>
+      </div>
+      <div class="roadmap-phase phase-p3">
+        <div class="rp-num">3</div>
+        <div class="rp-title">Remove SAP from PO Step</div>
+        <div class="rp-sub">Generate and approve POs entirely inside this system. SAP retirement milestone.</div>
+        <span class="rp-status">After Phase 2</span>
+      </div>
+      <div class="roadmap-phase phase-p4">
+        <div class="rp-num">4</div>
+        <div class="rp-title">Vendor Self-Service</div>
+        <div class="rp-sub">Vendor portal billing. Reduce Procurement workload. Vendors submit invoices directly.</div>
+        <span class="rp-status">Future</span>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="accent-box">
+        <div class="abox-label">Why this sequencing matters</div>
+        <div class="abox-text">Phase 2 must prove the accounting backbone works before Phase 3 removes SAP from the PO step. We cannot retire SAP if GR and Billing are not posting reliably to Bookkeeping first.</div>
+        <div class="abox-note">Phase 3 will not start until Phase 2 exit criterion is met.</div>
+      </div>
+      <div class="accent-callout">
+        <div class="ac-label">SAP Parallel Run</div>
+        <div class="ac-text">The system continues to accept a manually entered SAP PO number through Phase 1 and Phase 2. The switch to internal PO number generation is a deliberate, coordinated cutover in Phase 3 — not forced. Both systems run in parallel until confidence is established.</div>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">Phase exit criteria</div>
+    <div class="three-col">
+      <div class="info-box">
+        <div class="info-box-title">✓ Phase 1 Done When</div>
+        <p>All PRs carry a valid entity tag and master-driven finance codes. Vendor on every document is traceable back to the approved vendor at Price Comparison.</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">✓ Phase 2 Done When</div>
+        <p>A full cycle — PR → PO → GR → Billing → file posted to Bookkeeping — runs end-to-end with no manual handoff. Accounting records are complete and auditable without SAP.</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">✓ Phase 3 Done When</div>
+        <p>First PO is created, approved, and issued inside this system with no SAP step. SAP is no longer on the critical path for procurement.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 4 — PHASE 1: PR CORRECTIONS + VENDOR LINKAGE
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-phase1">
+  <div class="slide-header">
+    <div class="slide-label">Phase 1 — Make the System Reliable</div>
+    <div class="slide-title">PR Corrections &amp; Vendor Linkage</div>
+    <div class="slide-subtitle">Fix the foundation before building the accounting pipeline on top of it</div>
+    <span class="slide-counter">4 / 9</span>
+    <span class="slide-phase-tag tag-p1">Highest Priority</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="two-col">
+      <div class="accent-box" style="margin-bottom:0">
+        <div class="abox-label">Business Objective</div>
+        <div class="abox-text">Every PR that enters the system today may be missing its legal entity tag or have finance codes entered as free text. We cannot build reliable Bookkeeping integration on top of that. Phase 1 fixes the data before we build on it.</div>
+        <div class="abox-note">Affects: Procurement, Finance Coding (Accounting), CFO</div>
+      </div>
+      <div>
+        <div class="section-label">Audience Impact</div>
+        <div class="audience-row">
+          <span class="audience-badge ab-requester">Requester fills Entity</span>
+          <span class="audience-badge ab-accounting">Accounting uses master search</span>
+          <span class="audience-badge ab-procurement">Procurement locks vendor at Price Comparison</span>
+          <span class="audience-badge ab-cfo">CFO approval freezes vendor</span>
+        </div>
+        <div style="height:14px"></div>
+        <div class="section-label">Phase 1 sub-tracks</div>
+        <div class="rule-chips">
+          <span class="rule-chip">1A — PR Corrections (Foundation)</span>
+          <span class="rule-chip">1B — PR Vendor Linkage (Enhancement)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">1A — PR Corrections (must fix before anything else)</div>
+    <div class="two-col">
+      <div>
+        <ul class="feature-list">
+          <li>
+            <div class="fi-icon fi-todo">1</div>
+            <div class="fi-text">
+              <strong>Entity field on PR creation</strong><br>
+              Requester selects: NTB / NTBX / NTBI / NTBPL. Defaults to NTB. Passed to Bookkeeping in all accounting files.
+              <div class="fi-note">Field: dropdown, required, defaults NTB · Lock: editable until PR submitted</div>
+            </div>
+          </li>
+          <li>
+            <div class="fi-icon fi-todo">2</div>
+            <div class="fi-text">
+              <strong>Finance Coding — master-driven</strong><br>
+              Cost center and Expense GL sourced from Bookkeeping master via smart search. Asset number stays free text (from SAP).
+              <div class="fi-note">API: real-time search or periodic sync (TBD with Bookkeeping) · Current free text must be migrated</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Why these are blockers, not just enhancements</div>
+        <p>The Bookkeeping integration (Phase 2) will generate structured accounting files per transaction. Those files <strong>must contain a valid legal entity</strong> and <strong>correct GL / cost center codes</strong>. If PR data is wrong, accounting files will be wrong — and fixing them retroactively is far more expensive than fixing the source.</p>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">1B — Vendor Linkage Enhancements (E1–E5)</div>
+    <ul class="feature-list">
+      <li>
+        <div class="fi-icon fi-todo"><span class="e-tag" style="margin:0;font-size:9px">E1</span></div>
+        <div class="fi-text">
+          <strong>Two vendor input modes at Price Comparison</strong> — Search &amp; Select (vendor in master → locks vendor code + tax ID immediately) OR Manual Entry (vendor not yet in master → records name + tax ID as unconfirmed, flags as "Pending Vendor Registration")
+          <div class="fi-note">Field: mode toggle on each line item · UI already built — enforcement is the gap</div>
+        </div>
+      </li>
+      <li>
+        <div class="fi-icon fi-todo"><span class="e-tag" style="margin:0;font-size:9px">E2</span></div>
+        <div class="fi-text">
+          <strong>Vendor identity frozen after CFO approval</strong> — winning vendor per line item cannot change after CFO approves. Vendor code, tax ID, and name are all locked.
+          <div class="fi-note">Lock applies to: vendor code, tax ID, vendor name, expected delivery date</div>
+        </div>
+      </li>
+      <li>
+        <div class="fi-icon fi-todo"><span class="e-tag" style="margin:0;font-size:9px">E3</span></div>
+        <div class="fi-text">
+          <strong>Vendor match check at Waiting Create PO (manual entry path only)</strong> — Procurement searches vendor master by tax ID before document creation. Match on tax ID only (name variations acceptable). No match → register vendor first. Skip for master-selected vendors.
+          <div class="fi-note">Gate: blocks document creation until tax ID match confirmed · Only for Manual Entry path</div>
+        </div>
+      </li>
+      <li>
+        <div class="fi-icon fi-todo"><span class="e-tag" style="margin:0;font-size:9px">E4</span></div>
+        <div class="fi-text">
+          <strong>Vendor field on document is read-only</strong> — pre-populated from confirmed vendor code at PO / Contract / Memo / Online Payment creation. Not editable.
+        </div>
+      </li>
+      <li>
+        <div class="fi-icon fi-todo"><span class="e-tag" style="margin:0;font-size:9px">E5</span></div>
+        <div class="fi-text">
+          <strong>Expected delivery date per winning vendor at Price Comparison</strong> — when Procurement selects the winning vendor per line item, they must also fill in the Expected Delivery Date. One date per line item. Mandatory before PR can advance past Price Comparison.
+          <div class="fi-note">Lock: frozen after CFO approval (same lock as E2) · Pre-populated on PO creation (read-only) · Visible on GR screen</div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">Developer — Key Business Rules</div>
+    <div class="rule-chips">
+      <span class="rule-chip">Entity: required, defaults NTB, passed to all Bookkeeping files</span>
+      <span class="rule-chip">Cost center: one per PR (not per line item)</span>
+      <span class="rule-chip">GL code: per line item (Expense only)</span>
+      <span class="rule-chip">Asset number: free text, sourced from SAP</span>
+      <span class="rule-chip">Vendor lock: triggered on CFO approval event</span>
+      <span class="rule-chip">Tax ID match: exact match only, name is display only</span>
+      <span class="rule-chip">E5 date: per line item, not per PR, frozen with E2 lock</span>
+      <span class="rule-chip danger">Missing entity → blocks Bookkeeping file generation</span>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 5 — PHASE 2: GR + BILLING + BOOKKEEPING
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-phase2">
+  <div class="slide-header">
+    <div class="slide-label">Phase 2 — Complete the Accounting Pipeline</div>
+    <div class="slide-title">GR Module · Billing Module · Bookkeeping Integration</div>
+    <div class="slide-subtitle">Extract GR and Billing from the PO page, build the full Accounting flow, and wire them to Bookkeeping via S3</div>
+    <span class="slide-counter">5 / 9</span>
+    <span class="slide-phase-tag tag-p2">After Phase 1</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="accent-box" style="margin-bottom:24px">
+      <div class="abox-label">Business Objective</div>
+      <div class="abox-text">Today, GR and Billing happen inside the PO page and Accounting is outside the system entirely — they receive PDFs by email. Phase 2 gives GR and Billing their own modules, brings Accounting into the system, and connects everything to Bookkeeping via S3 file upload. When this is done, the accounting record is complete and auditable without touching SAP.</div>
+    </div>
+
+    <div class="two-col">
+
+      <!-- 2A GR -->
+      <div>
+        <div class="section-label">2A — GR as Standalone Module</div>
+        <ul class="feature-list">
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Extract GR from PO page into its own module with list view</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>Transaction types:</strong> Confirmed / Reversed / Reversal — to support double-entry accounting recording</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>New fields:</strong> Delivery Note number, Delivery Document attachment</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">GR confirmation triggers S3 file upload to Bookkeeping</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">GR reversal triggers offsetting S3 file upload</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Partial receipt tracking per line item</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">GR list page: Document View and Line Item View</div></li>
+        </ul>
+
+        <div style="height:14px"></div>
+        <div class="section-label">GR Status Machine</div>
+        <div class="status-machine">
+          <div class="sm-step">
+            <div class="sm-node sn-draft">Confirmed</div>
+          </div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-step">
+            <div class="sm-node sn-reversed">Reversed</div>
+            <div class="sm-label">cancel + reason</div>
+          </div>
+          <div class="sm-arrow">+</div>
+          <div class="sm-step">
+            <div class="sm-node sn-reversal">Reversal</div>
+            <div class="sm-label">counter-record</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2B Billing -->
+      <div>
+        <div class="section-label">2B — Billing as Standalone Module</div>
+        <ul class="feature-list">
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Extract Billing from PO page into its own module</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>Invoice Number</strong> field — required, unique per vendor (Thai Revenue Dept. requirement)</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>Full flow:</strong> Procurement creates → Accounting confirms → Bookkeeping file posted</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>Return flow:</strong> Accounting returns to Procurement with comment → Procurement edits and resubmits</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>Reject flow:</strong> permanent dead end, mandatory comment (Procurement or Accounting can reject)</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text"><strong>Reversal:</strong> Confirmed billing cancelled → creates Reversal counter-record with negative amounts → offsetting file to Bookkeeping</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Partial billing: multiple invoices per PO, progress bar per line item</div></li>
+        </ul>
+
+        <div style="height:14px"></div>
+        <div class="section-label">Billing Status Machine (6 statuses)</div>
+        <div class="status-machine" style="flex-wrap:wrap;gap:6px">
+          <div class="sm-step"><div class="sm-node sn-waiting" style="min-width:140px;font-size:10px">Waiting Procurement Review</div><div class="sm-label">Path B only</div></div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-step"><div class="sm-node sn-waiting" style="min-width:145px;font-size:10px">Waiting Accounting Confirm.</div></div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-step"><div class="sm-node sn-confirmed">Confirmed</div></div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-step"><div class="sm-node sn-reversed">Reversed</div></div>
+          <div class="sm-arrow">+</div>
+          <div class="sm-step"><div class="sm-node sn-reversal">Reversal</div></div>
+        </div>
+        <div style="margin-top:8px">
+          <span class="rule-chip danger" style="font-size:11px">Rejected</span>
+          <span style="font-size:11px;color:var(--text-muted);margin-left:6px">= permanent dead end (Procurement or Accounting)</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">2B — Developer: Billing Form Fields</div>
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Who Fills</th>
+          <th>Required</th>
+          <th>Rule / Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-code">invoice_number</td>
+          <td>Procurement</td>
+          <td class="req-yes">Yes</td>
+          <td>Unique per vendor across all POs (Thai Revenue Dept. requirement)</td>
+        </tr>
+        <tr>
+          <td class="td-code">invoice_date</td>
+          <td>Procurement</td>
+          <td class="req-yes">Yes</td>
+          <td>Date printed on vendor's tax invoice</td>
+        </tr>
+        <tr>
+          <td class="td-code">line_items[ ]</td>
+          <td>Procurement</td>
+          <td class="req-yes">Yes ≥1</td>
+          <td>Checkbox select from PO lines. At least one required.</td>
+        </tr>
+        <tr>
+          <td class="td-code">net_amount (per line)</td>
+          <td>Procurement</td>
+          <td class="req-yes">Yes</td>
+          <td>Amount before VAT. Amount-driven — no qty/unit price at billing stage.</td>
+        </tr>
+        <tr>
+          <td class="td-code">vat_amount (per line)</td>
+          <td>System</td>
+          <td class="req-no">Calculated</td>
+          <td><code>Math.round(net × rate) / 100</code> — 2dp precision. Not editable.</td>
+        </tr>
+        <tr>
+          <td class="td-code">invoice_total</td>
+          <td>System</td>
+          <td class="req-no">Calculated</td>
+          <td>Net + VAT. 0% VAT → VAT column shows "—" not "0.00"</td>
+        </tr>
+        <tr>
+          <td class="td-code">invoice_doc</td>
+          <td>Procurement</td>
+          <td class="req-yes">Yes</td>
+          <td>PDF of vendor's tax invoice</td>
+        </tr>
+        <tr>
+          <td class="td-code">po_copy</td>
+          <td>Procurement</td>
+          <td class="req-yes">Yes</td>
+          <td>PDF of the Purchase Order</td>
+        </tr>
+        <tr>
+          <td class="td-code">delivery_note_doc</td>
+          <td>Procurement</td>
+          <td class="req-no">Optional</td>
+          <td>Delivery note or receipt</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">2C — Bookkeeping Integration (starts after 2A + 2B complete)</div>
+    <div class="two-col">
+      <div>
+        <ul class="feature-list">
+          <li><div class="fi-icon fi-risk">!</div><div class="fi-text"><strong>File format TBD with Bookkeeping team</strong> — this is the longest lead-time item. Design activity can start in parallel with 2A/2B; implementation starts after modules exist.</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">S3 upload on: GR confirmation, GR reversal, Billing confirmation, Billing reversal</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Failed upload handling — record saved as Confirmed, flagged for retry</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Retry mechanism — manual button or background auto-retry (TBD)</div></li>
+        </ul>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">S3 Upload Triggers</div>
+        <ul>
+          <li>GR confirmed → GR accounting file → S3</li>
+          <li>GR reversed → reversal file → S3</li>
+          <li>Billing confirmed → AP file → S3</li>
+          <li>Billing reversed → reversal file → S3</li>
+        </ul>
+        <div style="height:8px"></div>
+        <p>The <strong>legal entity</strong> from the PR (NTB/NTBX/NTBI/NTBPL) is embedded in every file — this is why Phase 1A (entity field) is a hard prerequisite.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 6 — PHASE 3: PO APPROVAL + SAP RETIREMENT
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-phase3">
+  <div class="slide-header">
+    <div class="slide-label">Phase 3 — Remove SAP from the PO Step</div>
+    <div class="slide-title">PO Approval Process &amp; Internal PO Number Generation</div>
+    <div class="slide-subtitle">Generate and approve POs entirely inside this system — the SAP retirement milestone</div>
+    <span class="slide-counter">6 / 9</span>
+    <span class="slide-phase-tag tag-p3">After Phase 2</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="accent-box" style="margin-bottom:24px">
+      <div class="abox-label">Business Objective</div>
+      <div class="abox-text">Today, every PO must go through SAP for a PO number and approval — Procurement exports data, creates it in SAP, then enters the number back. Phase 3 eliminates this round-trip. POs are created, numbered, and approved entirely within this system. SAP is no longer on the critical path.</div>
+      <div class="abox-note">This phase begins ONLY after Phase 2 exit criterion is met — the accounting backbone must be proven first.</div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-label">What gets built in Phase 3</div>
+        <ul class="feature-list">
+          <li>
+            <div class="fi-icon fi-todo">→</div>
+            <div class="fi-text">
+              <strong>Internal PO number generation</strong><br>
+              Format: <strong>PO-{BE year}/{5-digit sequence}</strong> e.g. PO-2569/00001<br>
+              Assigned at Draft, never changes.
+              <div class="fi-note">Replaces manual SAP PO number entry · BE year = Gregorian + 543</div>
+            </div>
+          </li>
+          <li>
+            <div class="fi-icon fi-todo">→</div>
+            <div class="fi-text">
+              <strong>PO approval chain</strong><br>
+              Financial Controller approves. CFO approves only when PO total exceeds configurable threshold.
+            </div>
+          </li>
+          <li>
+            <div class="fi-icon fi-todo">→</div>
+            <div class="fi-text">
+              <strong>Rejection handling</strong><br>
+              PO returns to Draft with reviewer comments. Procurement edits and resubmits.
+            </div>
+          </li>
+          <li>
+            <div class="fi-icon fi-todo">→</div>
+            <div class="fi-text">
+              <strong>CFO threshold configuration</strong><br>
+              CFO sets the amount threshold. Applies to new POs only. Stored as a config value.
+              <div class="fi-note">Field: configurable amount · Rule: applies to new POs from config date forward</div>
+            </div>
+          </li>
+          <li>
+            <div class="fi-icon fi-todo">→</div>
+            <div class="fi-text">
+              <strong>PO cancellation flow</strong><br>
+              Procurement initiates with mandatory reason. Requires approval chain. Blocked if GR or confirmed Billing exists against this PO.
+              <div class="fi-note">Block condition: any confirmed GR or confirmed Billing → cancellation not allowed</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">PO Status Machine</div>
+        <div class="status-machine">
+          <div class="sm-step"><div class="sm-node sn-draft">Draft</div></div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-step"><div class="sm-node sn-pending">Pending Approval</div></div>
+          <div class="sm-arrow">→</div>
+          <div class="sm-step"><div class="sm-node sn-approved">Created</div></div>
+        </div>
+        <div style="margin-top:8px;margin-bottom:16px">
+          <span class="rule-chip">Return to Draft if rejected</span>
+        </div>
+
+        <div class="section-label">SAP cutover decision</div>
+        <div class="info-box">
+          <div class="info-box-title">Deliberate Coordinated Cutover (not automatic)</div>
+          <p>Once Phase 3 is live and validated, the PO number field switches from manual SAP entry to auto-generated. This is a planned cutover event — in-flight SAP-numbered POs are NOT migrated. The cutover applies to new POs only from the cut date forward.</p>
+        </div>
+
+        <div style="height:14px"></div>
+        <div class="section-label">Developer — Key Business Rules</div>
+        <div class="rule-chips" style="margin-top:4px">
+          <span class="rule-chip">PO number: assigned at Draft, immutable</span>
+          <span class="rule-chip">Sequence: per BE year, resets at new year</span>
+          <span class="rule-chip">CFO gate: threshold is a config value, not hardcoded</span>
+          <span class="rule-chip danger">Cancellation blocked if GR confirmed OR Billing confirmed exists</span>
+          <span class="rule-chip">In-flight SAP POs: not migrated at cutover</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">Phase 3 — Developer: PO Fields (new / changed)</div>
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Type</th>
+          <th>Rule</th>
+          <th>Change from today</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-code">po_number</td>
+          <td>String</td>
+          <td>Auto-generated: PO-{BE year}/{00001}. Immutable once assigned.</td>
+          <td>Currently: manual text input (SAP number)</td>
+        </tr>
+        <tr>
+          <td class="td-code">status</td>
+          <td>Enum</td>
+          <td>Draft → Pending Approval → Created · Return → Draft</td>
+          <td>Currently: Created immediately on submit</td>
+        </tr>
+        <tr>
+          <td class="td-code">cfo_threshold</td>
+          <td>Config (decimal)</td>
+          <td>CFO-set amount. If PO total ≥ threshold → CFO approval step added.</td>
+          <td>New</td>
+        </tr>
+        <tr>
+          <td class="td-code">cancellation_reason</td>
+          <td>String</td>
+          <td>Mandatory. Min 5 chars.</td>
+          <td>New</td>
+        </tr>
+        <tr>
+          <td class="td-code">cancellation_blocked</td>
+          <td>Boolean (derived)</td>
+          <td>True if confirmed_gr_count > 0 OR confirmed_billing_count > 0</td>
+          <td>New</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 7 — PHASE 4: VENDOR PORTAL
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-phase4">
+  <div class="slide-header">
+    <div class="slide-label">Phase 4 — Vendor Self-Service (Future)</div>
+    <div class="slide-title">Vendor Portal — Billing Submission</div>
+    <div class="slide-subtitle">Vendors submit invoices directly through a self-service portal — replaces email &amp; phone invoice submission</div>
+    <span class="slide-counter">7 / 9</span>
+    <span class="slide-phase-tag tag-p4">Future</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="accent-box" style="margin-bottom:24px">
+      <div class="abox-label">Business Objective</div>
+      <div class="abox-text">Today, vendors send invoices by email or phone. Procurement manually enters them into the system. Phase 4 gives vendors a self-service portal to view their POs, submit invoices, and track status — reducing Procurement workload and eliminating back-and-forth.</div>
+      <div class="abox-note">Prototype already built · Feature spec complete · Ready to develop when Phase 3 is stable</div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-label">Portal Pages</div>
+        <ul class="feature-list">
+          <li><div class="fi-icon fi-built">✓</div><div class="fi-text"><strong>PO List</strong> — vendor sees all POs, Contracts, Memos issued to them. Submit Invoice button per row.</div></li>
+          <li><div class="fi-icon fi-built">✓</div><div class="fi-text"><strong>Submit Invoice</strong> — vendor submits invoice against PO / Contract / Memo. Amount-driven (no qty). VAT auto-calculated from vendor master.</div></li>
+          <li><div class="fi-icon fi-built">✓</div><div class="fi-text"><strong>My Invoices</strong> — full history with 3 visible statuses: Waiting Review / Confirmed / Rejected.</div></li>
+        </ul>
+
+        <div style="height:14px"></div>
+        <div class="section-label">Vendor Access Model</div>
+        <ul class="feature-list">
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Invite-only — Procurement adds portal user (name + email) under vendor record</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">One vendor can have multiple portal users (e.g. finance + sales contact)</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">Invite link has no expiry. Procurement manages access (add / remove / reset).</div></li>
+          <li><div class="fi-icon fi-todo">→</div><div class="fi-text">All users under same vendor are Submitters — no admin tier on vendor side</div></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="section-label">PO Ceiling Rule</div>
+        <div class="info-box" style="margin-bottom:14px">
+          <div class="info-box-title">Cumulative billing cannot exceed PO value</div>
+          <p>Sum of all invoices (confirmed + pending) against a PO ≤ PO value.<br>
+          Exception: cumulative total reaching PO value − 1 THB counts as fully billed (rounding tolerance).<br>
+          Submission blocked if it would exceed PO value — error shown with remaining billable amount.</p>
+        </div>
+
+        <div class="section-label">Vendor-Facing Invoice Statuses (3 only)</div>
+        <div class="rule-chips" style="margin-bottom:14px">
+          <span class="rule-chip warning">Waiting Review</span>
+          <span class="rule-chip success">Confirmed</span>
+          <span class="rule-chip danger">Rejected</span>
+        </div>
+        <div class="info-box">
+          <div class="info-box-title">Why only 3 statuses?</div>
+          <p>Vendors do not see internal routing between Procurement and Accounting. Both "Waiting Procurement Review" and "Waiting Accounting Confirmation" map to "Waiting Review" from the vendor's perspective. Intentionally simple for non-technical vendor users.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">Developer — Submit Invoice Fields</div>
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>PO</th>
+          <th>Contract / Memo</th>
+          <th>Rule</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-code">invoice_number</td>
+          <td class="req-yes">Required</td>
+          <td class="req-yes">Required</td>
+          <td>Unique per vendor</td>
+        </tr>
+        <tr>
+          <td class="td-code">invoice_date</td>
+          <td class="req-yes">Required</td>
+          <td class="req-yes">Required</td>
+          <td>Date on vendor's invoice</td>
+        </tr>
+        <tr>
+          <td class="td-code">line_items[ ]</td>
+          <td class="req-yes">Pre-filled from PO</td>
+          <td class="req-yes">Pre-filled from contract/memo</td>
+          <td>Vendor selects which items to include</td>
+        </tr>
+        <tr>
+          <td class="td-code">net_amount (per line)</td>
+          <td class="req-yes">Vendor enters</td>
+          <td class="req-yes">Vendor enters</td>
+          <td>Amount before VAT — amount-driven billing</td>
+        </tr>
+        <tr>
+          <td class="td-code">vat</td>
+          <td>System auto-calc</td>
+          <td>System auto-calc</td>
+          <td>7% or 0% from vendor master. Read-only.</td>
+        </tr>
+        <tr>
+          <td class="td-code">invoice_doc</td>
+          <td class="req-yes">Required (PDF)</td>
+          <td class="req-yes">Required (PDF)</td>
+          <td>Vendor's tax invoice</td>
+        </tr>
+        <tr>
+          <td class="td-code">po_copy</td>
+          <td class="req-yes">Required (PDF)</td>
+          <td class="req-no">Not required</td>
+          <td>Copy of PO — not needed for Contract/Memo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">Internal Approval Flow (vendor does not see this)</div>
+    <div class="status-machine">
+      <div class="sm-step"><div class="sm-node sn-waiting" style="font-size:10px;min-width:120px">Vendor Submits</div></div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-step"><div class="sm-node sn-waiting" style="font-size:10px;min-width:155px">Waiting Procurement Review</div><div class="sm-label">Vendor sees: Waiting Review</div></div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-step"><div class="sm-node sn-waiting" style="font-size:10px;min-width:155px">Waiting Accounting Confirm.</div><div class="sm-label">Vendor sees: Waiting Review</div></div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-step"><div class="sm-node sn-confirmed">Confirmed</div><div class="sm-label">Vendor sees: Confirmed</div></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 8 — INTEGRATION ARCHITECTURE
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-integration">
+  <div class="slide-header">
+    <div class="slide-label">Architecture</div>
+    <div class="slide-title">Integration Pattern — Bookkeeping via S3</div>
+    <div class="slide-subtitle">How the procurement system connects to Bookkeeping — and what remains in SAP</div>
+    <span class="slide-counter">8 / 9</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="int-diagram" style="margin-bottom:24px">
+      <div class="int-node in-proc">
+        <div class="in-title">Procurement System</div>
+        <div class="in-sub">PR · PO · GR · Billing<br>Vendor Portal</div>
+      </div>
+      <div class="int-arr-label">
+        <div class="arr-icon">→</div>
+        <div class="arr-text">upload on event</div>
+      </div>
+      <div class="int-node in-s3">
+        <div class="in-title">AWS S3</div>
+        <div class="in-sub">Structured file<br>per accounting event</div>
+      </div>
+      <div class="int-arr-label">
+        <div class="arr-icon">→</div>
+        <div class="arr-text">reads &amp; records</div>
+      </div>
+      <div class="int-node in-book">
+        <div class="in-title">Bookkeeping System</div>
+        <div class="in-sub">AP / GR transactions<br>recorded here</div>
+      </div>
+      <div class="int-arr-label" style="margin-left:16px">
+        <div class="arr-icon" style="color:#94A3B8">⟵⟶</div>
+        <div class="arr-text">parallel run only</div>
+      </div>
+      <div class="int-node in-sap">
+        <div class="in-title">SAP (transitional)</div>
+        <div class="in-sub">PO numbers · Asset #<br>phased out Phase 3</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="section-label">S3 Upload Events</div>
+        <table class="spec-table">
+          <thead>
+            <tr><th>Trigger</th><th>File Generated</th><th>Phase</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>GR Confirmed</td>
+              <td class="td-code">GR accounting file</td>
+              <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">2A</span></td>
+            </tr>
+            <tr>
+              <td>GR Reversed</td>
+              <td class="td-code">GR reversal file</td>
+              <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">2A</span></td>
+            </tr>
+            <tr>
+              <td>Billing Confirmed</td>
+              <td class="td-code">AP liability file</td>
+              <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">2B</span></td>
+            </tr>
+            <tr>
+              <td>Billing Reversed</td>
+              <td class="td-code">AP reversal file</td>
+              <td><span class="gt-pill" style="background:#FEF3C7;color:#92400E">2B</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="section-label">File Content (per event)</div>
+        <div class="info-box">
+          <div class="info-box-title">Every file must include</div>
+          <ul>
+            <li><strong>Legal Entity</strong> (NTB / NTBX / NTBI / NTBPL) — from PR</li>
+            <li><strong>PO Number</strong> — SAP number (Phase 1–2) or internal (Phase 3+)</li>
+            <li><strong>GL code</strong> — from Finance Coding (Expense lines)</li>
+            <li><strong>Cost Center</strong> — from Finance Coding</li>
+            <li><strong>Net Amount, VAT Amount, Invoice Total</strong></li>
+            <li><strong>Transaction date</strong> and document reference</li>
+          </ul>
+          <div style="height:8px"></div>
+          <p style="color:var(--danger);font-weight:600;font-size:12px">⚠ File format TBD with Bookkeeping team — start this conversation immediately</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="section-label">Failed Upload Handling</div>
+    <div class="three-col">
+      <div class="info-box">
+        <div class="info-box-title">On upload failure</div>
+        <p>Record is saved as Confirmed. Flagged with a "Pending Bookkeeping" indicator. Does not block Accounting workflow.</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Retry mechanism</div>
+        <p>TBD — either a manual "Retry Upload" button on the record, or an automatic background retry job. Decision needed with Bookkeeping team.</p>
+      </div>
+      <div class="info-box">
+        <div class="info-box-title">Audit trail</div>
+        <p>Every upload attempt (success or failure) is timestamped and logged per billing/GR record. Required for accounting audit.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SLIDE 9 — RISKS & OPEN QUESTIONS
+══════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-risks">
+  <div class="slide-header">
+    <div class="slide-label">Risks &amp; Open Questions</div>
+    <div class="slide-title">What Could Block Us &amp; What We Still Need to Decide</div>
+    <div class="slide-subtitle">These are the dependencies that require action from stakeholders — not just the development team</div>
+    <span class="slide-counter">9 / 9</span>
+  </div>
+  <div class="slide-body">
+
+    <div class="section-label">Key Risks</div>
+    <div style="background:var(--bg-primary);border-radius:10px;border:1px solid var(--border);padding:4px 16px;margin-bottom:24px">
+      <div class="risk-row">
+        <div>
+          <div class="risk-name">Bookkeeping file format undefined</div>
+          <div class="risk-mit">S3 upload pattern agreed but file schema not started. Implementation of 2C cannot begin until format is agreed.</div>
+        </div>
+        <span class="risk-impact risk-high">High</span>
+        <div class="risk-mit"><strong>Mitigation:</strong> Start Bookkeeping team conversation immediately — this is the longest lead-time item. Design can run in parallel with 2A/2B coding.</div>
+      </div>
+      <div class="risk-row">
+        <div>
+          <div class="risk-name">Finance Coding master data integration undefined</div>
+          <div class="risk-mit">Phase 1B (master-driven cost center + GL) is blocked until integration approach is defined with Bookkeeping team.</div>
+        </div>
+        <span class="risk-impact risk-high">High</span>
+        <div class="risk-mit"><strong>Mitigation:</strong> Agree on real-time API call vs. periodic sync early. This decision affects system architecture.</div>
+      </div>
+      <div class="risk-row">
+        <div>
+          <div class="risk-name">Entity field missing from existing PRs</div>
+          <div class="risk-mit">All existing PRs lack a legal entity tag. Bookkeeping files generated from them will be incomplete.</div>
+        </div>
+        <span class="risk-impact risk-med">Medium</span>
+        <div class="risk-mit"><strong>Mitigation:</strong> Fix entity field in Phase 1A before any accounting recording is built. Consider backfill strategy for existing PRs.</div>
+      </div>
+      <div class="risk-row">
+        <div>
+          <div class="risk-name">Phase 3 started before Phase 2 is stable</div>
+          <div class="risk-mit">If POs are generated internally before GR/Billing post reliably to Bookkeeping, there is a risk of financial recording gaps.</div>
+        </div>
+        <span class="risk-impact risk-high">High</span>
+        <div class="risk-mit"><strong>Mitigation:</strong> Phase sequencing enforces this — Phase 2 exit criterion must be signed off before Phase 3 begins. No exceptions.</div>
+      </div>
+      <div class="risk-row" style="border-bottom:none">
+        <div>
+          <div class="risk-name">Asset number generation (SAP dependency)</div>
+          <div class="risk-mit">Asset numbers remain in SAP permanently under current plan. Accountant enters free text. Low risk but known limitation.</div>
+        </div>
+        <span class="risk-impact risk-low">Low</span>
+        <div class="risk-mit"><strong>Mitigation:</strong> Accept as known limitation. Revisit when broader SAP retirement is considered.</div>
+      </div>
+    </div>
+
+    <div class="section-label">Open Questions — Decision Needed</div>
+    <div class="two-col">
+      <ul class="feature-list">
+        <li>
+          <div class="fi-icon fi-risk">?</div>
+          <div class="fi-text">
+            <strong>Cost center &amp; GL master data source</strong><br>
+            Real-time API call to Bookkeeping, or periodic sync (nightly/hourly)?
+            <div class="fi-note">Decision owner: Bookkeeping team + Procurement Manager</div>
+          </div>
+        </li>
+        <li>
+          <div class="fi-icon fi-risk">?</div>
+          <div class="fi-text">
+            <strong>S3 file format and schema</strong><br>
+            Field names, types, encoding, and envelope structure for each accounting event file.
+            <div class="fi-note">Decision owner: Bookkeeping team</div>
+          </div>
+        </li>
+        <li>
+          <div class="fi-icon fi-risk">?</div>
+          <div class="fi-text">
+            <strong>Bookkeeping upload retry mechanism</strong><br>
+            Manual retry button on the record, or automatic background retry job?
+            <div class="fi-note">Decision owner: Bookkeeping team + Dev</div>
+          </div>
+        </li>
+      </ul>
+      <ul class="feature-list">
+        <li>
+          <div class="fi-icon fi-risk">?</div>
+          <div class="fi-text">
+            <strong>Contract / Memo / Online Payment — accounting recording</strong><br>
+            Do these document types require Bookkeeping posting, or are they purely document tracking?
+            <div class="fi-note">Decision owner: CFO + Accounting</div>
+          </div>
+        </li>
+        <li>
+          <div class="fi-icon fi-risk">?</div>
+          <div class="fi-text">
+            <strong>SAP cutover — in-flight POs</strong><br>
+            When Phase 3 goes live, do existing SAP-numbered POs migrate, or does the cutover apply to new POs only from that date forward?
+            <div class="fi-note">Decision owner: CFO + Procurement Manager</div>
+          </div>
+        </li>
+        <li>
+          <div class="fi-icon fi-risk">?</div>
+          <div class="fi-text">
+            <strong>GL code master list config screen</strong><br>
+            How does the Accounting team manage the GL code list — add / edit / deactivate codes? Needs a config screen design.
+            <div class="fi-note">Decision owner: Accounting + Dev</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide-divider"></div>
+
+    <div class="accent-callout">
+      <div class="ac-label">Immediate Actions Required</div>
+      <div class="ac-text">
+        1 — Start Bookkeeping file format discussion (longest lead time) &nbsp;·&nbsp;
+        2 — Agree on master data integration approach (real-time API or sync) &nbsp;·&nbsp;
+        3 — Decide on Contract / Memo accounting recording scope &nbsp;·&nbsp;
+        4 — Confirm Phase 2 exit criterion sign-off process before Phase 3 begins
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /deck-body -->
+</div><!-- /deck -->
+
+<div class="deck-footer">
+  Ngern Turbo Procurement System — Product Strategy &nbsp;·&nbsp; Phasathon C. &nbsp;·&nbsp; 2026-06-08
+</div>
+
+<script>
+// Highlight active nav link based on scroll position
+const navLinks = document.querySelectorAll('.nav-link');
+const slides = document.querySelectorAll('.slide[id]');
+
+function updateActiveNav() {
+  let current = '';
+  slides.forEach(slide => {
+    const rect = slide.getBoundingClientRect();
+    if (rect.top <= 120) current = slide.id;
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+}
+
+window.addEventListener('scroll', updateActiveNav, { passive: true });
+updateActiveNav();
+</script>
+</body>
+</html>
