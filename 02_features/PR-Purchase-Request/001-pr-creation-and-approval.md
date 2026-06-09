@@ -123,17 +123,14 @@ flowchart TD
     LOCK --> H[Finance Coding\nCost Center - GL or Asset Number]
     H --> I[Status: Waiting Create PO]
 
-    I --> VM{Vendor status\nper line item?}
-    VM -->|Search & Select\nConfirmed| J1
-    VM -->|Manual Entry\nPending Registration| VX[Search vendor master\nby Tax ID]
-    VX -->|Match found| VC[Vendor confirmed]
-    VC --> J1
-    VX -->|No match| VR[Register vendor\nin Vendor Management]
-    VR --> VX
-
-    J1{Document type?}
-    J1 -->|PO| K1[PO Workflow]
+    I --> J1{Document type?}
     J1 -->|Contract / Memo\nor Online Payment| K2[Document Created]
+    J1 -->|PO| VM{Vendor input mode?}
+    VM -->|Search & Select\nAlready confirmed| K1[PO Workflow]
+    VM -->|Manual Entry| VS[Select vendor\nfrom master]
+    VS -->|Vendor selected| K1
+    VS -->|Not in master| VR[Register vendor\nin Vendor Management]
+    VR --> VS
 
     style A fill:#4A90D9,color:#fff
     style LOCK fill:#8E44AD,color:#fff
@@ -216,33 +213,32 @@ On PO / Contract / Memo / Online Payment creation forms, the vendor field is pre
 - Vendor fields become read-only immediately after CFO approves.
 - Lock persists through Finance Coding, Waiting Create PO, and document creation.
 - On all document creation forms, vendor is pre-populated and read-only — no edit control is rendered.
-- PO creation is blocked if the vendor code is not yet confirmed. Procurement must complete E4 first.
+- PO creation is blocked for Manual Entry line items until Procurement selects the vendor from master (E4). Contract, Memo, and Online Payment are not blocked.
 - If a return occurs after CFO approval, vendor fields stay locked unless the PR re-enters Price Comparison.
 
 ---
 
-### E4 — Vendor Code Confirmation for Manual Entry Vendors
+### E4 — Vendor Selection for Manual Entry Vendors (PO only)
 
 **Status:** Pending
 
-For Manual Entry vendors, the vendor code must be confirmed against the vendor master before the PO can be created. This is enforced as a validation check at PO creation — Procurement must complete this step first.
+For line items where the vendor was entered manually at Price Comparison and the document type is **PO**, Procurement must select the vendor from the vendor master before the PO can be created. This step does not apply to Contract, Memo, or Online Payment document types — those can be created regardless of vendor input mode.
 
 **Flow:**
-1. Procurement searches the vendor master by tax ID at Waiting Create PO
-2. Match on **tax ID only** (name variations are acceptable)
-   - **Match found** → vendor code confirmed and stored. Pending Vendor Registration badge removed. PO creation available.
-   - **No match** → Procurement registers the vendor in Vendor Management, then searches again.
+1. At Waiting Create PO, line items with document type = PO and vendor input mode = Manual Entry show a **"Select Vendor"** prompt
+2. Procurement searches and selects the vendor from the vendor master (standard search & select — no tax ID validation against what was entered at Price Comparison)
+3. On selection: vendor code stored, Manual Entry flag cleared, PO creation available
 
 Search & Select line items skip this step — vendor code is already confirmed.
 
 Once the vendor code is confirmed, it is carried through to the PO and included in accounting transactions sent to Bookkeeping at GR confirmation and Billing approval.
 
 **Acceptance Criteria:**
-- PO creation is blocked for Manual Entry line items until the vendor code is confirmed.
-- Procurement must search and confirm the vendor code before creating the PO.
-- Match is by tax ID only.
-- On match: vendor code stored, Pending Vendor Registration badge removed, PO creation available.
-- On no match: Procurement registers the vendor in Vendor Management, then searches again.
+- Vendor selection from master is required only for Manual Entry line items with document type = PO.
+- Contract, Memo, and Online Payment document types are not blocked — no vendor code confirmation needed.
+- Procurement searches and selects the vendor from master. No tax ID validation or comparison against the manually entered details.
+- On selection: vendor code stored, PO creation available.
+- If no matching vendor exists in master, Procurement registers the vendor in Vendor Management, then selects from master.
 - Confirmed vendor code is included in accounting transactions sent to Bookkeeping at GR and Billing.
 
 ---

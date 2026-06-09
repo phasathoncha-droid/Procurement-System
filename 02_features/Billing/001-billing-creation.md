@@ -19,14 +19,24 @@ Built (inside PO page) — enhancements planned (see Enhancements section)
 | E5 | Bookkeeping integration: S3 file posting on confirmation and reversal | Pending |
 
 ## Overview
-After a PO is created, Procurement records billing against it by entering the vendor's invoice details. Billing is independent of GR — both can happen in any order. Partial billing is supported (multiple invoices per PO). Once Accounting confirms, the record moves to the Billing List and an accounting file is uploaded to S3 for Bookkeeping to record. Confirmed invoices can be cancelled by Accounting via a Reversal.
+After a PO is created, the Requester, Procurement team, or Vendor User records billing against it by entering the vendor's invoice details. Billing is independent of GR — both can happen in any order. Partial billing is supported (multiple invoices per PO). Every billing goes through a two-step approval: Procurement verifies, then a Requester or Procurement member (not the same person who verified) approves. Once approved, the record moves to the Billing List and an accounting transaction is posted to Bookkeeping.
 
 ## Solution Description
 
-**Two Billing Paths**
+**Who Can Submit Billing**
 
-- **Path A — Internal (Procurement-initiated):** Procurement creates a billing record directly in the system against a PO. It goes straight to Accounting for confirmation — no Procurement review step.
-- **Path B — Vendor Portal (Phase 2):** The vendor submits a billing record through the vendor self-service portal. Procurement reviews it first, then forwards to Accounting for confirmation.
+| Role | Channel |
+|---|---|
+| Requester (of the PO's PR) | Main Billing page |
+| Procurement team member | Main Billing page |
+| Vendor User | Vendor Portal only — appears in the Queue after submission |
+
+**Approval Flow — Single Path for All Submitters**
+
+Every billing record, regardless of who submitted it, goes through the same two-step approval:
+
+1. **Procurement Verification** — Any Procurement team member reviews the billing for completeness and accuracy. They can verify (pass to approval), return to the submitter with a mandatory comment, or reject permanently.
+2. **Approval** — The Requester of the PO or any Procurement team member approves. **The same person who verified in Step 1 cannot be the approver in Step 2 — the system blocks this.** The approver can approve (→ Confirmed), return to Procurement Verification with a mandatory comment, or reject permanently.
 
 **Billing Statuses**
 
@@ -34,16 +44,18 @@ There are exactly 6 statuses for a billing record:
 
 | Status | Where shown | Description |
 |---|---|---|
-| Waiting Procurement Review | Queue | External (Path B) only — vendor submitted, waiting for Procurement |
-| Waiting Accounting Confirmation | Queue | Internal lands here directly; External arrives after Procurement forwards. Also used when Accounting returns an Internal billing |
-| Rejected | Queue (hidden by default) | Permanently cancelled by Procurement or Accounting — dead end |
-| Confirmed | Billing List | Accounting confirmed — AP transaction posted to Bookkeeping |
+| Waiting Procurement Verification | Queue | Any billing just submitted — waiting for Procurement to verify |
+| Waiting Approval | Queue | Procurement verified — waiting for Requester or Procurement (not the verifier) to approve |
+| Rejected | Queue (hidden by default) | Permanently cancelled at any stage — dead end |
+| Confirmed | Billing List | Approved — AP transaction posted to Bookkeeping |
 | Reversed | Billing List | Original invoice that was cancelled — offset by a Reversal record |
 | Reversal | Billing List | Counter-entry that zeroes out the Reversed invoice — shown with negative amounts in red |
 
-Return is an action, not a status. When Accounting returns an Internal billing, the status stays Waiting Accounting Confirmation. The detail modal detects a return by the presence of Accounting's return comment and shows Procurement an "Edit & Resubmit" button instead of read-only view.
+Return is an action, not a status:
+- Procurement returns during verification → billing goes back to the submitter. Submitter corrects and resubmits → returns to Waiting Procurement Verification.
+- Approver returns during approval → billing goes back to Waiting Procurement Verification. Any Procurement member can re-verify.
 
-Queue default view shows Waiting Procurement Review + Waiting Accounting Confirmation only. Rejected records are hidden by default — user must filter by Status to see them.
+Queue default view shows Waiting Procurement Verification + Waiting Approval only. Rejected records are hidden by default — user must filter by Status to see them.
 
 **Billing Form Fields**
 
@@ -67,6 +79,25 @@ VAT flag is inherited from PR price comparison stage — 7% (VAT-registered vend
 
 A progress bar per line item shows cumulative billed amount vs PO line amount. Turns red if current billing would exceed the PO line amount.
 
+**Billing Adjustment**
+
+When the total billed amount differs from the PO amount by **±1 Baht or less**, the system automatically creates an adjustment transaction to bring the billing to exactly the PO amount.
+
+| Scenario | PO Amount | Billed | Difference | Result |
+|---|---|---|---|---|
+| Under-billed within ±1 | 100.00 | 99.90 | −0.10 | Auto-adjust +0.10 → final 100.00 |
+| Over-billed within ±1 | 100.00 | 100.01 | +0.01 | Auto-adjust −0.01 → final 100.00 |
+| Under-billed beyond 1 | 100.00 | 95.00 | −5.00 | Allowed — partial billing, no adjustment |
+| Over-billed beyond 1 | 100.00 | 101.50 | +1.50 | **Blocked** — cannot submit |
+
+- Adjustment is system-generated — not entered by the user
+- **Bookkeeping receives two separate transactions** under the same group reference: the billed amount and the adjustment. When reversed, both are reversed together as a group.
+- **Billing detail modal shows two lines** when an adjustment applies: the billed amount and the adjustment amount separately. Total of both = PO amount. Visible to all roles equally.
+- **Over-billing beyond +1 Baht is a hard block** — the Submit button is disabled and an inline error is shown. The user must correct the amount before submitting.
+- Under-billing beyond 1 Baht is allowed — treated as partial billing. The PO remains open for additional billings.
+
+---
+
 **Partial Billing**
 
 Multiple billing records can be created against a single PO. PO Billing Status reflects cumulative billed amount:
@@ -77,30 +108,26 @@ Multiple billing records can be created against a single PO. PO Billing Status r
 | Partial | Some amount billed, not fully billed |
 | Complete | Total billed equals PO amount |
 
-**Actions by Role and Path**
+**Actions by Role**
 
 | Situation | Who | Available Actions |
 |---|---|---|
-| Waiting Procurement Review (External) | Procurement | Forward to Accounting · Reject (mandatory comment) |
-| Waiting Accounting Confirmation | Accounting | Confirm · Return to Procurement (Internal only, mandatory comment) · Reject (mandatory comment) |
-| Waiting Accounting Confirmation + return comment (Internal) | Procurement | Edit & Resubmit → back to Waiting Accounting Confirmation |
-| Confirmed | Accounting | Cancel Invoice → triggers Reversal flow |
-| Any status | Procurement / Accounting | View details (read-only) |
+| Waiting Procurement Verification | Any Procurement member | Verify (→ Waiting Approval) · Return to submitter (mandatory comment) · Reject (mandatory comment) |
+| Waiting Approval | Requester or Procurement (not the verifier) | Approve (→ Confirmed) · Return to Procurement Verification (mandatory comment) · Reject (mandatory comment) |
+| Confirmed | Requester or Procurement | Cancel Invoice → triggers Reversal flow |
+| Any status | All roles | View details (read-only) |
 
 **Billing Reversal**
 
-After a billing is Confirmed, Accounting can cancel it:
-- Accounting clicks **Cancel Invoice** on the confirmed record's detail modal
+After a billing is Confirmed, an authorized user can cancel it:
+- Clicks **Cancel Invoice** on the confirmed record's detail modal
 - A cancellation modal shows invoice details + warning that this cannot be undone
 - Mandatory reason required (minimum 5 characters)
 - On confirm: original record status → Reversed; a new Reversal counter-record is created with the same invoice number + "-R" suffix and negative amounts
+- Reversal invoice date is system-set to the same date as the original invoice — not editable
 - Reversal is posted to Bookkeeping to offset the original AP entry
 
-Authority: Accounting only. No second approval required. This is not a credit note — Reversal = full cancellation of the AP liability.
-
-**Return (Accounting → Procurement)**
-
-Return is an action, not a status. Accounting returns an Internal billing to Procurement with a mandatory comment. Procurement edits and resubmits → status resets to Waiting Accounting Confirmation. Does not restart the Procurement review step. Return to vendor portal is not supported in Phase 1 — incorrect external submissions must be rejected.
+Authority: Requester of the PO's PR or any Procurement team member. No second approval required. Mandatory reason for audit trail. This is not a credit note — Reversal = full cancellation of the AP liability.
 
 **Queue Tab**
 
@@ -145,16 +172,19 @@ After Accounting confirms, the system posts an AP liability transaction to Bookk
 
 ## Acceptance Criteria
 - **Eligibility:** Billing can only be created against a PO with status = Created. No dependency on GR status.
-- **Path A flow:** Procurement submits → Waiting Accounting Confirmation → Accounting confirms → Confirmed → Bookkeeping transaction posted.
-- **Path B flow (Phase 2):** Vendor submits → Waiting Procurement Review → Procurement forwards → Waiting Accounting Confirmation → Accounting confirms → Confirmed → Bookkeeping posted.
-- **Reject:** Both Procurement (Path B) and Accounting can reject with mandatory comment. Status = Rejected. Dead end.
+- **Who can submit:** Requester of the PO's PR or any Procurement team member via the Billing page. Vendor Users submit via the Vendor Portal — their billings appear in the Queue automatically.
+- **Approval flow:** Any billing submitted (by any role) → Waiting Procurement Verification → Procurement verifies → Waiting Approval → Requester or Procurement (not the verifier) approves → Confirmed → Bookkeeping transaction posted.
+- **Verifier ≠ Approver:** The system blocks the same person who verified from being the approver. Other Procurement members and the Requester can still approve.
+- **Return — Procurement to submitter:** Procurement can return the billing to the submitter with a mandatory comment during verification. Submitter corrects and resubmits → returns to Waiting Procurement Verification.
+- **Return — Approver to Procurement:** The approver can return the billing to Procurement Verification with a mandatory comment. Any Procurement member can re-verify.
+- **Reject:** Procurement (during verification) and the approver (during approval) can reject with a mandatory comment. Status = Rejected. Dead end.
 - **Rejected visibility:** Hidden by default in Queue. User must filter by Status = Rejected to see them.
-- **Return (Internal only):** Accounting returns Internal billing with mandatory comment. Procurement edits and resubmits → Waiting Accounting Confirmation. No return to vendor portal in Phase 1.
 - **Mandatory fields:** Invoice Number, Invoice Date, Net Amount per line, Invoice Document (PDF), Copy of PO (PDF).
 - **Invoice Number uniqueness:** Unique per vendor across all POs.
 - **VAT auto-calculation:** VAT Amount = Net × VAT Rate, 2 decimal place precision. Not editable at billing. 0% VAT shows "—" not "0.00".
 - **Partial billing:** Multiple billing records per PO. Progress bar per line shows cumulative billed vs PO line amount. Turns red if billing would exceed PO line amount.
-- **Billing Reversal:** Accounting only. Mandatory reason (≥5 characters). Creates Reversal counter-record with negative amounts dated same as original. Posts offsetting transaction to Bookkeeping. Cannot be undone.
+- **Billing adjustment:** If the billed amount is within ±1 Baht of the PO amount, the system auto-generates an adjustment to bring the total to exactly the PO amount. Bookkeeping receives two transactions under the same group reference (billed + adjustment). The billing detail modal shows both as separate lines for all roles. Over-billing beyond +1 Baht is a hard block — Submit is disabled. Under-billing beyond 1 Baht is allowed as partial billing. On reversal, both transactions are reversed together as a group.
+- **Billing Reversal:** Requester or Procurement only. Mandatory reason (≥5 characters). Creates Reversal counter-record with negative amounts dated same as original invoice date (system-set, not editable). Posts offsetting transaction to Bookkeeping. Cannot be undone.
 - **Billing List statuses:** Confirmed, Reversed, Reversal. Reversal rows show negative amounts in red with red-tinted background.
 - **Bookkeeping integration:** Confirmed billing triggers AP transaction. Send failure saves record and flags for retry.
 
@@ -163,29 +193,27 @@ After Accounting confirms, the system posts an AP liability transaction to Bookk
 ```mermaid
 flowchart TD
     A([PO Status: Created])
-    A --> B1[Path A: Procurement creates billing]
-    A --> B2[Path B: Vendor submits via portal\nPhase 2]
+    A --> B[Billing submitted\nRequester or Procurement via Billing page\nVendor User via Vendor Portal]
+    B --> C[Waiting Procurement Verification]
 
-    B1 --> C[Waiting Accounting Confirmation]
-
-    B2 --> D{Procurement Review}
+    C --> D{Procurement Decision}
+    D -->|Return with comment| RS[Back to Submitter]
+    RS -->|Resubmit| C
     D -->|Reject| RJ([Rejected — dead end])
-    D -->|Forward| C
+    D -->|Verify| E[Waiting Approval]
 
-    C --> E{Accounting Decision}
-    E -->|Confirm| F[Confirmed → Billing List\nPost AP to Bookkeeping]
-    E -->|Return| G[Back to Procurement\nwith comment]
-    E -->|Reject| RJ
-    G -->|Edit & Resubmit| C
+    E --> F{Requester or Procurement\nnot the verifier}
+    F -->|Return with comment| C
+    F -->|Reject| RJ
+    F -->|Approve| G[Confirmed → Billing List\nPost AP to Bookkeeping]
 
-    F --> H{Accounting cancels?}
-    H -->|Cancel Invoice + reason| I[Reversed + Reversal created\nOffset posted to Bookkeeping]
+    G --> H{Cancel Invoice?}
+    H -->|Cancel + reason| I[Reversed + Reversal created\nOffset posted to Bookkeeping]
 
     style A fill:#27AE60,color:#fff
-    style F fill:#27AE60,color:#fff
+    style G fill:#27AE60,color:#fff
     style I fill:#94A3B8,color:#fff
     style RJ fill:#EF4444,color:#fff
-    style B2 fill:#8E44AD,color:#fff
 ```
 
 ## Enhancements
@@ -204,7 +232,7 @@ Replaces billing recording inside the PO page with a dedicated Billing page acce
 **Acceptance Criteria:**
 
 *Create Billing — 3-step modal*
-- "+ Create Billing" button opens the Create Billing modal.
+- "+ Create Billing" button is available to Requester and Procurement only. Vendor Users do not have access to this page — they submit via the Vendor Portal.
 - Step 1 — Select PO: user searches by PR number, PO number, or vendor name. Live dropdown appears when at least one character is typed.
 - Step 2 — Invoice Details: user fills in invoice information. Mandatory fields: Invoice Number, Invoice Date, at least one line item selected, Net Amount per selected line item.
 - Step 3 — Documents: user uploads supporting files. Mandatory: Invoice Document (PDF), Copy of PO (PDF). Optional: Delivery Goods Document, Remarks.
@@ -228,6 +256,9 @@ Replaces billing recording inside the PO page with a dedicated Billing page acce
 
 - VAT rate is inherited from PR price comparison — 7% or 0%. Not editable at billing.
 - A progress bar per line item shows cumulative billed amount vs PO line amount. Turns red if billing would exceed the PO line amount.
+- If the billed amount exceeds the PO amount by more than 1 Baht, submission is hard-blocked — Submit button is disabled and an inline error is shown.
+- If the billed amount differs from the PO amount by ±1 Baht or less, the system auto-generates an adjustment transaction to bring the total to exactly the PO amount. The adjustment is included in the Bookkeeping transaction and is not visible or editable by the user.
+- Under-billing beyond 1 Baht is allowed — treated as partial billing, no adjustment generated.
 
 *Queue page*
 - Default view shows Waiting Procurement Review and Waiting Accounting Confirmation records only.
@@ -268,25 +299,25 @@ Line Item View — one flat row per line item across all invoices. Reversal rows
 
 **Status:** Pending
 
-Adds a full approval chain between Procurement submission and billing being Confirmed: Accounting confirmation, return to Procurement for correction, and permanent rejection by either role.
+Adds a two-step approval chain: Procurement Verification → Approval by Requester or Procurement (not the verifier). Replaces free-form billing recording with a structured, role-enforced flow.
 
 **Acceptance Criteria:**
 
-*Confirmation*
-- Internal billing submitted by Procurement lands at Waiting Accounting Confirmation immediately.
-- External billing (Path B) lands at Waiting Accounting Confirmation after Procurement forwards it.
-- Accounting can Confirm the billing — status moves to Confirmed and Bookkeeping transaction is posted.
+*Step 1 — Procurement Verification*
+- All submitted billings (from any submitter) land at Waiting Procurement Verification.
+- Any Procurement team member can verify the billing — status moves to Waiting Approval.
+- Procurement can return the billing to the submitter with a mandatory comment. Submitter corrects and resubmits → returns to Waiting Procurement Verification.
+- Procurement can reject with a mandatory comment — status = Rejected. Dead end.
 
-*Return*
-- Accounting can return an Internal billing with a mandatory comment. Status remains Waiting Accounting Confirmation.
-- Procurement sees an "Edit & Resubmit" button in the detail modal when a return comment is present.
-- After Procurement edits and resubmits, status resets to Waiting Accounting Confirmation.
-- Return to vendor portal is not supported in Phase 1 — incorrect external submissions must be rejected.
+*Step 2 — Approval*
+- The Requester of the PO or any Procurement team member can approve.
+- The system blocks the same person who verified in Step 1 from being the approver. The Approve button is disabled for that person.
+- Approver can approve → status moves to Confirmed and Bookkeeping transaction is posted.
+- Approver can return with a mandatory comment → billing goes back to Waiting Procurement Verification. Any Procurement member can re-verify.
+- Approver can reject with a mandatory comment → status = Rejected. Dead end.
 
 *Reject*
-- Procurement can reject an External billing at Waiting Procurement Review with a mandatory comment.
-- Accounting can reject any billing at Waiting Accounting Confirmation with a mandatory comment.
-- Rejected status is permanent — no further actions available. Dead end.
+- Rejected status is permanent — no further actions available.
 - Rejected records are hidden by default in the Queue. User must filter by Status = Rejected to see them.
 
 ---
@@ -324,14 +355,17 @@ Posts accounting transactions to Bookkeeping on both billing confirmation and re
 
 ## Decisions Log
 - **Invoice uniqueness** — ✅ Unique per vendor — aligns with Thai Revenue Dept. tax invoice requirements.
-- **Return is an action not a status** — ✅ Status stays Waiting Accounting Confirmation. Return comment triggers Edit & Resubmit UI for Procurement.
-- **No return to vendor portal in Phase 1** — ✅ Incorrect external submissions are rejected; vendor resubmits new invoice.
-- **Reject is permanent** — ✅ Both Procurement and Accounting can reject with mandatory comment.
+- **Single approval path** — ✅ All submitters (Requester, Procurement, Vendor User) follow the same flow: Procurement Verification → Approval. No separate internal/external paths.
+- **Verifier ≠ Approver (same person)** — ✅ System blocks the person who verified from being the approver to prevent self-approval. Other Procurement members and Requesters can still approve.
+- **Return is an action not a status** — ✅ Returning goes back to a previous step without creating a new status. Waiting Procurement Verification and Waiting Approval are the only active queue statuses.
+- **Reject is permanent** — ✅ Both Procurement (at verification) and the approver can reject with mandatory comment.
 - **Rejected hidden by default** — ✅ Reduces noise in Queue. User must filter to see them.
 - **Reversal ≠ Credit Note** — ✅ Credit note = partial discount. Reversal = full cancellation of AP liability.
-- **Cancellation authority** — ✅ Accounting only. No second approval needed. Mandatory reason for audit trail.
+- **Reversal date = original invoice date** — ✅ System-set, not editable, so the offsetting transaction posts to the correct period.
+- **Reversal authority** — ✅ Requester of the PO's PR or any Procurement team member. No second approval required.
 - **Monetary precision** — ✅ 2 decimal places throughout. `Math.round(net × rate) / 100` to avoid floating point loss.
 - **0% VAT display** — ✅ VAT column shows "—" not "0.00" for non-VAT vendors.
+- **Billing adjustment tolerance** — ✅ ±1 Baht. Within tolerance: auto-adjustment to PO amount. Bookkeeping receives two transactions (billed + adjustment) under the same group reference. Billing detail shows both lines to all roles. On reversal, both are reversed as a group. Over-billed beyond +1: hard block. Under-billed beyond 1: allowed as partial billing.
 - **Due Date** — ✅ Out of scope — handled by Bookkeeping.
 
 ## Open Questions

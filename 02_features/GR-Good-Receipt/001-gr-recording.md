@@ -116,8 +116,12 @@ The GR Reversal is an independent document with its own GR number and date. It a
 The original GR is tagged **Reversed**. The reversal document is tagged **Reversal**. **Cancel GR** is only available on Confirmed GRs — Reversed and Reversal documents cannot be cancelled again.
 
 **Who Can Record / Reverse GR**
-- **Record GR:** Requester of the PR, or any Procurement team member
-- **Trigger reversal:** Requester of the PR (own PRs only), or any Procurement team member (any GR)
+
+| Action | Requester | Procurement | Accounting |
+|---|---|---|---|
+| Record GR | ✅ Own PRs only | ✅ Any PO | — |
+| Reverse GR | ✅ Own PRs only | ✅ Any GR | — |
+| View GR List | ✅ Own PRs only | ✅ All | ✅ All |
 
 **Bookkeeping Integration**
 Every confirmed GR and every GR Reversal triggers an accounting transaction to Bookkeeping (transaction payload TBD with Bookkeeping team). If the send fails, the GR is still saved and flagged internally for retry.
@@ -244,8 +248,9 @@ Replaces GR recording inside the PO page with a dedicated GR List page accessibl
 **Acceptance Criteria:**
 
 *Page access*
-- GR List page is accessible from the main navigation by Accounting and Procurement teams.
-- Requesters cannot access the GR List page — they see GR records from the PO page only.
+- GR List page is accessible from the main navigation by Procurement, Accounting, and Requesters.
+- Requesters see only GRs from their own PRs. Procurement and Accounting see all GRs.
+- Accounting can view GRs but cannot record or reverse them.
 
 *Toolbar*
 - Row 1: Search input (by GR number, PO number, vendor), Export button, Document View / Line Item View toggle, and "+ Record GR" button.
@@ -300,6 +305,7 @@ Allows a Confirmed GR to be reversed when recorded incorrectly. Creates an indep
 
 **Acceptance Criteria:**
 - "Cancel GR" button is shown in the GR Detail modal footer only for Confirmed GRs.
+- "Cancel GR" is visible only to Requesters (own PRs) and Procurement team members. Accounting cannot reverse a GR.
 - Clicking "Cancel GR" opens a Reversal confirmation modal showing the original GR details and the reversal document number.
 - Cancellation reason is mandatory (minimum 5 characters). Confirm button is disabled until filled.
 - GR Reversal is created with negative quantities and amounts. Reversal date is set to the original GR date — not editable.
